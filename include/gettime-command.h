@@ -10,6 +10,6 @@ using namespace std;
 class GetTimeCommand : public ICommand {
 public:
     GetTimeCommand() {};
-    void* Execute() {};
+    void* Execute();    // Don't forget to free me. - Willy
 };
 #endif

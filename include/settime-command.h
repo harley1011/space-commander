@@ -4,19 +4,33 @@
 #include "icommand.h"
 #include <time.h>
 #include <iostream>
+#include <cstdio>
 
 using namespace std;
 
 class SetTimeCommand : public ICommand {
 public:
     SetTimeCommand(char year, char month, char day, char hour, char minute, char second) {
-        this.year    = year;
-        this.month   = month;
-        this.day     = day;
-        this.hour    = hour;
-        this.minute  = minute;
-        this.second  = second;
-        this.seconds = year * month * day * hour * minute * second;
+        this->year    = year;
+        this->month   = month;
+        this->day     = day;
+        this->hour    = hour;
+        this->minute  = minute;
+        this->second  = second;
+
+        // Converts to tv_sec to avoid dealing with leap years.
+        time_t rawtime = 0;
+        struct tm* timeinfo;
+        timeinfo = localtime (&rawtime);
+
+        timeinfo->tm_year = year + 69;
+        timeinfo->tm_mon  = month - 1;
+        timeinfo->tm_mday = day;
+        timeinfo->tm_hour = hour;
+        timeinfo->tm_min  = minute;
+        timeinfo->tm_sec  = second;
+
+        this->seconds = mktime(timeinfo);
     }
 
     char GetYearSince1900()  { return year; };
@@ -26,7 +40,8 @@ public:
     char GetMinute()    { return minute; };
     char GetSecond()    { return second; };
     time_t GetSeconds() { return seconds; };
-    void* Execute() {};
+    void* Execute();
+
 private:
     char year;
     char month;

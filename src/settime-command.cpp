@@ -1,13 +1,12 @@
 #include "settime-command.h"
-
+#include <cerrno>
+#include <sys/time.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 void* SetTimeCommand::Execute(){
     struct timeval tv;
     
-    if(gettimeofday(&tv, 0) == -1){
-        printf ("Error! gettimeofday()\n");
-        exit(1);
-    }
-
     tv.tv_sec = GetSeconds();   
 
     if (settimeofday(&tv, 0) != 0){
@@ -15,5 +14,5 @@ void* SetTimeCommand::Execute(){
         exit(1);
     }
 
-    return;
+    return NULL;
 }
