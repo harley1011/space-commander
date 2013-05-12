@@ -14,10 +14,25 @@ TEST_GROUP(Parser) {
 };
 
 TEST(Parser, ParseBytes_InvalidCommandType_ReturnsNull) {
-    char* actual   = NULL;
-    char* expected = NULL;
-    char  input[1] = {-1}; //First element represent type
+    CommandParam* actual   = NULL;
+    CommandParam* expected = NULL;
+    char input[1]          = {-1}; //First element represent type
 
-    actual = (char* )Parser::ParseBytes(input);
+    actual = Parser::ParseBytes(input);
     POINTERS_EQUAL(expected, actual);
+}
+
+TEST(Parser, ParseBytes_ValidCommandType_ReturnCommandParamObject) {
+    char input[2]          = {2, 2};
+    CommandParam* actual   = NULL;
+    CommandParam expected;
+
+    expected.type      = 2;
+    expected.fields    = new void*[1];
+    expected.fields[0] = (void* )2;
+
+    actual = (CommandParam*) Parser::ParseBytes(input);
+    CHECK_EQUAL(expected.type,      actual->type);
+    CHECK_EQUAL(expected.fields[0], actual->fields[0]);
+    delete actual;
 }

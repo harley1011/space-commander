@@ -9,6 +9,17 @@ bool Parser::IsValidInput(char* input) {
     return true;
 }
 
-void* Parser::ParseBytes(char* input) {
+CommandParam* Parser::ParseBytes(char* input) {
     if ( !IsValidInput(input) ) { return NULL; }
+
+    CommandParam* result = new CommandParam();
+    result->type = input[0];
+    
+    if (input[0] == 2) {
+        result->fields    = new void*[1];
+        result->fields[0] = (void*)input[1];
+    }
+
+    return result;
+
 }

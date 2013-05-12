@@ -1,9 +1,10 @@
 #ifndef PARSER_H
 #define PARSER_H
 
+#include "command-param.h"
 class Parser {
 public:
-    static void* ParseBytes(char*);
+    static CommandParam* ParseBytes(char*);
 private:
     static bool IsValidInput(char *);
 };
