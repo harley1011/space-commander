@@ -15,6 +15,6 @@ buildBin:
 buildQ6:
 	$(MICROCC) $(MICROCFLAGS) $(INCPATH) src/*.cpp -o bin/space-commander
 
-buildAllTests: buildUnitTests buildIntegrationTests
+buildAllTests: buildUnitTests
 buildUnitTests:
 	$(CC) $(CFLAGS) $(DEBUGFLAGS) $(INCPATH) $(INCTESTPATH) $(LIBPATH) tests/unit/*.cpp -o bin/AllUnitTests $(LIBS)
