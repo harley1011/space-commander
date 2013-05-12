@@ -1,5 +1,6 @@
 #include "CppUTest/TestHarness.h"
-#include <string.h>
+#include <cstring>
+#include "parser.h"
 
 static const int BUFFER_SIZE = 10;
 static char zeroOutBuffer[BUFFER_SIZE];
@@ -12,6 +13,11 @@ TEST_GROUP(Parser) {
     void teardown() {}
 };
 
-TEST(Parser, ParseBytes_InvalidArrayOfBytes_ReturnsNull) {
-    FAIL("Do me!");
+TEST(Parser, ParseBytes_InvalidCommandType_ReturnsNull) {
+    char* actual   = NULL;
+    char* expected = NULL;
+    char  input[1] = {-1}; //First element represent type
+
+    actual = (char* )Parser::ParseBytes(input);
+    POINTERS_EQUAL(expected, actual);
 }

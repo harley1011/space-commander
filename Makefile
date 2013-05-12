@@ -17,4 +17,4 @@ buildQ6:
 
 buildAllTests: buildUnitTests
 buildUnitTests:
-	$(CC) $(CFLAGS) $(DEBUGFLAGS) $(INCPATH) $(INCTESTPATH) $(LIBPATH) tests/unit/*.cpp -o bin/AllUnitTests $(LIBS)
+	$(CC) $(CFLAGS) $(DEBUGFLAGS) $(INCPATH) $(INCTESTPATH) $(LIBPATH) src/*.cpp tests/unit/*.cpp -o bin/AllUnitTests $(LIBS)
