@@ -26,18 +26,20 @@ TEST(Parser, ParseBytes_InvalidCommandType_ReturnsNull) {
     POINTERS_EQUAL(expected, actual);
 }
 
+  
 TEST(Parser, ParseBytes_ValidCommandType_ReturnCommandParamObject) {
     char input[2]          = {2, 2};
     CommandParam* actual   = NULL;
     CommandParam expected;
 
     expected.type      = 2;
-    expected.fields    = new void*[1];
-    expected.fields[0] = (void* )2;
+    Field f;
+    f.SetInt(2);
+    expected.fields.push_back( f );
 
     actual = (CommandParam*) Parser::ParseBytes(input);
     CHECK_EQUAL(expected.type,      actual->type);
-    CHECK_EQUAL(expected.fields[0], actual->fields[0]);
+    CHECK_EQUAL(expected.fields[0].GetUChar(), actual->fields[0].GetUChar());
     delete actual;
 }
 
@@ -51,13 +53,12 @@ TEST(Parser, ParseBytes_CommandWithStringField_ReturnsString) {
     input[5] = 't';
 
     CommandParam* actual  = Parser::ParseBytes(input);
-    string* actualString  = static_cast<string* >(actual->fields[0]);
+    string* actualString  = static_cast<string* >(actual->fields[0].GetString());
     string expectedString = "test";
 
     CHECK_EQUAL(expectedString, *actualString);
   
 
     //TODO: change void** fields to vector<void *>, delete each element in the vector
-    delete actualString; 
     delete actual;
 }

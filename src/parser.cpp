@@ -1,6 +1,7 @@
 #include "parser.h"
 #include <cstddef>
 #include <string>
+#include <vector>
 
 using namespace std;
 
@@ -12,25 +13,28 @@ bool Parser::IsValidInput(char* input) {
     return true;
 }
 
+
 CommandParam* Parser::ParseBytes(char* input) {
     if ( !IsValidInput(input) ) { return NULL; }
 
     CommandParam* result = new CommandParam();
     result->type = input[0];
     
+    Field f;
     switch(input[0]) {
         case 1: {
-            result->fields    = new void*[200];
-            string* s         = new string((input+2), input[1]);        
-            result->fields[0] = (void*)s;
+            string* s = new string((input+2), input[1]);        
+            f.SetString(s);
+            result->fields.push_back(f);
         }
 
     }
     if (input[0] == 2) {
-        result->fields    = new void*[1];
-        result->fields[0] = (void*)input[1];
+        f.SetUChar(input[1]);
+        result->fields.push_back(f);
     }
 
     return result;
 
 }
+
