@@ -3,6 +3,8 @@
 #include <string>
 #include "command-factory.h"
 #include <iostream>
+#include <cstdlib>
+#include "CppUTest/MemoryLeakDetectorMallocMacros.h"
 
 using namespace std;
 
@@ -18,7 +20,7 @@ TEST_GROUP(CommandFactory) {
 };
 
 TEST(CommandFactory, ParseGetLog_MechSubSytem_Returns0) {
-    char input[2]          = {2, 0}; //First element represent type
+    char input[2] = {2, 0}; //First element represent type
 
     GetLogCommand* actual = (GetLogCommand*) CommandFactory::CreateCommand(input);
     GetLogCommand  expected(0);
