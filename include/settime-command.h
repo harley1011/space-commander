@@ -9,39 +9,30 @@ using namespace std;
 
 class SetTimeCommand : public ICommand {
 public:
-    SetTimeCommand(unsigned int seconds) {
-        this->seconds = seconds; 
-        timeval tv;
-        tv.tv_sec = seconds;
-        time_t nowtime = tv.tv_sec;
-        tm *nowtm;
-        nowtm = gmtime(&nowtime);
-        year  = nowtm->tm_year;
-        month = nowtm->tm_mon;
-        day   = nowtm->tm_mday;
+    SetTimeCommand(time_t seconds) {
+        this->seconds  = seconds; 
+        time_t nowtime = seconds;
 
-        char tmbuf[64], buf[64];
-        strftime(tmbuf, sizeof tmbuf, "%Y-%m-%d %H:%M:%S", nowtm);
-        cout << tmbuf;
+        tm *nowtm = gmtime(&this->seconds);
+
+        year   = nowtm->tm_year;
+        month  = nowtm->tm_mon;
+        day    = nowtm->tm_mday;
+        hour   = nowtm->tm_hour;
+        minute = nowtm->tm_min;
+        second = nowtm->tm_sec;
     }
 
-    SetTimeCommand(int y, char m, char d, char h, char min, char s) {
-        year = y;
-        month = m;
-        day = d;
-        hour = h;
-        minute = min;
-        second = s;
-    };
-    
-
-    int GetYearSince1900()  { return year; };
-    int GetMonth() { return month; };
-    int GetDay()   { return day; };
+    char GetYearSince1900()  { return year; };
+    char GetMonth()  { return month; };
+    char GetDay()    { return day; };
+    char GetHour()   { return hour; };
+    char GetMinute() { return minute; };
+    char GetSecond() { return second; };
 
     void Execute() {};
 private:
-    int year;
+    char year;
     char month;
     char day;
     char hour;

@@ -34,9 +34,7 @@ ICommand* CommandFactory::CreateUpdate(char* data) {
 
 ICommand* CommandFactory::CreateSetTime(char* data) {
     data += 1;
-    //TODO: Check endian on Q6
     unsigned int seconds = (data[0] << 24 & 0xFF000000) | (data[1] << 16 & 0x00FF0000) | (data[2] << 8 & 0x0000FF00) | (data[3] & 0x000000FF);
-   unsigned int seconds2 = (data[0]) | (data[1] << 8) | (data[2] << 16) | (data[3] << 24);
     SetTimeCommand* result = new SetTimeCommand(seconds);
     return result;
 }

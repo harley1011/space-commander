@@ -52,16 +52,22 @@ TEST(CommandFactory, ParseSetTime_MaxDate_Returns0) {
     unsigned int seconds = 1499439600;
     input[1] = (seconds >> 24) & 0xFF;
     input[2] = (seconds >> 16) & 0xFF;
-    input[3] = (seconds >> 8) & 0xFF;
+    input[3] = (seconds >> 8)  & 0xFF;
     input[4] = seconds & 0xFF;
 
     SetTimeCommand* actual = (SetTimeCommand*) CommandFactory::CreateCommand(input);
-    unsigned int  expectedYear  = 117;
-    unsigned int  expectedMonth = 6; // Month starts at 0
-    unsigned int  expectedDay   = 7;
+    int  expectedYear   = 117;
+    int  expectedMonth  = 6; // Month starts at 0
+    int  expectedDay    = 7;
+    int  expectedHour   = 15;
+    int  expectedMinute = 0;
+    int  expectedSecond = 0;
 
-    CHECK_EQUAL(expectedYear,  actual->GetYearSince1900());
-    CHECK_EQUAL(expectedMonth, actual->GetMonth());
-    CHECK_EQUAL(expectedDay,   actual->GetDay());
+    CHECK_EQUAL(expectedYear,   actual->GetYearSince1900());
+    CHECK_EQUAL(expectedMonth,  actual->GetMonth());
+    CHECK_EQUAL(expectedDay,    actual->GetDay());
+    CHECK_EQUAL(expectedHour,   actual->GetHour());
+    CHECK_EQUAL(expectedMinute, actual->GetMinute());
+    CHECK_EQUAL(expectedSecond, actual->GetSecond());
     delete actual;
 }
