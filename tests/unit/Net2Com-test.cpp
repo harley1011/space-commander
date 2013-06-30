@@ -42,9 +42,9 @@ TEST(Net2ComTestGroup, WriteToDataPipe_ReturnsCorrectNumberOfBytesWritten){
         exit(0);
     }else{                                                  // Parent
         result = netman->WriteToDataPipe(data);
+        //printf("strlen(data) : %d, result : %d\n", strlen(data), result);
         CHECK_EQUAL(strlen(data), result);
     }
-        //printf("strlen(data) : %d, result : %d\n", strlen(data), result);
 }
 TEST(Net2ComTestGroup, ReadFromDataPipe_ReturnsCorrectString){
     FAIL("TODO");
