@@ -10,6 +10,7 @@ class  NamedPipe{
         NamedPipe(const char* fifo_path);
         ~NamedPipe();
         bool CreatePipe();
+        bool Exist();
         char* ReadFromPipe(char* buffer);   // Return value : On success, buffer is returned. On failure, NULL is returned.
         int WriteToPipe(const char* str);   // Return value : On success, the number of bytes written. On failure, negative value.
 };

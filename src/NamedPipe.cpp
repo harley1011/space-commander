@@ -81,3 +81,13 @@ int NamedPipe::WriteToPipe(const char* str){
 
     return result;
 }
+//----------------------------------------------
+//  Exist
+//----------------------------------------------
+bool NamedPipe::Exist(){
+    if (access(fifo_path, F_OK) == 0){
+        return true;
+    }else{
+        return false;
+    }
+}
