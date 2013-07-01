@@ -19,11 +19,13 @@ class Net2Com{
         NamedPipe* infoPipe_r;
 
     public :
-        Net2Com(PIPE_NUM dataw, PIPE_NUM datar, PIPE_NUM infow, PIPE_NUM infor);
+        Net2Com(PIPE_NUM dataw, PIPE_NUM datar, PIPE_NUM infow, PIPE_NUM infor);        // DATA_WRITE, DATA_READ, INFO_WRITE, INFO_READ
         ~Net2Com();
         int WriteToDataPipe(const char* str);
+        int WriteToDataPipe(unsigned char);
         char* ReadFromDataPipe(char* buffer);
         int WriteToInfoPipe(const char* str);
+        int WriteToInfoPipe(unsigned char);
         char* ReadFromInfoPipe(char* buffer);
 
     private :
