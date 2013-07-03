@@ -2,7 +2,7 @@
 #include <NamedPipe.h>
 #include <cstdlib>
 #include <cstdio>
-
+#include <cstring>
 
 const char* Net2Com::pipe_str[] = {"pipe1", "pipe2", "pipe3", "pipe4"};
 //----------------------------------------------
@@ -51,7 +51,11 @@ bool Net2Com::CreatePipes(){
 // WriteToDataPipe 
 //----------------------------------------------
 int Net2Com::WriteToDataPipe(const char* str){
-    int result = dataPipe_w->WriteToPipe(str);
+    int result = dataPipe_w->WriteToPipe(str, strlen(str) + NULL_CHAR);
+    return result;
+}
+int Net2Com::WriteToDataPipe(const void* data, int size){
+    int result = dataPipe_w->WriteToPipe(data, size);
     return result;
 }
 int Net2Com::WriteToDataPipe(unsigned char number){
@@ -69,7 +73,11 @@ char* Net2Com::ReadFromDataPipe(char* buffer){
 // WriteToInfoPipe 
 //----------------------------------------------
 int Net2Com::WriteToInfoPipe(const char* str){
-    int result = infoPipe_w->WriteToPipe(str);
+    int result = infoPipe_w->WriteToPipe(str, strlen(str) + NULL_CHAR);
+    return result;
+}
+int Net2Com::WriteToInfoPipe(const void* data, int size){
+    int result = infoPipe_w->WriteToPipe(data, size);
     return result;
 }
 int Net2Com::WriteToInfoPipe(unsigned char number){
