@@ -49,12 +49,15 @@ bool NamedPipe::CreatePipe(){
 // ReadFromPipe
 //----------------------------------------------
 char* NamedPipe::ReadFromPipe(char* buffer){
-    FILE* fifo = fopen(fifo_path, "r");
+    const int NUMBER_OF_BYTES_READ = 256;
+    FILE* fifo = fopen(fifo_path, "rb");
     if (fifo == NULL){
         return NULL;
     }
 
-    fscanf(fifo, "%s", buffer);
+    while (fread(buffer, 1, NUMBER_OF_BYTES_READ, fifo) > 0){
+        buffer += NUMBER_OF_BYTES_READ;
+    }
     fclose(fifo);
 
     return buffer;
@@ -62,16 +65,16 @@ char* NamedPipe::ReadFromPipe(char* buffer){
 //----------------------------------------------
 //  WriteToPipe
 //----------------------------------------------
-int NamedPipe::WriteToPipe(const char* str){
+int NamedPipe::WriteToPipe(const void* data, int size){
     int result;
 
-    FILE* fifo = fopen(fifo_path, "w");
+    FILE* fifo = fopen(fifo_path, "wb");
     if (fifo == NULL){
         fprintf(stderr, "Can't open the pipe : %s\n", strerror(errno));
         return -1;
     }
 
-    result = fprintf(fifo, "%s", str);
+    result = fwrite(data, 1, size, fifo);
 
     if (result < 0){
         fprintf(stderr, "Can't write to the pipe : %s\n", strerror(errno));
