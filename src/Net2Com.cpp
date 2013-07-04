@@ -59,8 +59,8 @@ int Net2Com::WriteToDataPipe(const void* data, int size){
     return result;
 }
 int Net2Com::WriteToDataPipe(unsigned char number){
-    char byte[] = {number, '\0'};
-    return WriteToDataPipe(byte);
+    unsigned char byte = number;
+    return dataPipe_w->WriteToPipe(&byte, sizeof(unsigned char));
 }
 //----------------------------------------------
 // ReadFromDataPipe 
@@ -81,8 +81,8 @@ int Net2Com::WriteToInfoPipe(const void* data, int size){
     return result;
 }
 int Net2Com::WriteToInfoPipe(unsigned char number){
-    char byte[] = {number, '\0'};
-    return WriteToInfoPipe(byte);
+    unsigned char byte = number;
+    return infoPipe_w->WriteToPipe(&byte, sizeof(unsigned char));
 }
 //----------------------------------------------
 //  ReadFromInfoPipe
