@@ -57,15 +57,16 @@ int main(){
     unsigned char settime_command[] = {0,0xF,0xF,0xF,0xF,12,1,12,59,59};
     int_to_charArr convert;
     convert.i = 2012;
-    for (int i=0; i<4; i++){
+    for (int i = 0; i < 4; i++) {
         settime_command[1 + i] = convert.arr[i];
     }
 
     Write(channel, 252);    // Start session signal.
     Write(channel, settime_command, sizeof(settime_command)); // send setsettime_command command.
 
-
-    delete channel;
-
+    if (channel != NULL){
+        delete channel;
+        channel = NULL;
+    }
     return 0;
 }

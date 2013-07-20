@@ -25,10 +25,16 @@ TEST_GROUP(Net2ComTestGroup){
         commander = new Net2Com(PIPE_TWO, PIPE_ONE, PIPE_FOUR, PIPE_THREE);
     }
     void teardown(){
-        delete netman;
-        delete commander;
-    }
+        if (netman != NULL){
+            delete netman;
+            netman = NULL;
+        }
 
+        if (commander != NULL){
+            delete commander;
+            commander = NULL;
+        }
+    }
 };
 TEST(Net2ComTestGroup, WriteToDataPipe_ReturnsCorrectNumberOfBytesWritten){
     char buffer[BUFFER_SIZE];
