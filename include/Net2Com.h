@@ -8,7 +8,7 @@ enum PIPE_NUM{
 
 class Net2Com{
     private :
-        const static int NULL_CHAR = 1;
+        const static int NULL_CHAR_LENGTH = 1;
         static const int NUMBER_OF_PIPES = 4;
         static const char* pipe_str[];
          
@@ -20,7 +20,7 @@ class Net2Com{
         NamedPipe* infoPipe_r;
 
     public :
-        Net2Com(PIPE_NUM dataw, PIPE_NUM datar, PIPE_NUM infow, PIPE_NUM infor);        // DATA_WRITE, DATA_READ, INFO_WRITE, INFO_READ
+        Net2Com(PIPE_NUM dataw, PIPE_NUM datar, PIPE_NUM infow, PIPE_NUM infor);        // ORDER : DATA_WRITE, DATA_READ, INFO_WRITE, INFO_READ
         ~Net2Com();
         int WriteToDataPipe(const char* str);
         int WriteToDataPipe(unsigned char);

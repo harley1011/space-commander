@@ -19,7 +19,7 @@ TEST_GROUP(Net2ComTestGroup){
     Net2Com* netman;
     Net2Com* commander;
     static const int BUFFER_SIZE = 50;
-    static const int NULL_CHAR = 1;
+    static const int NULL_CHAR_LENGTH = 1;
     void setup(){
         netman = new Net2Com(PIPE_ONE, PIPE_TWO, PIPE_THREE, PIPE_FOUR);
         commander = new Net2Com(PIPE_TWO, PIPE_ONE, PIPE_FOUR, PIPE_THREE);
@@ -52,9 +52,9 @@ TEST(Net2ComTestGroup, WriteToDataPipe_ReturnsCorrectNumberOfBytesWritten){
     }else{                                                  // Parent
         result = netman->WriteToDataPipe(data);
         #ifdef DEBUG
-        printf("strlen(data) : %d, result : %d\n", strlen(data) + NULL_CHAR, result);
+        printf("strlen(data) : %d, result : %d\n", strlen(data) + NULL_CHAR_LENGTH, result);
         #endif
-        CHECK_EQUAL(strlen(data) + NULL_CHAR, result);
+        CHECK_EQUAL(strlen(data) + NULL_CHAR_LENGTH, result);
     }
 }
 TEST(Net2ComTestGroup, ReadFromDataPipe_ReturnsCorrectString){
@@ -64,7 +64,7 @@ TEST(Net2ComTestGroup, ReadFromDataPipe_ReturnsCorrectString){
     pid_t pid = fork();
     if (pid == 0){
         result = commander->WriteToDataPipe(data);
-        CHECK_EQUAL(strlen(data) + NULL_CHAR, result);
+        CHECK_EQUAL(strlen(data) + NULL_CHAR_LENGTH, result);
         exit(0);
     }else{
         netman->ReadFromDataPipe(buffer);

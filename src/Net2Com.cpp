@@ -51,7 +51,7 @@ bool Net2Com::CreatePipes(){
 // WriteToDataPipe 
 //----------------------------------------------
 int Net2Com::WriteToDataPipe(const char* str){
-    int result = dataPipe_w->WriteToPipe(str, strlen(str) + NULL_CHAR);
+    int result = dataPipe_w->WriteToPipe(str, strlen(str) + NULL_CHAR_LENGTH);
     return result;
 }
 int Net2Com::WriteToDataPipe(const void* data, int size){
@@ -73,7 +73,7 @@ char* Net2Com::ReadFromDataPipe(char* buffer){
 // WriteToInfoPipe 
 //----------------------------------------------
 int Net2Com::WriteToInfoPipe(const char* str){
-    int result = infoPipe_w->WriteToPipe(str, strlen(str) + NULL_CHAR);
+    int result = infoPipe_w->WriteToPipe(str, strlen(str) + NULL_CHAR_LENGTH);
     return result;
 }
 int Net2Com::WriteToInfoPipe(const void* data, int size){

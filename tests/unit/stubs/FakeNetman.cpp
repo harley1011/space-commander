@@ -3,14 +3,14 @@
 #include <cstdio>
 #include <cstdlib>
 #include <unistd.h>
-const int NULL_CHAR = 1;
+const int NULL_CHAR_LENGTH = 1;
 
 void Write(Net2Com* channel, unsigned char byte){
     channel->WriteToInfoPipe(sizeof(unsigned char));
     channel->WriteToDataPipe(byte);
 }
 void Write(Net2Com* channel, const char* data){
-    channel->WriteToInfoPipe(strlen(data) + NULL_CHAR);
+    channel->WriteToInfoPipe(strlen(data) + NULL_CHAR_LENGTH);
     channel->WriteToDataPipe(data);
 }
 void Write(Net2Com* channel, const void* data, int size){
