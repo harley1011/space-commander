@@ -44,7 +44,7 @@ struct CommandParam {
     vector<Field> fields;
 
     ~CommandParam() {
-        for (int i = 0; i != fields.size(); i++) {
+        for (unsigned int i = 0; i != fields.size(); i++) {
             if (fields[i].GetType() == 2) { 
                 if (fields[i].GetString() != NULL) {
                     delete fields[i].GetString();

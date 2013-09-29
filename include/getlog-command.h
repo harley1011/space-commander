@@ -2,6 +2,7 @@
 #define GETLOG_COMMAND_H
 
 #include "icommand.h"
+#include <cstdlib>
 
 class GetLogCommand : public ICommand {
 public:
@@ -9,10 +10,10 @@ public:
         this->subsystem = subsystem;
     };
     
-    ~GetLogCommand() {};
+    ~GetLogCommand() {}
 
-    void* Execute() { return NULL};
-    char GetSubSystem() { return subsystem; };
+    void* Execute() { return NULL; }
+    char GetSubSystem() { return subsystem; }
 private:
     char subsystem;
 };

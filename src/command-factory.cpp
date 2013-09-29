@@ -5,16 +5,18 @@ ICommand* CommandFactory::CreateCommand(char * data) {
     if (data == NULL) { return NULL; }
 
     switch(data[0]) {
-            case 0: {
-                return CommandFactory::CreateSetTime(data);
-            }
-            case 1: {
-                return CommandFactory::CreateUpdate(data);
+        case 0: {
+            return CommandFactory::CreateSetTime(data);
         }
-            case 2: {
+        case 1: {
+            return CommandFactory::CreateUpdate(data);
+        }
+        case 2: {
             return CommandFactory::CreateGetLog(data);
         }
     }
+
+    return NULL;
 }
 
 ICommand* CommandFactory::CreateGetLog(char* data) {
@@ -33,8 +35,6 @@ ICommand* CommandFactory::CreateUpdate(char* data) {
 }
 
 ICommand* CommandFactory::CreateSetTime(char* data) {
-    data += 1;
-    unsigned int seconds = (data[0] << 24 & 0xFF000000) | (data[1] << 16 & 0x00FF0000) | (data[2] << 8 & 0x0000FF00) | (data[3] & 0x000000FF);
-    SetTimeCommand* result = new SetTimeCommand(seconds);
+    SetTimeCommand* result = new SetTimeCommand(data[0], data[1], data[2], data[3], data[4], data[5]);
     return result;
 }

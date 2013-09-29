@@ -1,4 +1,4 @@
-#include "NamePipe.h"
+#include "NamedPipe.h"
 #include "command-factory.h"
 
 int main() {
