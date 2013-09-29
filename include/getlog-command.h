@@ -11,7 +11,7 @@ public:
     
     ~GetLogCommand() {};
 
-    void Execute() {};
+    void* Execute() { return NULL};
     char GetSubSystem() { return subsystem; };
 private:
     char subsystem;

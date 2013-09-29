@@ -20,7 +20,7 @@ public:
         }
     };
 
-    void Execute() {};
+    void* Execute() {return NULL};
     string* GetPath() { return path; };
 private:
     string* path;
