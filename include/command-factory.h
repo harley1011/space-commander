@@ -5,6 +5,7 @@
 #include "getlog-command.h"
 #include "update-command.h"
 #include "settime-command.h"
+#include "gettime-command.h"
 
 class CommandFactory {
 public:
@@ -14,6 +15,7 @@ private:
     static ICommand* CreateGetLog(char* data); 
     static ICommand* CreateUpdate(char* data); 
     static ICommand* CreateSetTime(char* data); 
+    static ICommand* CreateGetTime(char* data); 
 };
 
 #endif

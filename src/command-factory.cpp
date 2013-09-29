@@ -5,13 +5,16 @@ ICommand* CommandFactory::CreateCommand(char * data) {
     if (data == NULL) { return NULL; }
 
     switch(data[0]) {
-        case 0: {
+        case '0': {
             return CommandFactory::CreateSetTime(data);
         }
-        case 1: {
+        case '1': {
+            return CommandFactory::CreateGetTime(data);
+        }
+        case '2': {
             return CommandFactory::CreateUpdate(data);
         }
-        case 2: {
+        case '3': {
             return CommandFactory::CreateGetLog(data);
         }
     }
@@ -36,5 +39,10 @@ ICommand* CommandFactory::CreateUpdate(char* data) {
 
 ICommand* CommandFactory::CreateSetTime(char* data) {
     SetTimeCommand* result = new SetTimeCommand(data[0], data[1], data[2], data[3], data[4], data[5]);
+    return result;
+}
+
+ICommand* CommandFactory::CreateGetTime(char* data) {
+    GetTimeCommand* result = new GetTimeCommand();
     return result;
 }
