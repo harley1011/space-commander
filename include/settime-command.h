@@ -26,7 +26,7 @@ public:
     char GetMinute()    { return minute; };
     char GetSecond()    { return second; };
     time_t GetSeconds() { return seconds; };
-    void Execute() {};
+    void* Execute() {};
 private:
     char year;
     char month;

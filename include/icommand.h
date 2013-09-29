@@ -4,7 +4,7 @@
 class ICommand {
 public:
     virtual ~ICommand() {};
-    virtual void Execute() = 0;
+    virtual void* Execute() = 0;
 };
 
 #endif

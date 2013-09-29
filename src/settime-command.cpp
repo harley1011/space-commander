@@ -1,6 +1,6 @@
 #include "settime-command.h"
 
-void SetTimeCommand::Execute(){
+void* SetTimeCommand::Execute(){
     struct timeval tv;
     
     if(gettimeofday(&tv, 0) == -1){
@@ -14,4 +14,6 @@ void SetTimeCommand::Execute(){
         perror ("Error! settimeofday()\n");
         exit(1);
     }
+
+    return;
 }
