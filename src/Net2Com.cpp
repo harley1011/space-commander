@@ -4,7 +4,11 @@
 #include <cstdio>
 #include <cstring>
 
+#ifdef PC
 const char* Net2Com::pipe_str[] = {"pipe1", "pipe2", "pipe3", "pipe4"};
+#else   
+const char* Net2Com::pipe_str[] = {"/home/pipes/pipe1", "/home/pipes/pipe2", "/home/pipes/pipe3", "/home/pipes/pipe4"}; // Q6 paths
+#endif
 //----------------------------------------------
 //  Constructor
 //----------------------------------------------
