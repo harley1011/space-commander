@@ -47,6 +47,21 @@ bool Net2Com::CreatePipes(){
 
     return true;
 }
+
+//----------------------------------------------
+//  OpenReadPipesPersistently 
+//----------------------------------------------
+void Net2Com::OpenReadPipesPersistently(){
+    infoPipe_r->persist_open('r');
+    dataPipe_r->persist_open('r');
+}
+//----------------------------------------------
+//  OpenWritePipesPersistently 
+//----------------------------------------------
+void Net2Com::OpenWritePipesPersistently(){
+    infoPipe_w->persist_open('w');
+    dataPipe_w->persist_open('w');
+}
 //----------------------------------------------
 // WriteToDataPipe 
 //----------------------------------------------

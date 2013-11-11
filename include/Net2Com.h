@@ -31,6 +31,9 @@ class Net2Com{
         int WriteToInfoPipe(unsigned char);
         char* ReadFromInfoPipe(char* buffer);
 
+        void OpenReadPipesPersistently();                                               // If you are using this mode, you have to 
+        void OpenWritePipesPersistently();                                              // persistently open on BOTH sides, unless it blocks.
+
     private :
         bool Initialize();
         bool CreatePipes();
