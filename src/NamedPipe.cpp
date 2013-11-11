@@ -12,11 +12,13 @@
 //----------------------------------------------
 NamedPipe::NamedPipe(const char* fifo){
     strcpy(fifo_path, fifo);
+    this->fifo = NULL;
 }
 //----------------------------------------------
 //  Destructor
 //----------------------------------------------
 NamedPipe::~NamedPipe(){
+    this->close();
     unlink(fifo_path);
 }
 //----------------------------------------------
@@ -45,20 +47,61 @@ bool NamedPipe::CreatePipe(){
     
     return result;
 }
+
+//----------------------------------------------
+//  persist_open          
+//----------------------------------------------
+bool NamedPipe::persist_open(char mode){
+    if (this->fifo != NULL){                                                                // Pipe already open.
+        return true;
+    }
+
+    if (mode == 'w'){
+        this->fifo = fopen(fifo_path, "wb");
+    }else if (mode == 'r'){
+        this->fifo = fopen(fifo_path, "rb");
+    }
+
+    if (this->fifo == NULL){
+        fprintf(stderr, "Can't open the pipe : %s\n", strerror(errno));
+        return false;
+    }
+
+    return true;
+}
+
+//----------------------------------------------
+//  close
+//----------------------------------------------
+void NamedPipe::close(){
+    if (this->fifo != NULL){
+        fclose(this->fifo);
+        this->fifo == NULL;
+    }
+}
+
 //----------------------------------------------
 // ReadFromPipe
 //----------------------------------------------
 char* NamedPipe::ReadFromPipe(char* buffer){
     const int NUMBER_OF_BYTES_READ = 256;
-    FILE* fifo = fopen(fifo_path, "rb");
-    if (fifo == NULL){
-        return NULL;
-    }
 
-    while (fread(buffer, 1, NUMBER_OF_BYTES_READ, fifo) > 0){
-        buffer += NUMBER_OF_BYTES_READ;
+    if (this->fifo == NULL){
+        FILE* fifo = fopen(fifo_path, "rb");
+        if (fifo == NULL){
+            return NULL;
+        }   
+
+        while (fread(buffer, 1, NUMBER_OF_BYTES_READ, fifo) > 0){
+            buffer += NUMBER_OF_BYTES_READ;
+        }
+        
+        fclose(fifo);
+    }else{
+        while (fread(buffer, 1, NUMBER_OF_BYTES_READ, fifo) > 0){
+            buffer += NUMBER_OF_BYTES_READ;
+        }
     }
-    fclose(fifo);
 
     return buffer;
 }
@@ -67,20 +110,24 @@ char* NamedPipe::ReadFromPipe(char* buffer){
 //----------------------------------------------
 int NamedPipe::WriteToPipe(const void* data, int size){
     int result;
+    
+    if (this->fifo == NULL){
+        FILE* fifo = fopen(fifo_path, "wb");
+        if (fifo == NULL){
+            fprintf(stderr, "Can't open the pipe : %s\n", strerror(errno));
+            return -1;
+        }
 
-    FILE* fifo = fopen(fifo_path, "wb");
-    if (fifo == NULL){
-        fprintf(stderr, "Can't open the pipe : %s\n", strerror(errno));
-        return -1;
+        result = fwrite(data, 1, size, fifo);
+
+        fclose(fifo);
+    }else{
+        result = fwrite(data, 1, size, fifo);
     }
-
-    result = fwrite(data, 1, size, fifo);
 
     if (result < 0){
         fprintf(stderr, "Can't write to the pipe : %s\n", strerror(errno));
     }
-
-    fclose(fifo);
 
     return result;
 }

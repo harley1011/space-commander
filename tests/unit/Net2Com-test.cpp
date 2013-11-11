@@ -101,3 +101,24 @@ TEST(Net2ComTestGroup, ReadFromInfoPipe_ReturnsCorrectByte){
         CHECK_EQUAL(byte, (unsigned char)buffer[0]);
     }
 }
+
+TEST(Net2ComTestGroup, ReadFromInfoPipe_persist_open_ReturnsCorrectByte){
+    char buffer[BUFFER_SIZE];
+    const unsigned char byte = 252;
+    int result;
+    pid_t pid = fork();
+
+
+    if (pid == 0){
+        commander->OpenWritePipesPersistently();
+        result = commander->WriteToInfoPipe(&byte, 1);
+        CHECK_EQUAL(1, result);
+        exit(0);
+    }else{
+        netman->OpenReadPipesPersistently();
+        netman->OpenReadPipesPersistently();
+        netman->ReadFromInfoPipe(buffer);
+        CHECK_EQUAL(byte, (unsigned char)buffer[0]);
+    }
+
+}
