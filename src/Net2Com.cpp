@@ -84,9 +84,8 @@ int Net2Com::WriteToDataPipe(unsigned char number){
 //----------------------------------------------
 // ReadFromDataPipe 
 //----------------------------------------------
-char* Net2Com::ReadFromDataPipe(char* buffer){
-    dataPipe_r->ReadFromPipe(buffer);
-    return buffer;
+int Net2Com::ReadFromDataPipe(char* buffer, int buf_size){
+    return dataPipe_r->ReadFromPipe(buffer, buf_size);
 }
 //----------------------------------------------
 // WriteToInfoPipe 
@@ -106,7 +105,6 @@ int Net2Com::WriteToInfoPipe(unsigned char number){
 //----------------------------------------------
 //  ReadFromInfoPipe
 //----------------------------------------------
-char* Net2Com::ReadFromInfoPipe(char* buffer){
-    infoPipe_r->ReadFromPipe(buffer);
-    return buffer;
+int Net2Com::ReadFromInfoPipe(char* buffer, int buf_size){
+    return infoPipe_r->ReadFromPipe(buffer, buf_size);
 }

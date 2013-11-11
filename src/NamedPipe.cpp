@@ -83,8 +83,9 @@ void NamedPipe::close(){
 //----------------------------------------------
 // ReadFromPipe
 //----------------------------------------------
-char* NamedPipe::ReadFromPipe(char* buffer){
-    const int NUMBER_OF_BYTES_READ = 256;
+int NamedPipe::ReadFromPipe(char* buffer, int buf_size){
+    const int NUMBER_OF_BYTES_READ = 1;
+    int total_bytes_read = 0;
 
     if (this->fifo == NULL){
         FILE* fifo = fopen(fifo_path, "rb");
@@ -92,18 +93,24 @@ char* NamedPipe::ReadFromPipe(char* buffer){
             return NULL;
         }   
 
-        while (fread(buffer, 1, NUMBER_OF_BYTES_READ, fifo) > 0){
+        int bytes_read = 0;
+
+        while (total_bytes_read < buf_size && (bytes_read = fread(buffer, 1, NUMBER_OF_BYTES_READ, fifo)) > 0){
+            total_bytes_read += bytes_read;
             buffer += NUMBER_OF_BYTES_READ;
         }
         
         fclose(fifo);
     }else{
-        while (fread(buffer, 1, NUMBER_OF_BYTES_READ, fifo) > 0){
+        int bytes_read = 0;
+
+        while (total_bytes_read < buf_size && (bytes_read = fread(buffer, 1, NUMBER_OF_BYTES_READ, fifo)) > 0){
+            total_bytes_read += bytes_read;
             buffer += NUMBER_OF_BYTES_READ;
         }
     }
 
-    return buffer;
+    return total_bytes_read;
 }
 //----------------------------------------------
 //  WriteToPipe

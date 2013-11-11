@@ -25,11 +25,11 @@ class Net2Com{
         int WriteToDataPipe(const char* str);
         int WriteToDataPipe(unsigned char);
         int WriteToDataPipe(const void*, int);
-        char* ReadFromDataPipe(char* buffer);
+        int ReadFromDataPipe(char* buffer, int buf_size);
         int WriteToInfoPipe(const char* str);
         int WriteToInfoPipe(const void*, int);
         int WriteToInfoPipe(unsigned char);
-        char* ReadFromInfoPipe(char* buffer);
+        int ReadFromInfoPipe(char* buffer, int buf_size);
 
         void OpenReadPipesPersistently();                                               // If you are using this mode, you have to 
         void OpenWritePipesPersistently();                                              // persistently open BOTH sides, otherwise it blocks.
