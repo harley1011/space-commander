@@ -32,17 +32,18 @@ int main(){
     if (pid == 0){
         Net2Com* commander = new Net2Com(PIPE_TWO, PIPE_ONE, PIPE_FOUR, PIPE_THREE);
         char* info = new char;
-        char buffer[100];
+        const int BUF_SIZE = 100;
+        char buffer[BUF_SIZE];
 
-        commander->ReadFromInfoPipe(info);
+        commander->ReadFromInfoPipe(info, 1);
         printf("Info : %d\t", (unsigned char)(*info) );
 
-        commander->ReadFromDataPipe(buffer); 
+        commander->ReadFromDataPipe(buffer, BUF_SIZE); 
         printf("Data : %d\n", (unsigned char)buffer[0] );
     
-        commander->ReadFromInfoPipe(info);
+        commander->ReadFromInfoPipe(info, 1);
         printf("Info : %d\t", *info );
-        commander->ReadFromDataPipe(buffer);
+        commander->ReadFromDataPipe(buffer, BUF_SIZE);
         int_to_charArr year;
         for (int i=0; i<4; i++){
             year.arr[i] = (unsigned char)buffer[1 + i];
