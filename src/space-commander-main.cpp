@@ -37,7 +37,7 @@ int main() {
 
     while (true) {
         memset(buffer, 0, sizeof(char) * 255);
-        commander->ReadFromDataPipe(buffer);
+        commander->ReadFromDataPipe(buffer, 255);
         printf("buffer = %s", buffer);
         command = CommandFactory::CreateCommand(buffer);
         
