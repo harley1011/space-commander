@@ -43,7 +43,7 @@ TEST(Net2ComTestGroup, WriteToDataPipe_ReturnsCorrectNumberOfBytesWritten){
     pid_t pid;
     pid = fork();
     if (pid == 0){                                          // Child
-        commander->ReadFromDataPipe(buffer);
+        commander->ReadFromDataPipe(buffer, BUFFER_SIZE);
         #ifdef DEBUG
         printf("data : %s, buffer : %s\n", data, buffer);
         #endif
@@ -67,7 +67,7 @@ TEST(Net2ComTestGroup, ReadFromDataPipe_ReturnsCorrectString){
         CHECK_EQUAL(strlen(data) + NULL_CHAR_LENGTH, result);
         exit(0);
     }else{
-        netman->ReadFromDataPipe(buffer);
+        netman->ReadFromDataPipe(buffer, BUFFER_SIZE);
         STRCMP_EQUAL(data, buffer);
     }
 }
@@ -78,7 +78,7 @@ TEST(Net2ComTestGroup, WriteToInfoPipe_ReturnsCorrectNumberOfBytesWritten){
     pid_t pid = fork();
 
     if (pid == 0){
-        commander->ReadFromInfoPipe(buffer);
+        commander->ReadFromInfoPipe(buffer, BUFFER_SIZE);
         CHECK_EQUAL(byte, (unsigned char)buffer[0]);
         exit(0);
     }else{
@@ -97,7 +97,7 @@ TEST(Net2ComTestGroup, ReadFromInfoPipe_ReturnsCorrectByte){
         CHECK_EQUAL(1, result);
         exit(0);
     }else{
-        netman->ReadFromInfoPipe(buffer);
+        netman->ReadFromInfoPipe(buffer, BUFFER_SIZE);
         CHECK_EQUAL(byte, (unsigned char)buffer[0]);
     }
 }
@@ -116,9 +116,27 @@ TEST(Net2ComTestGroup, ReadFromInfoPipe_persist_open_ReturnsCorrectByte){
         exit(0);
     }else{
         netman->OpenReadPipesPersistently();
-        netman->OpenReadPipesPersistently();
-        netman->ReadFromInfoPipe(buffer);
+        int bytes_read = netman->ReadFromInfoPipe(buffer, BUFFER_SIZE);
+        CHECK_EQUAL(bytes_read, 1);
         CHECK_EQUAL(byte, (unsigned char)buffer[0]);
+    }
+
+}
+
+TEST(Net2ComTestGroup, ReadFromInfoPipe_TryOverFlowBuffer_ReadUntilBufferIsFull){
+    const int TO_SMALL = 5;
+    char buffer[TO_SMALL];
+    const char* data = "myCommand";
+    int result;
+    pid_t pid = fork();
+    if (pid == 0){
+        result = commander->WriteToDataPipe(data);
+        CHECK_EQUAL(strlen(data) + NULL_CHAR_LENGTH, result);
+        exit(0);
+    }else{
+        int bytes_read = netman->ReadFromDataPipe(buffer, TO_SMALL);
+        STRCMP_EQUAL("myCom", buffer);
+        CHECK_EQUAL(TO_SMALL, bytes_read);
     }
 
 }

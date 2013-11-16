@@ -4,7 +4,11 @@
 #include <cstdio>
 #include <cstring>
 
+#ifdef PC
 const char* Net2Com::pipe_str[] = {"pipe1", "pipe2", "pipe3", "pipe4"};
+#else   
+const char* Net2Com::pipe_str[] = {"/home/pipes/pipe1", "/home/pipes/pipe2", "/home/pipes/pipe3", "/home/pipes/pipe4"}; // Q6 paths
+#endif
 //----------------------------------------------
 //  Constructor
 //----------------------------------------------
@@ -80,9 +84,8 @@ int Net2Com::WriteToDataPipe(unsigned char number){
 //----------------------------------------------
 // ReadFromDataPipe 
 //----------------------------------------------
-char* Net2Com::ReadFromDataPipe(char* buffer){
-    dataPipe_r->ReadFromPipe(buffer);
-    return buffer;
+int Net2Com::ReadFromDataPipe(char* buffer, int buf_size){
+    return dataPipe_r->ReadFromPipe(buffer, buf_size);
 }
 //----------------------------------------------
 // WriteToInfoPipe 
@@ -102,7 +105,6 @@ int Net2Com::WriteToInfoPipe(unsigned char number){
 //----------------------------------------------
 //  ReadFromInfoPipe
 //----------------------------------------------
-char* Net2Com::ReadFromInfoPipe(char* buffer){
-    infoPipe_r->ReadFromPipe(buffer);
-    return buffer;
+int Net2Com::ReadFromInfoPipe(char* buffer, int buf_size){
+    return infoPipe_r->ReadFromPipe(buffer, buf_size);
 }
