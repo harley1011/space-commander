@@ -76,7 +76,7 @@ bool NamedPipe::persist_open(char mode){
 void NamedPipe::close(){
     if (this->fifo != NULL){
         fclose(this->fifo);
-        this->fifo == NULL;
+        this->fifo = NULL;
     }
 }
 
