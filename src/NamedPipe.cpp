@@ -90,7 +90,8 @@ int NamedPipe::ReadFromPipe(char* buffer, int buf_size){
     if (this->fifo == NULL){
         FILE* fifo = fopen(fifo_path, "rb");
         if (fifo == NULL){
-            return NULL;
+            fprintf(stderr, "Can't open the pipe : %s\n", strerror(errno));
+            return -1;
         }   
 
         int bytes_read = 0;
