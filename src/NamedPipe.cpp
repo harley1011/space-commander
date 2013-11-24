@@ -4,6 +4,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <errno.h>
 #include <cstdio>
 #include <unistd.h>
@@ -57,9 +58,46 @@ bool NamedPipe::persist_open(char mode){
     }
 
     if (mode == 'w'){
-        this->fifo = fopen(fifo_path, "wb");
+         fprintf(stderr, "Initializing %s\n", __FILE__);
+
+         int fifo_fd = open(fifo_path, O_NONBLOCK | O_WRONLY);
+         if(fifo_fd == -1){
+            fprintf(stderr, "Couldn't open fd for %s\n", fifo_path);
+            return false;
+         }
+
+         this->fifo = fdopen(fifo_fd, "wb");
+
+         if(!this->fifo){
+            fprintf(stderr, "Failed to open he100 pipe");
+            return false;
+         }
+
+
+         fprintf(stderr, "Initialization successful!\n");
+
+         return true;
     }else if (mode == 'r'){
-        this->fifo = fopen(fifo_path, "rb");
+
+         fprintf(stderr, "Initializing %s\n", __FILE__);
+
+         int fifo_fd = open(fifo_path, O_NONBLOCK | O_RDONLY);
+         if(fifo_fd == -1){
+            fprintf(stderr, "Couldn't open fd for %s\n", fifo_path);
+            return false;
+         }
+
+         this->fifo = fdopen(fifo_fd, "rb");
+
+         if(!this->fifo){
+            fprintf(stderr, "Failed to open he100 pipe");
+            return false;
+         }
+
+
+         fprintf(stderr, "Initialization successful!\n");
+
+         return true;
     }
 
     if (this->fifo == NULL){
@@ -100,6 +138,12 @@ int NamedPipe::ReadFromPipe(char* buffer, int buf_size){
 
     bytes_read = fread(buffer, 1, buf_size, fifo);
 
+    if(bytes_read == 0){
+      if(feof(fifo)){
+         printf("feof(fifo)!!\n");
+      }
+    }
+
     if(need_to_close_pipe){
        fclose(fifo);
     }
@@ -114,7 +158,7 @@ int NamedPipe::WriteToPipe(const void* data, int size){
     int result;
 
     if (fifo == NULL){
-        fifo = fopen(fifo_path, "rb");
+        fifo = fopen(fifo_path, "wb");
         if (fifo == NULL){
             fprintf(stderr, "Can't open the pipe : %s\n", strerror(errno));
             return -1;
