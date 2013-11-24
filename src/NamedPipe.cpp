@@ -146,6 +146,7 @@ int NamedPipe::ReadFromPipe(char* buffer, int buf_size){
 
     if(need_to_close_pipe){
        fclose(fifo);
+       this->fifo = NULL;
     }
 
     return bytes_read;
@@ -176,6 +177,7 @@ int NamedPipe::WriteToPipe(const void* data, int size){
 
     if(need_to_close_pipe){
        fclose(fifo);
+       this->fifo = NULL;
     }
 
     return result;
