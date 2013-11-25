@@ -46,9 +46,12 @@ int main() {
             struct tm* timeinfo;
             timeinfo = localtime(currentTime);
             printf("Current time = %s", asctime(timeinfo));
+            commander->WriteToPipe(*currentTime, sizeof(time_t));
             free(currentTime);
         }
+
         delete command;
+        command = NULL;
 
         signal_watch_puppy();
     }
