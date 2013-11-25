@@ -37,7 +37,7 @@ int main() {
 
     while (true) {
         memset(buffer, 0, sizeof(char) * 255);
-        commander->ReadFromDataPipe(buffer);
+        commander->ReadFromDataPipe(buffer, 255);
         printf("buffer = %s", buffer);
         command = CommandFactory::CreateCommand(buffer);
         
@@ -46,7 +46,8 @@ int main() {
             struct tm* timeinfo;
             timeinfo = localtime(currentTime);
             printf("Current time = %s", asctime(timeinfo));
-            commander->WriteToPipe(*currentTime, sizeof(time_t));
+            //commander->WriteToDataPipe((void *)*currentTime, sizeof(time_t));
+            commander->WriteToDataPipe("C");
             free(currentTime);
         }
 

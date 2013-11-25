@@ -11,7 +11,7 @@ LIBS=-lCppUTest -lCppUTestExt
 DEBUG_SRC_FILES =`find src/ ! -name 'space-commander-main.cpp' -name '*.cpp'`
 
 buildBin:
-	$(CC) $(CFLAGS) $(INCPATH) $(LIBPATH) src/*.cpp -o bin/space-commander
+	$(CC) $(CFLAGS) $(INCPATH) $(LIBPATH) -DPC src/*.cpp -o bin/space-commander
 buildQ6:
 	$(MICROCC) $(MICROCFLAGS) $(INCPATH) src/*.cpp -o bin/space-commander
 
