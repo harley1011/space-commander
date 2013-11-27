@@ -137,7 +137,7 @@ int NamedPipe::WriteToPipe(const void* buffer, int size){
            fprintf(stderr, "Couldn't write(fifo) : %s\n", strerror(errno));
         }
         return 0;
-    }
+   }
 
     return bytes_written;
 }

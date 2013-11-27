@@ -105,7 +105,7 @@ TEST(Net2ComTestGroup, ReadFromInfoPipe_ReturnsCorrectByte){
 TEST(Net2ComTestGroup, ReadFromInfoPipe_persist_open_ReturnsCorrectByte){
     char buffer[BUFFER_SIZE];
     const unsigned char byte = 252;
-    int result;
+    int result = 0;
     pid_t pid = fork();
 
 
@@ -116,7 +116,14 @@ TEST(Net2ComTestGroup, ReadFromInfoPipe_persist_open_ReturnsCorrectByte){
         exit(0);
     }else{
         netman->OpenReadPipesPersistently();
-        int bytes_read = netman->ReadFromInfoPipe(buffer, BUFFER_SIZE);
+
+        int bytes_read = 0;
+        
+        while (bytes_read == 0){
+            sleep(1);
+            bytes_read = netman->ReadFromInfoPipe(buffer, BUFFER_SIZE);
+        }
+
         CHECK_EQUAL(bytes_read, 1);
         CHECK_EQUAL(byte, (unsigned char)buffer[0]);
     }
