@@ -6,7 +6,7 @@ class  NamedPipe{
         const static int MAX_RETRY = 5;
         const static int BUFFER_SIZE = 100;
         char fifo_path[BUFFER_SIZE];
-        FILE* fifo;
+        int fifo; // file descriptor
 
     public :
         NamedPipe(const char* fifo_path);
@@ -16,6 +16,6 @@ class  NamedPipe{
         int ReadFromPipe(char* buffer, int buf_size);   // Return value : On success, buffer is returned. On failure, NULL is returned.
         int WriteToPipe(const void* data, int size); // Return value : On success, the number of bytes written. On failure, negative value.
         bool ensure_open(char mode);
-        void close();
+        void closePipe();
 };
 #endif
