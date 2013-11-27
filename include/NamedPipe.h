@@ -8,14 +8,14 @@ class  NamedPipe{
         char fifo_path[BUFFER_SIZE];
         FILE* fifo;
 
-    public : 
+    public :
         NamedPipe(const char* fifo_path);
         ~NamedPipe();
         bool CreatePipe();
         bool Exist();
         int ReadFromPipe(char* buffer, int buf_size);   // Return value : On success, buffer is returned. On failure, NULL is returned.
         int WriteToPipe(const void* data, int size); // Return value : On success, the number of bytes written. On failure, negative value.
-        bool persist_open(char mode);
+        bool ensure_open(char mode);
         void close();
 };
 #endif
