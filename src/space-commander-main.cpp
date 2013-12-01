@@ -31,7 +31,7 @@ void signal_watch_puppy() {
 }
 
 int main() {
-    Net2Com* commander = new Net2Com(PIPE_TWO, PIPE_ONE, PIPE_FOUR, PIPE_THREE);
+    Net2Com* commander = new Net2Com(Dcom_w_net_r, Dnet_w_com_r, Icom_w_net_r, Inet_w_com_r);
     char buffer[255];
     ICommand* command = NULL;
 

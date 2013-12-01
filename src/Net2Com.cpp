@@ -5,14 +5,14 @@
 #include <cstring>
 
 #ifdef PC
-const char* Net2Com::pipe_str[] = {"pipe1", "pipe2", "pipe3", "pipe4"};
+const char* Net2Com::pipe_str[] = {"Dnet-w-com-r", "Dcom-w-net-r", "Inet-w-com-r", "Icom-w-net-r"};
 #else   
-const char* Net2Com::pipe_str[] = {"/tmp/Net2Com/pipes/pipe1", "/tmp/Net2Com/pipes/pipe2", "/tmp/Net2Com/pipes/pipe3", "/tmp/Net2Com/pipes/pipe4"}; // Q6 paths
+const char* Net2Com::pipe_str[] = {"/tmp/Net2Com/pipes/Dnet-w-com-r", "/tmp/Net2Com/pipes/Dcom-w-net-r", "/tmp/Net2Com/pipes/Inet-w-com-r", "/tmp/Net2Com/pipes/Icom-w-net-r"}; // Q6 paths
 #endif
 //----------------------------------------------
 //  Constructor
 //----------------------------------------------
-Net2Com::Net2Com(PIPE_NUM dataw, PIPE_NUM datar, PIPE_NUM infow, PIPE_NUM infor){
+Net2Com::Net2Com(pipe_num_t dataw, pipe_num_t datar, pipe_num_t infow, pipe_num_t infor){
     Initialize();
     CreatePipes(); 
     
