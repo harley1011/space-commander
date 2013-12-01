@@ -44,7 +44,7 @@ bool NamedPipe::CreatePipe(){
 
         usleep(100000);                                                                     // 100 ms
     }
-    
+
     return result;
 }
 
@@ -84,57 +84,54 @@ void NamedPipe::close(){
 // ReadFromPipe
 //----------------------------------------------
 int NamedPipe::ReadFromPipe(char* buffer, int buf_size){
-    const int NUMBER_OF_BYTES_READ = 1;
-    int total_bytes_read = 0;
+    int bytes_read;
+    bool need_to_close_pipe;
 
-    if (this->fifo == NULL){
-        FILE* fifo = fopen(fifo_path, "rb");
+    if (fifo == NULL){
+        fifo = fopen(fifo_path, "rb");
         if (fifo == NULL){
             fprintf(stderr, "Can't open the pipe : %s\n", strerror(errno));
-            return -1;
-        }   
-
-        int bytes_read = 0;
-
-        while (total_bytes_read < buf_size && (bytes_read = fread(buffer, 1, NUMBER_OF_BYTES_READ, fifo)) > 0){
-            total_bytes_read += bytes_read;
-            buffer += NUMBER_OF_BYTES_READ;
+            return 0;
         }
-        
-        fclose(fifo);
+        need_to_close_pipe = true;
     }else{
-        int bytes_read = 0;
-
-        while (total_bytes_read < buf_size && (bytes_read = fread(buffer, 1, NUMBER_OF_BYTES_READ, fifo)) > 0){
-            total_bytes_read += bytes_read;
-            buffer += NUMBER_OF_BYTES_READ;
-        }
+        need_to_close_pipe = false;
     }
 
-    return total_bytes_read;
+    bytes_read = fread(buffer, 1, buf_size, fifo);
+
+    if(need_to_close_pipe){
+       fclose(fifo);
+    }
+
+    return bytes_read;
 }
 //----------------------------------------------
 //  WriteToPipe
 //----------------------------------------------
 int NamedPipe::WriteToPipe(const void* data, int size){
+    bool need_to_close_pipe;
     int result;
-    
-    if (this->fifo == NULL){
-        FILE* fifo = fopen(fifo_path, "wb");
+
+    if (fifo == NULL){
+        fifo = fopen(fifo_path, "rb");
         if (fifo == NULL){
             fprintf(stderr, "Can't open the pipe : %s\n", strerror(errno));
             return -1;
         }
-
-        result = fwrite(data, 1, size, fifo);
-
-        fclose(fifo);
+        need_to_close_pipe = true;
     }else{
-        result = fwrite(data, 1, size, fifo);
+        need_to_close_pipe = false;
     }
+
+    result = fwrite(data, 1, size, fifo);
 
     if (result < 0){
         fprintf(stderr, "Can't write to the pipe : %s\n", strerror(errno));
+    }
+
+    if(need_to_close_pipe){
+       fclose(fifo);
     }
 
     return result;
