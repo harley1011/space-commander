@@ -1,7 +1,7 @@
 CC=g++
-MICROCC=microblaze-unknown-linux-gnu-g++
+MICROCC=microblazeel-xilinx-linux-gnu-g++
 CFLAGS=-Wall
-MICROCFLAGS=-mcpu=v8.10.a -mxl-barrel-shift -mxl-multiply-high -mxl-pattern-compare -mno-xl-soft-mul -mno-xl-soft-div -mxl-float-sqrt -mhard-float -mxl-float-convert -ffixed-r31 --sysroot /usr/local/lib/mbgcc/microblaze-unknown-linux-gnu/sys-root -Wall
+MICROCFLAGS=-mcpu=v8.40.b -mxl-barrel-shift -mxl-multiply-high -mxl-pattern-compare -mno-xl-soft-mul -mno-xl-soft-div -mxl-float-sqrt -mhard-float -mxl-float-convert -mlittle-endian -Wall
 DEBUGFLAGS=-ggdb -g -gdwarf-2 -g3 #gdwarf-2 + g3 provides macro info to gdb
 INCPATH=-I./include/
 INCTESTPATH=-I./tests/unit/stubs/ -I./tests/helpers/include/
@@ -13,7 +13,7 @@ DEBUG_SRC_FILES =`find src/ ! -name 'space-commander-main.cpp' -name '*.cpp'`
 buildBin:
 	$(CC) $(CFLAGS) $(INCPATH) $(LIBPATH) -DPC src/*.cpp -o bin/space-commander
 buildQ6:
-	$(MICROCC) $(MICROCFLAGS) $(INCPATH) src/*.cpp -o bin/space-commander
+	$(MICROCC) $(MICROCFLAGS) $(INCPATH) src/*.cpp -o bin/space-commanderQ6
 
 buildAllTests: buildUnitTests
 buildUnitTests:
