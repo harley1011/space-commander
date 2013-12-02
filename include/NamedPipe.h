@@ -8,7 +8,7 @@ class  NamedPipe{
         char fifo_path[BUFFER_SIZE];
         int fifo; // file descriptor
 
-    public : 
+    public :
         NamedPipe(const char* fifo_path);
         ~NamedPipe();
         bool CreatePipe();

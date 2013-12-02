@@ -24,7 +24,7 @@ NamedPipe::~NamedPipe(){
     unlink(fifo_path);
 }
 //----------------------------------------------
-// CreatePipe 
+// CreatePipe
 //----------------------------------------------
 bool NamedPipe::CreatePipe(){
     int retry = 0;
@@ -51,7 +51,7 @@ bool NamedPipe::CreatePipe(){
 }
 
 //----------------------------------------------
-//  persist_open          
+//  persist_open
 //----------------------------------------------
 bool NamedPipe::ensure_open(char mode){
     if (fifo != -1){ // Pipe already open.
@@ -104,6 +104,7 @@ int NamedPipe::ReadFromPipe(char* buffer, int size){
     struct pollfd fds;
     fds.fd = fifo;
     fds.events = POLLIN;
+
     // poll 5 ms to see if there's new data to be read
     if(poll(&fds, 1, 5)){
        bytes_read = read(fifo, buffer, size);
@@ -136,6 +137,7 @@ int NamedPipe::WriteToPipe(const void* buffer, int size){
         }
         return 0;
     }
+
 
     return bytes_written;
 }
