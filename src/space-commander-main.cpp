@@ -37,23 +37,24 @@ int main() {
 
     while (true) {
         memset(buffer, 0, sizeof(char) * 255);
-        commander->ReadFromDataPipe(buffer, 255);
-        printf("buffer = %s", buffer);
-        command = CommandFactory::CreateCommand(buffer);
-        
-        if (command != NULL) {
-            time_t* currentTime = (time_t*)command->Execute();
-            struct tm* timeinfo;
-            timeinfo = localtime(currentTime);
-            printf("Current time = %s", asctime(timeinfo));
-            //commander->WriteToDataPipe((void *)*currentTime, sizeof(time_t));
-            commander->WriteToDataPipe("C");
-            free(currentTime);
-        }
+        size_t bytes = commander->ReadFromDataPipe(buffer, 255);
+	if(bytes > 0) {
+		printf("buffer = %s", buffer);
+		command = CommandFactory::CreateCommand(buffer);
+		
+		if (command != NULL) {
+		    time_t* currentTime = (time_t*)command->Execute();
+		    struct tm* timeinfo;
+		    timeinfo = localtime(currentTime);
+		    printf("Current time = %s", asctime(timeinfo));
+		    //commander->WriteToDataPipe((void *)*currentTime, sizeof(time_t));
+		    commander->WriteToDataPipe("C");
+		    free(currentTime);
+		}
 
-        delete command;
-        command = NULL;
-
+		delete command;
+		command = NULL;
+	}
         signal_watch_puppy();
     }
 

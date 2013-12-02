@@ -21,7 +21,7 @@ buildUnitTests:
 
 
 %.o: %.cpp
-	$(CC) $(CFLAGS) $(INCPATH) $(LIBPATH) -c $^ -o $@
+	$(CC) $(CFLAGS) $(INCPATH) -DPC $(LIBPATH) -c $^ -o $@
 
 %.a: %.o
 	ar -cvq $@ $^
