@@ -47,57 +47,64 @@ int main() {
 
     while (true) {
         memset(info_buffer, 0, sizeof(char) * 255);
-        printf("Readng...");
-        fflush(stdout);
-        commander->ReadFromInfoPipe(info_buffer, 255);
-        
-        read = atoi(info_buffer);
+        size_t bytes = commander->ReadFromInfoPipe(info_buffer, 255);
 
-        fflush(stdout);
-        printf("Read = %d", read);
+        if (bytes > 0) {
+            read = atoi(info_buffer);
 
-        if (read == 252) {
-            read = 0;
-            read_total = 0;
-        }
-        else if (read > 0 && read <= 251) {
-            read_total += read;
-            buffer = (char* )realloc(buffer, read_total * sizeof(char));
-            memset(buffer, 0, sizeof(char) * read_total);
-
-        }
-        else if (read == 253 || read == 255) {
-            commander->ReadFromDataPipe(buffer, read_total);
-                        
-            if (fp_last_command) {
-                fwrite(buffer, sizeof(char), read_total, fp_last_command); 
-                fclose(fp_last_command);
-            }
-
-            printf("buffer = %s", buffer);
             fflush(stdout);
-            command = CommandFactory::CreateCommand(buffer);
-            if (command != NULL) {                
-                char* result  = (char* )command->Execute();
-                if (result != NULL) {
-                    printf("Result = %s", result);
-                    fflush(stdout);
-                    commander->WriteToDataPipe(result);
+            printf("Read = %d", read);
 
-                    free(result);
-                    result = NULL;
+            if (read == 252) {
+                read = 0;
+                read_total = 0;
+            }
+            else if (read > 0 && read <= 251) {
+                read_total += read;
+                buffer = (char* )realloc(buffer, read_total * sizeof(char));
+                memset(buffer, 0, sizeof(char) * read_total);
+
+            }
+            else if (read == 253 || read == 255) {
+                size_t data_bytes = 0;
+                while (data_bytes == 0) {             
+                    data_bytes = commander->ReadFromDataPipe(buffer, read_total);
+                    if (data_bytes > 0) {
+                        if (fp_last_command) {
+                            fwrite(buffer, sizeof(char), read_total, fp_last_command); 
+                            fclose(fp_last_command);
+                        }
+
+                        printf("buffer = %s", buffer);
+                        fflush(stdout);
+                        command = CommandFactory::CreateCommand(buffer);
+                        if (command != NULL) {                
+                            char* result  = (char* )command->Execute();
+                            if (result != NULL) {
+                                printf("Result = %s", result);
+                                fflush(stdout);
+                                commander->WriteToDataPipe("1111");
+
+                                free(result);
+                                result = NULL;
+                            }
+                            delete command;
+                            command = NULL;
+                        }
+
+                        delete buffer;
+                        buffer = NULL;
+                    }
+
+                    signal_watch_puppy();
                 }
+
                 delete command;
                 command = NULL;
             }
-
-            delete buffer;
-            buffer = NULL;
+        
+            signal_watch_puppy();
         }
-
-		delete command;
-		command = NULL;
-        signal_watch_puppy();
     }
 
     delete commander;
