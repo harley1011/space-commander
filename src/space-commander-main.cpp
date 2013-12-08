@@ -38,9 +38,9 @@ int main() {
         retry -= 1;
     }
             
-    Net2Com* commander = new Net2Com(PIPE_TWO, PIPE_ONE, PIPE_FOUR, PIPE_THREE);
     char info_buffer[255];
     char* buffer = NULL;
+    Net2Com* commander = new Net2Com(Dcom_w_net_r, Dnet_w_com_r, Icom_w_net_r, Inet_w_com_r);
     ICommand* command = NULL;
     int read = 0;
     int read_total = 0;
