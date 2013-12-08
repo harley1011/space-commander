@@ -14,8 +14,8 @@ const char* Net2Com::pipe_str[] = {"/tmp/Net2Com/pipes/Dnet-w-com-r", "/tmp/Net2
 //----------------------------------------------
 Net2Com::Net2Com(pipe_num_t dataw, pipe_num_t datar, pipe_num_t infow, pipe_num_t infor){
     Initialize();
-    CreatePipes(); 
-    
+    CreatePipes();
+
     dataPipe_w = pipe[dataw];
     dataPipe_r = pipe[datar];
     infoPipe_w = pipe[infow];
@@ -34,7 +34,7 @@ Net2Com::~Net2Com(){
 //----------------------------------------------
 bool Net2Com::Initialize(){
     for (int i=0; i<NUMBER_OF_PIPES; i++){
-        pipe[i] = new NamedPipe(pipe_str[i]); 
+        pipe[i] = new NamedPipe(pipe_str[i]);
     }
 
     return true;
@@ -45,7 +45,7 @@ bool Net2Com::Initialize(){
 bool Net2Com::CreatePipes(){
     for (int i=0; i<NUMBER_OF_PIPES; i++){
         if (pipe[i]->Exist() == false){
-            pipe[i]->CreatePipe();   
+            pipe[i]->CreatePipe();
         }
     }
 
@@ -53,21 +53,17 @@ bool Net2Com::CreatePipes(){
 }
 
 //----------------------------------------------
-//  OpenReadPipesPersistently 
+//  OpenReadPipesPersistently
 //----------------------------------------------
 void Net2Com::OpenReadPipesPersistently(){
-    infoPipe_r->persist_open('r');
-    dataPipe_r->persist_open('r');
 }
 //----------------------------------------------
-//  OpenWritePipesPersistently 
+//  OpenWritePipesPersistently
 //----------------------------------------------
 void Net2Com::OpenWritePipesPersistently(){
-    infoPipe_w->persist_open('w');
-    dataPipe_w->persist_open('w');
 }
 //----------------------------------------------
-// WriteToDataPipe 
+// WriteToDataPipe
 //----------------------------------------------
 int Net2Com::WriteToDataPipe(const char* str){
     int result = dataPipe_w->WriteToPipe(str, strlen(str) + NULL_CHAR_LENGTH);
@@ -82,13 +78,13 @@ int Net2Com::WriteToDataPipe(unsigned char number){
     return dataPipe_w->WriteToPipe(&byte, sizeof(unsigned char));
 }
 //----------------------------------------------
-// ReadFromDataPipe 
+// ReadFromDataPipe
 //----------------------------------------------
 int Net2Com::ReadFromDataPipe(char* buffer, int buf_size){
     return dataPipe_r->ReadFromPipe(buffer, buf_size);
 }
 //----------------------------------------------
-// WriteToInfoPipe 
+// WriteToInfoPipe
 //----------------------------------------------
 int Net2Com::WriteToInfoPipe(const char* str){
     int result = infoPipe_w->WriteToPipe(str, strlen(str) + NULL_CHAR_LENGTH);

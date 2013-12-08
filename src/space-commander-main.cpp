@@ -94,6 +94,9 @@ int main() {
             delete buffer;
             buffer = NULL;
         }
+
+		delete command;
+		command = NULL;
         signal_watch_puppy();
     }
 

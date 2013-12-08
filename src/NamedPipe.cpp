@@ -4,25 +4,27 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <errno.h>
 #include <cstdio>
 #include <unistd.h>
+#include <poll.h>
 //----------------------------------------------
 //  Constructor
 //----------------------------------------------
 NamedPipe::NamedPipe(const char* fifo){
     strcpy(fifo_path, fifo);
-    this->fifo = NULL;
+    this->fifo = -1;
 }
 //----------------------------------------------
 //  Destructor
 //----------------------------------------------
 NamedPipe::~NamedPipe(){
-    this->close();
+    closePipe();
     unlink(fifo_path);
 }
 //----------------------------------------------
-// CreatePipe 
+// CreatePipe
 //----------------------------------------------
 bool NamedPipe::CreatePipe(){
     int retry = 0;
@@ -44,100 +46,100 @@ bool NamedPipe::CreatePipe(){
 
         usleep(100000);                                                                     // 100 ms
     }
-    
+
     return result;
 }
 
 //----------------------------------------------
-//  persist_open          
+//  persist_open
 //----------------------------------------------
-bool NamedPipe::persist_open(char mode){
-    if (this->fifo != NULL){                                                                // Pipe already open.
+bool NamedPipe::ensure_open(char mode){
+    if (fifo != -1){ // Pipe already open.
         return true;
     }
 
     if (mode == 'w'){
-        this->fifo = fopen(fifo_path, "wb");
+         fifo = open(fifo_path, O_NONBLOCK | O_WRONLY);
+         if(fifo == -1){
+            fprintf(stderr, "Couldn't open(\"%s\", O_NONBLOCK | O_WRONLY) : %s\n"
+                          ,                   fifo_path,                     strerror(errno));
+         }
+
     }else if (mode == 'r'){
-        this->fifo = fopen(fifo_path, "rb");
+         fifo = open(fifo_path, O_NONBLOCK | O_RDONLY);
+         if(fifo == -1){
+            fprintf(stderr, "Couldn't open(\"%s\", O_NONBLOCK | O_RDONLY) : %s\n"
+                          ,                   fifo_path,                     strerror(errno));
+         }
+
     }
 
-    if (this->fifo == NULL){
-        fprintf(stderr, "Can't open the pipe : %s\n", strerror(errno));
-        return false;
-    }
-
-    return true;
+    return fifo != -1;
 }
 
 //----------------------------------------------
 //  close
 //----------------------------------------------
-void NamedPipe::close(){
-    if (this->fifo != NULL){
-        fclose(this->fifo);
-        this->fifo = NULL;
+void NamedPipe::closePipe(){
+    if (fifo != -1){
+        if(close(fifo) == -1){
+            fprintf(stderr, "Couldn't close(fifo) : %s\n", strerror(errno));
+        }else{
+            fifo = -1;
+        }
     }
 }
 
 //----------------------------------------------
 // ReadFromPipe
 //----------------------------------------------
-int NamedPipe::ReadFromPipe(char* buffer, int buf_size){
-    const int NUMBER_OF_BYTES_READ = 1;
-    int total_bytes_read = 0;
+int NamedPipe::ReadFromPipe(char* buffer, int size){
+    int bytes_read = 0;
 
-    if (this->fifo == NULL){
-        FILE* fifo = fopen(fifo_path, "rb");
-        if (fifo == NULL){
-            fprintf(stderr, "Can't open the pipe : %s\n", strerror(errno));
-            return -1;
-        }   
-
-        int bytes_read = 0;
-
-        while (total_bytes_read < buf_size && (bytes_read = fread(buffer, 1, NUMBER_OF_BYTES_READ, fifo)) > 0){
-            total_bytes_read += bytes_read;
-            buffer += NUMBER_OF_BYTES_READ;
-        }
-        
-        fclose(fifo);
-    }else{
-        int bytes_read = 0;
-
-        while (total_bytes_read < buf_size && (bytes_read = fread(buffer, 1, NUMBER_OF_BYTES_READ, fifo)) > 0){
-            total_bytes_read += bytes_read;
-            buffer += NUMBER_OF_BYTES_READ;
-        }
+    if(!ensure_open('r')){
+       return 0;
     }
 
-    return total_bytes_read;
+    // TODO - make this a private member and initialize only once (?)
+    struct pollfd fds;
+    fds.fd = fifo;
+    fds.events = POLLIN;
+
+    // poll 5 ms to see if there's new data to be read
+    if(poll(&fds, 1, 5)){
+       bytes_read = read(fifo, buffer, size);
+
+       if(bytes_read == -1){
+          if(errno != EAGAIN){
+             fprintf(stderr, "Couldn't read(fifo) : %s\n", strerror(errno));
+          }
+          return 0;
+       }
+    }
+
+    return bytes_read;
 }
 //----------------------------------------------
 //  WriteToPipe
 //----------------------------------------------
-int NamedPipe::WriteToPipe(const void* data, int size){
-    int result;
-    
-    if (this->fifo == NULL){
-        FILE* fifo = fopen(fifo_path, "wb");
-        if (fifo == NULL){
-            fprintf(stderr, "Can't open the pipe : %s\n", strerror(errno));
-            return -1;
+int NamedPipe::WriteToPipe(const void* buffer, int size){
+    int bytes_written;
+
+    if(!ensure_open('w')){
+       return 0;
+    }
+
+    bytes_written = write(fifo, buffer, size);
+
+    if (bytes_written == -1){
+        if(errno != EAGAIN){
+           fprintf(stderr, "Couldn't write(fifo) : %s\n", strerror(errno));
         }
-
-        result = fwrite(data, 1, size, fifo);
-
-        fclose(fifo);
-    }else{
-        result = fwrite(data, 1, size, fifo);
+        return 0;
     }
 
-    if (result < 0){
-        fprintf(stderr, "Can't write to the pipe : %s\n", strerror(errno));
-    }
 
-    return result;
+    return bytes_written;
 }
 //----------------------------------------------
 //  Exist

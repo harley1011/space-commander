@@ -18,3 +18,14 @@ buildQ6:
 buildAllTests: buildUnitTests
 buildUnitTests:
 	$(CC) $(CFLAGS) $(DEBUGFLAGS) $(INCPATH) $(INCTESTPATH) $(LIBPATH) src/*.cpp tests/unit/*.cpp -o bin/AllUnitTests $(LIBS)
+
+
+%.o: %.cpp
+	$(CC) $(CFLAGS) $(INCPATH) $(LIBPATH) -c $^ -o $@
+
+%.a: %.o
+	ar -cvq $@ $^
+
+staticlibs.tar: src/NamedPipe.a src/Net2Com.a
+	mv $^ ./
+	tar -cf $@ include/NamedPipe.h include/Net2Com.h NamedPipe.a Net2Com.a
