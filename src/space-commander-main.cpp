@@ -42,7 +42,7 @@ int main() {
     char* buffer = NULL;
     Net2Com* commander = new Net2Com(Dcom_w_net_r, Dnet_w_com_r, Icom_w_net_r, Inet_w_com_r);
     ICommand* command = NULL;
-    int read = 0;
+    unsigned char read = 0;
     int read_total = 0;
 
     while (true) {
@@ -50,61 +50,72 @@ int main() {
         size_t bytes = commander->ReadFromInfoPipe(info_buffer, 255);
 
         if (bytes > 0) {
-            read = atoi(info_buffer);
+            for(int i = 0; i != bytes; i++) {
+                read = (unsigned char)info_buffer[i]; 
+              
+                printf("Read = %d", read);
+                fflush(stdout);
 
-            fflush(stdout);
-            printf("Read = %d", read);
-
-            if (read == 252) {
-                read = 0;
-                read_total = 0;
-            }
-            else if (read > 0 && read <= 251) {
-                read_total += read;
-                buffer = (char* )realloc(buffer, read_total * sizeof(char));
-                memset(buffer, 0, sizeof(char) * read_total);
-
-            }
-            else if (read == 253 || read == 255) {
-                size_t data_bytes = 0;
-                while (data_bytes == 0) {             
-                    data_bytes = commander->ReadFromDataPipe(buffer, read_total);
-                    if (data_bytes > 0) {
-                        if (fp_last_command) {
-                            fwrite(buffer, sizeof(char), read_total, fp_last_command); 
-                            fclose(fp_last_command);
-                        }
-
-                        printf("buffer = %s", buffer);
-                        fflush(stdout);
-                        command = CommandFactory::CreateCommand(buffer);
-                        if (command != NULL) {                
-                            char* result  = (char* )command->Execute();
-                            if (result != NULL) {
-                                printf("Result = %s", result);
+                switch (read) {
+                    case 252: break;
+                    case 253:
+                    case 254:
+                    case 255: {
+                     
+                        size_t data_bytes = 0;
+                        while (data_bytes == 0) {
+                            data_bytes = commander->ReadFromDataPipe(buffer, read_total);
+                    
+                            if (data_bytes > 0) {
+                                printf("data_bytes = %d", data_bytes);
                                 fflush(stdout);
-                                commander->WriteToDataPipe("1111");
 
-                                free(result);
-                                result = NULL;
+                                if (data_bytes != read_total) {
+                                    printf("Something went wrong !!");
+                                    fflush(stdout);
+                                    read_total = 0;
+                                    break;
+                                }
+
+                                command = CommandFactory::CreateCommand(buffer);
+                                if (command != NULL) {    
+                                    printf("%s\n", "executing command");
+                                    fflush(stdout);            
+                           
+                                    char* result  = (char* )command->Execute();
+                                    if (result != NULL) {
+                                        printf("Result = %s", result);
+                                        fflush(stdout);
+                           
+                                        commander->WriteToDataPipe("1");
+
+                                        free(result);
+                                        result = NULL;
+                                    }
+                                    delete command;
+                                    command = NULL;
+                                }
+
+                                free(buffer);
+                                buffer = NULL;
                             }
-                            delete command;
-                            command = NULL;
-                        }
 
-                        delete buffer;
-                        buffer = NULL;
+                            signal_watch_puppy();
+                        } //end while
+
+                        read_total = 0;
+                        break;
                     }
+                    default:
+                        read_total += read;
+                        buffer = (char* )realloc(buffer, read_total * sizeof(char));
+                        memset(buffer, 0, sizeof(char) * read_total);
+                        break;
+                } // end switch
+            } // end for
 
-                    signal_watch_puppy();
-                }
-
-                delete command;
-                command = NULL;
-            }
-        
             signal_watch_puppy();
-        }
+        } // end if
     }
 
     delete commander;
