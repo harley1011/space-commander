@@ -29,3 +29,20 @@ buildUnitTests:
 staticlibs.tar: src/NamedPipe.a src/Net2Com.a
 	mv $^ ./
 	tar -cf $@ include/NamedPipe.h include/Net2Com.h NamedPipe.a Net2Com.a
+	rm *.a
+
+src/NamedPipeQ6.o: src/NamedPipe.cpp
+	$(MICROCC) $(MICROCFLAGS) $(INCPATH) -c $^ -o $@
+
+src/Net2ComQ6.o : src/Net2Com.cpp
+	$(MICROCC) $(MICROCFLAGS) $(INCPATH) -c $^ -o $@
+
+src/NamedPipe-mbcc.a: src/NamedPipeQ6.o 
+	ar -cvq $@ $^
+
+src/Net2Com-mbcc.a: src/Net2ComQ6.o 
+	ar -cvq $@ $^
+
+staticlibsQ6.tar: src/NamedPipe-mbcc.a src/Net2Com-mbcc.a
+	mv $^ ./
+	tar -cf $@ include/NamedPipe.h include/Net2Com.h NamedPipe-mbcc.a Net2Com-mbcc.a
