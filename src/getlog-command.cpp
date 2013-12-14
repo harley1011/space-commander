@@ -192,8 +192,10 @@ char* GetLogCommand::ReadLogFile(char* filename, size_t length) {
 
     if (length > size) { length = size; }
 
-    char* bufferRead  = (char* )malloc(sizeof(char) * length);
+    char* bufferRead  = (char* )malloc(sizeof(char) * length + 1);
     char* bufferWrite = (char* )malloc(sizeof(char) * size - length);
+
+    memset(bufferRead, '\0', sizeof(char) * length + 1);
 
     size_t bytesRead = 0;
     int retries      = 10;

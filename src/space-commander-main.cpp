@@ -53,7 +53,7 @@ int main() {
             for(int i = 0; i != bytes; i++) {
                 read = (unsigned char)info_buffer[i]; 
               
-                printf("Read = %d", read);
+                printf("Read = %d bytes\n", read);
                 fflush(stdout);
 
                 switch (read) {
@@ -77,6 +77,9 @@ int main() {
                                     break;
                                 }
 
+                                
+                                printf("buffer = %s\n", buffer);
+                                fflush(stdout);
                                 command = CommandFactory::CreateCommand(buffer);
                                 if (command != NULL) {    
                                     printf("%s\n", "executing command");
@@ -84,10 +87,10 @@ int main() {
                            
                                     char* result  = (char* )command->Execute();
                                     if (result != NULL) {
-                                        printf("Result = %s", result);
+                                        printf("Result = %s\n", result);
                                         fflush(stdout);
                            
-                                        commander->WriteToDataPipe("1");
+                                        commander->WriteToDataPipe(result);
 
                                         free(result);
                                         result = NULL;
