@@ -11,7 +11,7 @@ class GetLogCommand : public ICommand {
 public:
     static const size_t MAX_LENGTH;
 
-    GetLogCommand(char subsystem, string* log_folder, size_t length) {
+    GetLogCommand(char subsystem, size_t length) {
         this->subsystem  = subsystem;
         this->length     = length;
     };
@@ -19,6 +19,13 @@ public:
     ~GetLogCommand() {}
 
     void* Execute();
+
+#ifdef PC
+    const char* GetLogFolder() { return "/home/spaceconcordia/space/space-commander/logs"; }
+#else
+    const char* GetLogFolder() { return "/home/logs"; }
+#endif
+
     char GetSubSystem() { return subsystem; }
     size_t GetLength()  { return length; }
 private:
@@ -26,6 +33,5 @@ private:
     char* GetLogFilename(char subsystem);
     char subsystem;
     size_t length;
-    string log_folder;
 };
 #endif

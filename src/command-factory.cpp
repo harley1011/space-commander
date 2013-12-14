@@ -23,8 +23,7 @@ ICommand* CommandFactory::CreateCommand(char * data) {
 }
 
 ICommand* CommandFactory::CreateGetLog(char* data) {
-    string* s = new string(data[1], 1);
-    GetLogCommand* result = new GetLogCommand(data[1], s, (size_t)data[2]);
+    GetLogCommand* result = new GetLogCommand(data[1], (size_t)data[2]);
     return result;
 }
 
