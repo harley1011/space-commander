@@ -11,6 +11,8 @@ const int COMMAND_RESEND_INDEX = 0;
 const char COMMAND_RESEND_CHAR = '!';
 const int MAX_COMMAND_SIZE     = 215;
 
+const char ERROR_CREATING_COMMAND  = '1';
+const char ERROR_EXECUTING_COMMAND = '2';
 
 pid_t get_watch_puppy_pid() {
     const int BUFFER_SIZE = 10;
@@ -99,13 +101,19 @@ int main() {
                                                 printf("Result = %s", result);
                                                 fflush(stdout);
                            
-                                                commander->WriteToDataPipe("1");
+                                                commander->WriteToDataPipe(result);
                                                 free(result);
                                                 result = NULL;
+                                            } else {
+                                                commander->WriteToInfoPipe(ERROR_EXECUTING_COMMAND);
                                             }
+
                                             delete command;
                                             command = NULL;
+                                         } else {
+                                            commander->WriteToInfoPipe(ERROR_CREATING_COMMAND);
                                          }
+
                                          free(previous_command_buffer);
                                          previous_command_buffer = NULL;
 
