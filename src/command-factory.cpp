@@ -19,6 +19,9 @@ ICommand* CommandFactory::CreateCommand(char * data) {
         case '3': {
             return CommandFactory::CreateGetLog(data);
         }
+        case '4': {
+            return CommandFactory::CreateReboot(data);
+        }
     }
 
     return NULL;
