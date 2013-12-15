@@ -7,6 +7,11 @@
 #include <signal.h>
 
 const string LAST_COMMAND_FILENAME("last-command");
+const int COMMAND_RESEND_INDEX = 0;
+const char COMMAND_RESEND_CHAR = '!';
+const int MAX_COMMAND_SIZE     = 215;
+
+
 pid_t get_watch_puppy_pid() {
     const int BUFFER_SIZE = 10;
     string filename = "/home/pids/watch-puppy.pid";
@@ -31,19 +36,13 @@ void signal_watch_puppy() {
 }
 
 int main() {
-    FILE* fp_last_command = NULL;
-    unsigned int retry = 10000;
-    while (retry > 0 && fp_last_command == NULL) {
-        fp_last_command = fopen(LAST_COMMAND_FILENAME.c_str(), "w"); 
-        retry -= 1;
-    }
-            
     char info_buffer[255];
     char* buffer = NULL;
+    char* previous_command_buffer = NULL;
     Net2Com* commander = new Net2Com(Dcom_w_net_r, Dnet_w_com_r, Icom_w_net_r, Inet_w_com_r);
-    ICommand* command = NULL;
+    ICommand* command  = NULL;
     unsigned char read = 0;
-    int read_total = 0;
+    int read_total     = 0;
 
     while (true) {
         memset(info_buffer, 0, sizeof(char) * 255);
@@ -77,31 +76,56 @@ int main() {
                                     break;
                                 }
 
-                                
-                                printf("buffer = %s\n", buffer);
-                                fflush(stdout);
-                                command = CommandFactory::CreateCommand(buffer);
-                                if (command != NULL) {    
-                                    printf("%s\n", "executing command");
-                                    fflush(stdout);            
-                           
-                                    char* result  = (char* )command->Execute();
-                                    if (result != NULL) {
-                                        printf("Result = %s\n", result);
-                                        fflush(stdout);
-                           
-                                        commander->WriteToDataPipe(result);
+                                FILE *fp_last_command = NULL;
+                                unsigned int retry = 10000;
 
-                                        free(result);
-                                        result = NULL;
+                                if(buffer[COMMAND_RESEND_INDEX] == COMMAND_RESEND_CHAR) {
+                                    while(retry > 0 && fp_last_command == NULL){
+                                        fp_last_command = fopen(LAST_COMMAND_FILENAME.c_str(), "r");
+                                        retry -=1;
                                     }
-                                    delete command;
-                                    command = NULL;
-                                }
 
+                                    if (fp_last_command != NULL){
+                                        previous_command_buffer = (char*) malloc(MAX_COMMAND_SIZE);
+                                        fread(previous_command_buffer, sizeof(char), MAX_COMMAND_SIZE, fp_last_command); 
+                                        fclose(fp_last_command);
+                                        command = CommandFactory::CreateCommand(previous_command_buffer);
+                                        if (command != NULL) {
+                                            printf("%s\n", "executing command");
+                                            fflush(stdout);            
+                           
+                                            char* result  = (char* )command->Execute();
+                                            if (result != NULL) {
+                                                printf("Result = %s", result);
+                                                fflush(stdout);
+                           
+                                                commander->WriteToDataPipe("1");
+                                                free(result);
+                                                result = NULL;
+                                            }
+                                            delete command;
+                                            command = NULL;
+                                         }
+                                         free(previous_command_buffer);
+                                         previous_command_buffer = NULL;
+
+                                    }
+                                } else {
+
+                                    while (retry > 0 && fp_last_command == NULL) {
+                                        fp_last_command = fopen(LAST_COMMAND_FILENAME.c_str(), "w");
+                                        retry -= 1;
+                                    }
+
+                                    if (fp_last_command != NULL) {
+                                        fwrite(buffer, sizeof(char), data_bytes, fp_last_command);
+                                        fclose(fp_last_command);
+                                    }
+                                }
+                                               
                                 free(buffer);
                                 buffer = NULL;
-                            }
+                            }           
 
                             signal_watch_puppy();
                         } //end while
