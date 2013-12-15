@@ -53,3 +53,8 @@ ICommand* CommandFactory::CreateGetTime(char* data) {
     GetTimeCommand* result = new GetTimeCommand();
     return result;
 }
+
+ICommand* CommandFactory::CreateReboot(char* data){
+    RebootCommand* result = new RebootCommand();
+    return result;
+}
