@@ -1,6 +1,7 @@
 #include "command-factory.h"
 #include <cstddef>
-#include <cstdlib>
+#include <stdlib.h>
+#include <cstring>
 
 ICommand* CommandFactory::CreateCommand(char * data) {
     if (data == NULL) { return NULL; }
@@ -37,6 +38,7 @@ ICommand* CommandFactory::CreateUpdate(char* data) {
     char file_data_length[4] = { data[4 + path_length_itoa], data[5 + path_length_itoa], data[6 + path_length_itoa], '\0' };
     int file_data_length_itoa = atoi(file_data_length);
     char* file_data  = (char* )malloc(sizeof(char) * file_data_length_itoa + 1);
+    memset(file_data, '\0', file_data_length_itoa + 1);
     strncpy(file_data, data + (4 + path_length_itoa + 3), file_data_length_itoa);
     UpdateCommand* result = new UpdateCommand(path, file_data_length_itoa, file_data);
     return result;
