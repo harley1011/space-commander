@@ -7,7 +7,7 @@
 #ifdef PC
 const char* Net2Com::pipe_str[] = {"Dnet-w-com-r", "Dcom-w-net-r", "Inet-w-com-r", "Icom-w-net-r"};
 #else   
-const char* Net2Com::pipe_str[] = {"/tmp/Net2Com/pipes/Dnet-w-com-r", "/tmp/Net2Com/pipes/Dcom-w-net-r", "/tmp/Net2Com/pipes/Inet-w-com-r", "/tmp/Net2Com/pipes/Icom-w-net-r"}; // Q6 paths
+const char* Net2Com::pipe_str[] = {"/home/pipes/Dnet-w-com-r", "/home/pipes/Dcom-w-net-r", "/home/pipes/Inet-w-com-r", "/home/pipes/Icom-w-net-r"}; // Q6 paths
 #endif
 //----------------------------------------------
 //  Constructor
