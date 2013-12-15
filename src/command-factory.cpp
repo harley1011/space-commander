@@ -1,5 +1,6 @@
 #include "command-factory.h"
 #include <cstddef>
+#include <cstdlib>
 
 ICommand* CommandFactory::CreateCommand(char * data) {
     if (data == NULL) { return NULL; }
@@ -28,12 +29,16 @@ ICommand* CommandFactory::CreateGetLog(char* data) {
 }
 
 ICommand* CommandFactory::CreateUpdate(char* data) {
-    char* start = data + 2;
-    char length = data[1];
+    char path_length[4] = { data[1] , data[2] , data[3] , '\0' };
+    int path_length_itoa = atoi(path_length);
+    char* path = (char* )malloc(sizeof(char) * path_length_itoa + 1);
+    strncpy(path, data + 4, path_length_itoa);
 
-    string* s = new string(start, length);
-
-    UpdateCommand* result = new UpdateCommand(s);
+    char file_data_length[4] = { data[4 + path_length_itoa], data[5 + path_length_itoa], data[6 + path_length_itoa], '\0' };
+    int file_data_length_itoa = atoi(file_data_length);
+    char* file_data  = (char* )malloc(sizeof(char) * file_data_length_itoa + 1);
+    strncpy(file_data, data + (4 + path_length_itoa + 3), file_data_length_itoa);
+    UpdateCommand* result = new UpdateCommand(path, file_data_length_itoa, file_data);
     return result;
 }
 
