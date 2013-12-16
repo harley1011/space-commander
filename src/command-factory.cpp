@@ -19,6 +19,9 @@ ICommand* CommandFactory::CreateCommand(char * data) {
         case '3': {
             return CommandFactory::CreateGetLog(data);
         }
+        case '6': {
+            return CommandFactory::CreateDecode(data);
+        }
     }
 
     return NULL;
@@ -52,5 +55,21 @@ ICommand* CommandFactory::CreateSetTime(char* data) {
 
 ICommand* CommandFactory::CreateGetTime(char* data) {
     GetTimeCommand* result = new GetTimeCommand();
+    return result;
+}
+
+ICommand* CommandFactory::CreateDecode(char* data) {
+    char path_length[4] = { data[2] , data[3] , data[4] , '\0' };
+    int path_length_itoa = atoi(path_length);
+    char* path = (char* )malloc(sizeof(char) * path_length_itoa + 1);
+    memset(path, '\0', path_length_itoa + 1); 
+    strncpy(path, data + 5, path_length_itoa);
+
+    char file_data_length[4] = { data[5 + path_length_itoa], data[6 + path_length_itoa], data[7 + path_length_itoa], '\0' };
+    int file_data_length_itoa = atoi(file_data_length);
+    char* file_data  = (char* )malloc(sizeof(char) * file_data_length_itoa + 1);
+    memset(file_data, '\0', file_data_length_itoa + 1);
+    strncpy(file_data, data + (5 + path_length_itoa + 3), file_data_length_itoa);
+    DecodeCommand* result = new DecodeCommand( file_data, path, 0);
     return result;
 }
