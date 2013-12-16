@@ -9,20 +9,28 @@ using namespace std;
 
 class UpdateCommand : public ICommand {
 public:
-    UpdateCommand(string* path) {
+    UpdateCommand(char* path, int data_length, char* file_data) {
         this->path = path;
+        this->data_length = data_length;
+        this->file_data = file_data;
     }
     
     ~UpdateCommand(){ 
+//Does file_data need to be set to null as well?
         if (path != NULL) {
             delete path;
             path = NULL;
         }
+        
     }
 
-    void* Execute() {return NULL;}
-    string* GetPath() { return path; }
+    void* Execute();
+    char* GetPath() { return path; }
 private:
-    string* path;
+    string Base64ToAscii(string base64_data);
+
+    char* path;
+    int data_length;
+    char* file_data;
 };
 #endif
