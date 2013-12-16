@@ -9,7 +9,7 @@
 const string LAST_COMMAND_FILENAME("last-command");
 const int COMMAND_RESEND_INDEX = 0;
 const char COMMAND_RESEND_CHAR = '!';
-const int MAX_COMMAND_SIZE     = 215;
+const int MAX_COMMAND_SIZE     = 255;
 
 
 pid_t get_watch_puppy_pid() {

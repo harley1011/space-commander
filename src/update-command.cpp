@@ -18,10 +18,10 @@ void* UpdateCommand::Execute() {
         string decoded_data = base64_decode(file_data_sting);
 
         retry = 10000;
-        size_t bytes_left = 2; //this->data_length;
+        size_t bytes_left = 142; //this->data_length;
         size_t bytes_written = 0;
         while(retry > 0 && bytes_left > 0){
-            bytes_left = 2 - bytes_written;
+            bytes_left = 142 - bytes_written;
             bytes_written += fwrite(decoded_data.c_str() + bytes_written, sizeof(char), bytes_left, fp_update_file);
             retry =- 1;
         }

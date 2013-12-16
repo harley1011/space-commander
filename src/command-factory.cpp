@@ -33,6 +33,7 @@ ICommand* CommandFactory::CreateUpdate(char* data) {
     char path_length[4] = { data[1] , data[2] , data[3] , '\0' };
     int path_length_itoa = atoi(path_length);
     char* path = (char* )malloc(sizeof(char) * path_length_itoa + 1);
+    memset(path, '\0', path_length_itoa + 1); 
     strncpy(path, data + 4, path_length_itoa);
 
     char file_data_length[4] = { data[4 + path_length_itoa], data[5 + path_length_itoa], data[6 + path_length_itoa], '\0' };
