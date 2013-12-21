@@ -18,6 +18,10 @@ private:
     static ICommand* CreateSetTime(char* data); 
     static ICommand* CreateGetTime(char* data); 
     static ICommand* CreateDecode(char* data); 
+        
+    static int GetLength3(char* data, int offset);
+    static int GetLength10(char* data, int offset);
+    static char* GetPath(char* data, size_t length, int offset);
 };
 
 #endif

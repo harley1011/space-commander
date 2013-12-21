@@ -28,23 +28,28 @@ ICommand* CommandFactory::CreateCommand(char * data) {
 }
 
 ICommand* CommandFactory::CreateGetLog(char* data) {
-    GetLogCommand* result = new GetLogCommand(data[1], (size_t)data[2]);
+    int bytes = GetLength3(data, 2);
+
+    GetLogCommand* result = new GetLogCommand(data[1], (size_t)bytes);
     return result;
 }
 
 ICommand* CommandFactory::CreateUpdate(char* data) {
-    char path_length[4] = { data[1] , data[2] , data[3] , '\0' };
-    int path_length_itoa = atoi(path_length);
-    char* path = (char* )malloc(sizeof(char) * path_length_itoa + 1);
-    memset(path, '\0', path_length_itoa + 1); 
-    strncpy(path, data + 4, path_length_itoa);
+    const int PATH_LENGTH = 3;
+    int offset = 2;
 
-    char file_data_length[4] = { data[4 + path_length_itoa], data[5 + path_length_itoa], data[6 + path_length_itoa], '\0' };
-    int file_data_length_itoa = atoi(file_data_length);
-    char* file_data  = (char* )malloc(sizeof(char) * file_data_length_itoa + 1);
-    memset(file_data, '\0', file_data_length_itoa + 1);
-    strncpy(file_data, data + (4 + path_length_itoa + 3), file_data_length_itoa);
-    UpdateCommand* result = new UpdateCommand(path, file_data_length_itoa, file_data);
+    int pathLength = GetLength3(data, offset);
+
+    offset += PATH_LENGTH;
+    char* path = GetPath(data, pathLength, offset);
+
+    offset += pathLength;
+    int fileDataLength = GetLength3(data, offset);
+
+    offset += PATH_LENGTH;
+    char* fileData = GetPath(data, fileDataLength, offset);
+    
+    UpdateCommand* result = new UpdateCommand(path, fileDataLength, fileData);
     return result;
 }
 
@@ -59,22 +64,45 @@ ICommand* CommandFactory::CreateGetTime(char* data) {
 }
 
 ICommand* CommandFactory::CreateDecode(char* data) {
-    char path_length[4] = { data[2] , data[3] , data[4] , '\0' };
-    int path_length_itoa = atoi(path_length);
-    char* path = (char* )malloc(sizeof(char) * path_length_itoa + 1);
-    memset(path, '\0', path_length_itoa + 1); 
-    strncpy(path, data + 5, path_length_itoa);
+    const int PATH_LENGTH = 3;
+    int offset = 2;
+    
+    int srcLength = GetLength3(data, offset);
 
-    char file_data_length[4] = { data[5 + path_length_itoa], data[6 + path_length_itoa], data[7 + path_length_itoa], '\0' };
-    int file_data_length_itoa = atoi(file_data_length);
-    char* file_data  = (char* )malloc(sizeof(char) * file_data_length_itoa + 1);
-    memset(file_data, '\0', file_data_length_itoa + 1);
-    strncpy(file_data, data + (5 + path_length_itoa + 3), file_data_length_itoa);
+    offset += PATH_LENGTH;
+    char* src = GetPath(data, srcLength, offset);
 
-    char file_size_length[4] = { data[8 + path_length_itoa + file_data_length_itoa],
-                                 data[9 + path_length_itoa + file_data_length_itoa],
-                                 data[10 + path_length_itoa + file_data_length_itoa], '\0' };
-    int file_size_length_itoa = atoi(file_size_length);
-    DecodeCommand* result = new DecodeCommand( file_data, path, 0, file_size_length_itoa);
+    offset += srcLength;
+    int destLength = GetLength3(data, offset);
+
+    offset += PATH_LENGTH;
+    char* dest = GetPath(data, destLength, offset);
+    
+    offset += destLength;
+    int decodedSize = GetLength10(data, offset);
+
+    DecodeCommand* result = new DecodeCommand(dest, src, 0, decodedSize);
+    return result;
+}
+
+int CommandFactory::GetLength3(char* data, int offset) {
+    char length[4] = { data[offset] , data[offset + 1] , data[offset + 2] , '\0' };
+    int result = atoi(length);
+    return result;
+}
+
+int CommandFactory::GetLength10(char* data, int offset) {
+    char length[11] = { data[offset]     , data[offset + 1] , data[offset + 2],  
+                        data[offset + 3] , data[offset + 4] , data[offset + 5], 
+                        data[offset + 6] , data[offset + 7] , data[offset + 8], 
+                        data[offset + 9] , '\0' };
+    int result = atoi(length);
+    return result;
+}
+
+char* CommandFactory::GetPath(char* data, size_t length, int offset) {
+    char* result = (char* )malloc(sizeof(char) * length + 1);
+    memset(result, '\0', length + 1); 
+    strncpy(result, data + offset, length);
     return result;
 }
