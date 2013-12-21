@@ -48,7 +48,7 @@ void* DecodeCommand::Execute() {
 
         fclose(fpDestFile); 
 
-        if (chmod(this->GetDestPath(), S_IRWXU) != 0){
+        if (this->IsExecutable() && chmod(this->GetDestPath(), S_IRWXU) != 0){
             // TODO log it   
         } 
  

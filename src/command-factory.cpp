@@ -39,7 +39,7 @@ ICommand* CommandFactory::CreateGetLog(char* data) {
 
 ICommand* CommandFactory::CreateUpdate(char* data) {
     const int PATH_LENGTH = 3;
-    int offset = 2;
+    int offset = 1;
 
     int pathLength = GetLength3(data, offset);
 

@@ -17,12 +17,8 @@ public:
     }
     
     ~DecodeCommand(){ 
-//Does file_data need to be set to null as well?
-        if (srcPath != NULL) {
-            delete srcPath;
-            srcPath = NULL;
-        }
-        
+        if (srcPath  != NULL) { delete srcPath;  }
+        if (destPath != NULL) { delete destPath; }
     }
 
     void* Execute();
