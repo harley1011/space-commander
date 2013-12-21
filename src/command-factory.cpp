@@ -19,9 +19,12 @@ ICommand* CommandFactory::CreateCommand(char * data) {
         case '3': {
             return CommandFactory::CreateGetLog(data);
         }
+        case '4': {
+            return CommandFactory::CreateReboot(data);
+        }
         case '6': {
             return CommandFactory::CreateDecode(data);
-        }
+        } 
     }
 
     return NULL;
@@ -60,6 +63,12 @@ ICommand* CommandFactory::CreateSetTime(char* data) {
 
 ICommand* CommandFactory::CreateGetTime(char* data) {
     GetTimeCommand* result = new GetTimeCommand();
+    return result;
+}
+
+
+ICommand* CommandFactory::CreateReboot(char* data){
+    RebootCommand* result = new RebootCommand();
     return result;
 }
 
@@ -104,5 +113,4 @@ char* CommandFactory::GetPath(char* data, size_t length, int offset) {
     char* result = (char* )malloc(sizeof(char) * length + 1);
     memset(result, '\0', length + 1); 
     strncpy(result, data + offset, length);
-    return result;
 }
