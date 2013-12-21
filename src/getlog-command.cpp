@@ -11,14 +11,14 @@
 #include <limits.h>   
 #include <ctype.h>
 
-const char ACS          = 30;
-const char COMMS        = 31;
-const char HARDWARE     = 32;
-const char MECH         = 33;
-const char PAYLOAD      = 34;
-const char POWER        = 35;
-const char SOFTWARE     = 36;
-const char WATCH_PUPPY  = 37;
+const char ACS          = 0x30;
+const char COMMS        = 0x31;
+const char HARDWARE     = 0x32;
+const char MECH         = 0x33;
+const char PAYLOAD      = 0x34;
+const char POWER        = 0x35;
+const char SOFTWARE     = 0x36;
+const char WATCH_PUPPY  = 0x37;
 
 const size_t GetLogCommand::MAX_LENGTH = 140;bool prefixMatches(const char prefix[], const char filename[]){
     if( strncmp(prefix, filename, strlen(prefix)) == 0) {
