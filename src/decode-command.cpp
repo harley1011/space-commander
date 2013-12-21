@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include "base64.h"
 #include <cstring>
+#include <sys/stat.h>
 
 void* DecodeCommand::Execute() {
     FILE* fpDestFile = NULL;
@@ -46,6 +47,14 @@ void* DecodeCommand::Execute() {
         }
 
         fclose(fpDestFile); 
+
+        if (chmod(this->GetDestPath(), S_IRWXU) != 0){
+            // TODO log it   
+        } 
+ 
+        if (remove(this->GetSrcPath()) != 0){
+            // TODO log it
+        }
 
         result = (char* )malloc(sizeof(char) * 50);
         memset(result, '\0', sizeof(char) * 50);
