@@ -5,6 +5,7 @@
 #include <time.h>
 #include <cstring>
 #include <signal.h>
+#include <unistd.h>
 
 const string LAST_COMMAND_FILENAME("last-command");
 const int COMMAND_RESEND_INDEX = 0;
@@ -13,6 +14,8 @@ const int MAX_COMMAND_SIZE     = 255;
 
 const char ERROR_CREATING_COMMAND  = '1';
 const char ERROR_EXECUTING_COMMAND = '2';
+
+const int SLEEP_TIME = 10;
 
 pid_t get_watch_puppy_pid() {
     const int BUFFER_SIZE = 10;
@@ -135,6 +138,7 @@ int main() {
                                 buffer = NULL;
                             }           
 
+                            sleep(SLEEP_TIME);
                             signal_watch_puppy();
                         } //end while
 
@@ -149,8 +153,11 @@ int main() {
                 } // end switch
             } // end for
 
-            signal_watch_puppy();
         } // end if
+
+
+        sleep(SLEEP_TIME);
+        signal_watch_puppy();
     }
 
     delete commander;
