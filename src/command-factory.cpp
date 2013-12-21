@@ -70,6 +70,11 @@ ICommand* CommandFactory::CreateDecode(char* data) {
     char* file_data  = (char* )malloc(sizeof(char) * file_data_length_itoa + 1);
     memset(file_data, '\0', file_data_length_itoa + 1);
     strncpy(file_data, data + (5 + path_length_itoa + 3), file_data_length_itoa);
-    DecodeCommand* result = new DecodeCommand( file_data, path, 0);
+
+    char file_size_length[4] = { data[8 + path_length_itoa + file_data_length_itoa],
+                                 data[9 + path_length_itoa + file_data_length_itoa],
+                                 data[10 + path_length_itoa + file_data_length_itoa], '\0' };
+    int file_size_length_itoa = atoi(file_size_length);
+    DecodeCommand* result = new DecodeCommand( file_data, path, 0, file_size_length_itoa);
     return result;
 }

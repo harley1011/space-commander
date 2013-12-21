@@ -9,10 +9,11 @@ using namespace std;
 
 class DecodeCommand : public ICommand {
 public:
-    DecodeCommand(char* destPath, char* srcPath, int isExecutable) {
+    DecodeCommand(char* destPath, char* srcPath, int isExecutable, int totalSize) {
         this->destPath     = destPath;
         this->srcPath      = srcPath;
         this->isExecutable = isExecutable;
+        this->totalSize    = totalSize;
     }
     
     ~DecodeCommand(){ 
@@ -28,9 +29,11 @@ public:
     char* GetDestPath() { return destPath; }
     char* GetSrcPath()  { return srcPath; }
     int IsExecutable()  { return isExecutable; }
+    int GetTotalSize()  { return totalSize; }
 private:
     char* destPath;
     char* srcPath;
     int isExecutable;
+    int totalSize;
 };
 #endif

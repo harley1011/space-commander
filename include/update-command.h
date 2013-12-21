@@ -25,10 +25,9 @@ public:
     }
 
     void* Execute();
-    char* GetPath() { return path; }
+    char* GetPath()       { return path; }
+    int   GetDataLength() { return data_length; }
 private:
-    string Base64ToAscii(string base64_data);
-
     char* path;
     int data_length;
     char* file_data;
