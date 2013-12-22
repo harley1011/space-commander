@@ -20,7 +20,9 @@ const char POWER        = 0x35;
 const char SOFTWARE     = 0x36;
 const char WATCH_PUPPY  = 0x37;
 
-const size_t GetLogCommand::MAX_LENGTH = 140;bool prefixMatches(const char prefix[], const char filename[]){
+const size_t GetLogCommand::MAX_LENGTH = 140;
+
+bool prefixMatches(const char prefix[], const char filename[]){
     if( strncmp(prefix, filename, strlen(prefix)) == 0) {
 	    return true;
     }
@@ -213,12 +215,16 @@ char* GetLogCommand::ReadLogFile(char* filename, size_t length) {
 
     fclose(fp);
 
-    // Write remaining text
-    if (bytesRead > 0) {
+    // Remove file if all read or write remaining text
+    if (size - length == 0) {
+        remove(filename);
+    }
+    else if (bytesRead > 0) {
         fp = fopen(filename, "w");
         fwrite(bufferWrite, sizeof(char), size - length, fp);
         fclose(fp);
-    }
+    } 
+
 
     free(bufferWrite);
 
