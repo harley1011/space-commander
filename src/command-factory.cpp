@@ -90,7 +90,8 @@ ICommand* CommandFactory::CreateDecode(char* data) {
     offset += destLength;
     int decodedSize = GetLength10(data, offset);
 
-    DecodeCommand* result = new DecodeCommand(dest, src, 0, decodedSize);
+    int executable = data[1] - '0';
+    DecodeCommand* result = new DecodeCommand(dest, src, executable, decodedSize);
     return result;
 }
 
@@ -113,4 +114,5 @@ char* CommandFactory::GetPath(char* data, size_t length, int offset) {
     char* result = (char* )malloc(sizeof(char) * length + 1);
     memset(result, '\0', length + 1); 
     strncpy(result, data + offset, length);
+    return result;
 }

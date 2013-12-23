@@ -15,6 +15,11 @@ void* DecodeCommand::Execute() {
         retry =- 1;
     }
 
+    printf("  GetSrcPath:   %s\n", this->GetSrcPath());
+    printf("  GetDestPath:  %s\n", this->GetDestPath());
+    printf("  IsExecutable: %d\n", this->IsExecutable());
+    fflush(stdout);
+
     if(fpSrcFile != NULL) {
         fseek(fpSrcFile, 0L, SEEK_END);
         long s = ftell(fpSrcFile);
@@ -49,11 +54,13 @@ void* DecodeCommand::Execute() {
         fclose(fpDestFile); 
 
         if (this->IsExecutable() && chmod(this->GetDestPath(), S_IRWXU) != 0){
-            // TODO log it   
+            printf("  Error: Chmod Failed!:\n");
+            fflush(stdout);
         } 
  
         if (remove(this->GetSrcPath()) != 0){
-            // TODO log it
+            printf("  Error: Remove Failed!:\n");
+            fflush(stdout);
         }
 
         result = (char* )malloc(sizeof(char) * 50);
