@@ -6,6 +6,7 @@
 #include <cstring>
 #include <signal.h>
 #include <unistd.h>
+#include <inttypes.h>
 
 const string LAST_COMMAND_FILENAME("last-command");
 const int COMMAND_RESEND_INDEX = 0;
@@ -49,15 +50,17 @@ int main() {
     unsigned char read = 0;
     int read_total     = 0;
 
+    printf("Commander waiting commands from ground...\n");
+
     while (true) {
         memset(info_buffer, 0, sizeof(char) * 255);
         size_t bytes = commander->ReadFromInfoPipe(info_buffer, 255);
 
         if (bytes > 0) {
             for(int i = 0; i != bytes; i++) {
-                read = (unsigned char)info_buffer[i]; 
-              
-                printf("Read = %d bytes\n", read);
+                read = (unsigned char)info_buffer[i];
+
+                printf("Read from info pipe = %d bytes\n", read);
                 fflush(stdout);
 
                 switch (read) {
@@ -65,17 +68,23 @@ int main() {
                     case 253:
                     case 254:
                     case 255: {
-                     
+
                         size_t data_bytes = 0;
                         while (data_bytes == 0) {
                             data_bytes = commander->ReadFromDataPipe(buffer, read_total);
-                    
+
                             if (data_bytes > 0) {
-                                printf("data_bytes = %d", data_bytes);
+                                printf("Read %zu bytes from ground station: ", data_bytes);
+                                fflush(stdout);
+                                for(uint8_t z = 0; z < data_bytes; ++z){
+                                    uint8_t c = buffer[z];
+                                    printf("0x%02X ", c);
+                                }
+                                printf("\n");
                                 fflush(stdout);
 
                                 if (data_bytes != read_total) {
-                                    printf("Something went wrong !!");
+                                    printf("Something went wrong !!\n");
                                     fflush(stdout);
                                     read_total = 0;
                                     break;
@@ -92,18 +101,18 @@ int main() {
 
                                     if (fp_last_command != NULL){
                                         previous_command_buffer = (char*) malloc(MAX_COMMAND_SIZE);
-                                        fread(previous_command_buffer, sizeof(char), MAX_COMMAND_SIZE, fp_last_command); 
+                                        fread(previous_command_buffer, sizeof(char), MAX_COMMAND_SIZE, fp_last_command);
                                         fclose(fp_last_command);
                                         command = CommandFactory::CreateCommand(previous_command_buffer);
                                         if (command != NULL) {
-                                            printf("%s\n", "executing command");
-                                            fflush(stdout);            
-                           
+                                            printf("%s\n", "Executing command");
+                                            fflush(stdout);
+
                                             char* result  = (char* )command->Execute();
                                             if (result != NULL) {
-                                                printf("Result = %s", result);
+                                                printf("Command output = %s", result);
                                                 fflush(stdout);
-                           
+
                                                 commander->WriteToDataPipe(result);
                                                 free(result);
                                                 result = NULL;
@@ -133,10 +142,10 @@ int main() {
                                         fclose(fp_last_command);
                                     }
                                 }
-                                               
+
                                 free(buffer);
                                 buffer = NULL;
-                            }           
+                            }
 
                             sleep(SLEEP_TIME);
                             signal_watch_puppy();

@@ -10,6 +10,8 @@
 void* GetTimeCommand::Execute(){
     struct timeval tv;
 
+    printf("Getting time\n");
+
     if(gettimeofday(&tv, 0) == -1){
         perror ("Error! gettimeofday()\n");
         exit(1);
@@ -18,11 +20,11 @@ void* GetTimeCommand::Execute(){
     time_t* rawtime = (time_t*)malloc(sizeof(time_t));
     *rawtime = tv.tv_sec;
 
-    std::cout << *rawtime << endl;    
+    std::cout << *rawtime << endl;
 
     char* result = (char*)malloc(sizeof(char) * 50);
     memset(result, '\0', sizeof(char) * 50);
     sprintf(result, "%lld", (long long)*rawtime);
-    
+
     return (void*)result;
 }

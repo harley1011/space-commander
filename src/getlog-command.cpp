@@ -8,7 +8,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <dirent.h>
-#include <limits.h>   
+#include <limits.h>
 #include <ctype.h>
 
 const char ACS          = 0x30;
@@ -34,14 +34,14 @@ bool prefixMatches(const char prefix[], const char filename[]){
 bool suffixMatches(const char suffix[], const char filename[]){
     //2nd argument of strncmp is all about starting the comparaison at the end of the string minus the length of the suffix
     if ( strncmp(suffix, ( filename + strlen(filename) - strlen(suffix) ), strlen(suffix)) == 0){
-	    return true;	
+	    return true;
     }
     else{
 	    return false;
     }
 }
 
-//returning -1 means the log number could not be parsed in the log name (there aren't two periods surrounding the log number, the log number contains letters or symbols, etc) 
+//returning -1 means the log number could not be parsed in the log name (there aren't two periods surrounding the log number, the log number contains letters or symbols, etc)
 int getLogNumber(const char filename[]){
 	char buffer[256];
 	const char* firstPeriod;
@@ -51,7 +51,7 @@ int getLogNumber(const char filename[]){
 
         if( (lastPeriod = strrchr(filename, '.' )) != NULL){
 			if( (firstPeriod + 1) == lastPeriod){
-				//printf("%d\n%d\n", firstPeriod, lastPeriod); 
+				//printf("%d\n%d\n", firstPeriod, lastPeriod);
 				return -1; //there is nothing between the periods
 			}
 
@@ -59,7 +59,7 @@ int getLogNumber(const char filename[]){
 			int offsetStart = firstPeriod - filename + 1; //calculating offset to find the character after the first period
 			memcpy(buffer, filename + offsetStart, lastPeriod - firstPeriod - 1 );
 			buffer[lastPeriod - firstPeriod - 1] = '\0';
-			
+
 			//couldn't find a string to integer parser that did quite this part; gotta make sure there aren't any non-digits
 			for(int i = 0; i < (lastPeriod - firstPeriod - 1) ; i++){
 				if(! (isdigit(buffer[i])) ){
@@ -110,15 +110,15 @@ int GetOldestLog(const char prefix[], const char directory[], char filename[])
     }
 
 	DIR *dir = opendir(directory);
-	struct dirent *element;	
+	struct dirent *element;
 	int smallestLogNumber = -1;
 	char smallestLogFilename[256];
 	int currentLogNumber;
 
 	if(dir) {
-		
+
 		while( ( element = readdir(dir))  != NULL){
-			
+
 			if(! (prefixMatches(prefix,element->d_name) )){
 				printf("Prefix didn't match for: %s\n", element->d_name);
 			}
@@ -129,7 +129,7 @@ int GetOldestLog(const char prefix[], const char directory[], char filename[])
 				printf("%s\n", element->d_name);
 				if(smallestLogNumber == -1 || currentLogNumber < smallestLogNumber){
 					smallestLogNumber = currentLogNumber;
-					
+
 					if( strlen(element->d_name) <= 256 ) { strcpy(smallestLogFilename, element->d_name); }
 				}
 			}
@@ -223,7 +223,7 @@ char* GetLogCommand::ReadLogFile(char* filename, size_t length) {
         fp = fopen(filename, "w");
         fwrite(bufferWrite, sizeof(char), size - length, fp);
         fclose(fp);
-    } 
+    }
 
 
     free(bufferWrite);
@@ -232,12 +232,15 @@ char* GetLogCommand::ReadLogFile(char* filename, size_t length) {
 }
 
 void* GetLogCommand::Execute(){
+    printf("Getting logs from ");
     char* filename = GetLogFilename(this->GetSubSystem());
     char* filepath = (char*)malloc(sizeof(char) * 256);
     strcpy(filepath, this->GetLogFolder());
     strcat(filepath, "/");
     strcat(filepath, filename);
     char* data     = ReadLogFile(filepath, this->GetLength());
+
+    printf("%s\n", filepath);
 
     free(filename);
     free(filepath);

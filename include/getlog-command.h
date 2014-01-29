@@ -15,7 +15,7 @@ public:
         this->subsystem  = subsystem;
         this->length     = length;
     };
-    
+
     ~GetLogCommand() {}
 
     void* Execute();

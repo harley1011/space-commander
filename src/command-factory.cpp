@@ -24,7 +24,7 @@ ICommand* CommandFactory::CreateCommand(char * data) {
         }
         case '6': {
             return CommandFactory::CreateDecode(data);
-        } 
+        }
     }
 
     return NULL;
@@ -51,7 +51,7 @@ ICommand* CommandFactory::CreateUpdate(char* data) {
 
     offset += PATH_LENGTH;
     char* fileData = GetPath(data, fileDataLength, offset);
-    
+
     UpdateCommand* result = new UpdateCommand(path, fileDataLength, fileData);
     return result;
 }
@@ -75,7 +75,7 @@ ICommand* CommandFactory::CreateReboot(char* data){
 ICommand* CommandFactory::CreateDecode(char* data) {
     const int PATH_LENGTH = 3;
     int offset = 2;
-    
+
     int srcLength = GetLength3(data, offset);
 
     offset += PATH_LENGTH;
@@ -86,7 +86,7 @@ ICommand* CommandFactory::CreateDecode(char* data) {
 
     offset += PATH_LENGTH;
     char* dest = GetPath(data, destLength, offset);
-    
+
     offset += destLength;
     int decodedSize = GetLength10(data, offset);
 
@@ -102,9 +102,9 @@ int CommandFactory::GetLength3(char* data, int offset) {
 }
 
 int CommandFactory::GetLength10(char* data, int offset) {
-    char length[11] = { data[offset]     , data[offset + 1] , data[offset + 2],  
-                        data[offset + 3] , data[offset + 4] , data[offset + 5], 
-                        data[offset + 6] , data[offset + 7] , data[offset + 8], 
+    char length[11] = { data[offset]     , data[offset + 1] , data[offset + 2],
+                        data[offset + 3] , data[offset + 4] , data[offset + 5],
+                        data[offset + 6] , data[offset + 7] , data[offset + 8],
                         data[offset + 9] , '\0' };
     int result = atoi(length);
     return result;
@@ -112,7 +112,7 @@ int CommandFactory::GetLength10(char* data, int offset) {
 
 char* CommandFactory::GetPath(char* data, size_t length, int offset) {
     char* result = (char* )malloc(sizeof(char) * length + 1);
-    memset(result, '\0', length + 1); 
+    memset(result, '\0', length + 1);
     strncpy(result, data + offset, length);
     return result;
 }

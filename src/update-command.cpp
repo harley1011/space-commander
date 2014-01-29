@@ -13,6 +13,8 @@ void* UpdateCommand::Execute() {
         retry =- 1;
     }
 
+    printf("Uploading file %s\n", this->GetPath());
+
     if(fp_update_file != NULL) {
         retry = 10000;
         size_t bytes_left = this->GetDataLength();
