@@ -1,5 +1,6 @@
 CC=g++
 MICROCC=microblazeel-xilinx-linux-gnu-g++
+BEAGLECC=arm-linux-gnueabi-g++
 CFLAGS=-Wall
 MICROCFLAGS=-mcpu=v8.40.b -mxl-barrel-shift -mxl-multiply-high -mxl-pattern-compare -mno-xl-soft-mul -mno-xl-soft-div -mxl-float-sqrt -mhard-float -mxl-float-convert -mlittle-endian -Wall
 DEBUGFLAGS=-ggdb -g -gdwarf-2 -g3 #gdwarf-2 + g3 provides macro info to gdb
@@ -37,10 +38,22 @@ src/NamedPipeQ6.o: src/NamedPipe.cpp
 src/Net2ComQ6.o : src/Net2Com.cpp
 	$(MICROCC) $(MICROCFLAGS) $(INCPATH) -c $^ -o $@
 
-src/NamedPipe-mbcc.a: src/NamedPipeQ6.o 
+src/NamedPipe-mbcc.a: src/NamedPipeQ6.o
 	ar -cvq $@ $^
 
-src/Net2Com-mbcc.a: src/Net2ComQ6.o 
+src/Net2Com-mbcc.a: src/Net2ComQ6.o
+	ar -cvq $@ $^
+
+src/NamedPipeBB.o: src/NamedPipe.cpp
+	$(BEAGLECC) $(MICROFLAGS) $(INCPATH) -c $^ -o $@
+
+src/Net2ComBB.o: src/Net2Com.cpp
+	$(BEAGLECC) $(MICROFLAGS) $(INCPATH) -c $^ -o $@
+
+src/NamedPipe-BB.a: src/NamedPipeBB.o
+	ar -cvq $@ $^
+
+src/Net2Com-BB.a: src/Net2ComBB.o
 	ar -cvq $@ $^
 
 staticlibsQ6.tar: src/NamedPipe-mbcc.a src/Net2Com-mbcc.a
