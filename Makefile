@@ -52,10 +52,10 @@ src/NamedPipeBB.o: src/NamedPipe.cpp
 src/Net2ComBB.o: src/Net2Com.cpp
 	$(BEAGLECC) $(MICROFLAGS) $(INCPATH) -c $^ -o $@
 
-src/NamedPipe-BB.a: src/NamedPipeBB.o
+NamedPipe-BB.a: src/NamedPipeBB.o
 	ar -cvq $@ $^
 
-src/Net2Com-BB.a: src/Net2ComBB.o
+Net2Com-BB.a: src/Net2ComBB.o
 	ar -cvq $@ $^
 
 staticlibsQ6.tar: src/NamedPipe-mbcc.a src/Net2Com-mbcc.a
