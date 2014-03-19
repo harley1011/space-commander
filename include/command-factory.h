@@ -8,6 +8,7 @@
 #include "gettime-command.h"
 #include "decode-command.h"
 #include "reboot-command.h"
+#include "schedule-command.h"
 
 class CommandFactory {
 public:
@@ -20,6 +21,7 @@ private:
     static ICommand* CreateGetTime(char* data); 
     static ICommand* CreateReboot(char* data);
     static ICommand* CreateDecode(char* data); 
+    static ICommand* CreateSchedule(char* data); 
         
     static int GetLength3(char* data, int offset);
     static int GetLength10(char* data, int offset);

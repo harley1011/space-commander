@@ -25,6 +25,13 @@ ICommand* CommandFactory::CreateCommand(char * data) {
         case '6': {
             return CommandFactory::CreateDecode(data);
         }
+        
+        
+        
+        case '8': {
+            return CommandFactory::CreateSchedule(data);
+        }
+
     }
 
     return NULL;
@@ -53,6 +60,17 @@ ICommand* CommandFactory::CreateUpdate(char* data) {
     char* fileData = GetPath(data, fileDataLength, offset);
 
     UpdateCommand* result = new UpdateCommand(path, fileDataLength, fileData);
+    return result;
+}
+
+ICommand* CommandFactory::CreateSchedule(char* data) {
+
+    char * command = NULL;
+    //char * command = GetCommand();
+    char * date_time = NULL;
+    //char * date_time = GetDateTime();
+
+    ScheduleCommand* result = new ScheduleCommand(command, date_time);
     return result;
 }
 
