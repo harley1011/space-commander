@@ -2,3 +2,7 @@ bin/
 *.swp
 *.swo
 *~
+*.a
+*.o
+staticlibs.tar
+staticlibsQ6.tar
