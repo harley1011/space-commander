@@ -18,6 +18,8 @@ GTEST_DIR = ../../../gtest-1.7.0
 
 # Where to find user code.
 USER_DIR = ../../../space-commander
+UPDATER_PATH = ../../../space-updater
+INCLUDE = -I$(UPDATER_PATH)/include -I./include
 
 # Flags passed to the preprocessor.
 # Set Google Test's header directory as a system directory, such that
@@ -70,8 +72,11 @@ gtest_main.a : gtest-all.o gtest_main.o
 
 ###########################
 
-cmd-test.o : $(USER_DIR)/tests/gtest/cmd-test.cpp $(GTEST_HEADERS) $(COMMANDER_SRCS)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/tests/gtest/cmd-test.cpp
+fileIO.o: $(UPDATER_PATH)/src/fileIO.cpp $(UPDATER_PATH)/include/fileIO.h
+	$(CXX) $(INCLUDE) -c $< -o $@
 
-cmd-test: cmd-test.o gtest_main.a $(COMMANDER_SRCS)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $^ -o $@ -lrt -lpthread
+cmd-test.o : $(USER_DIR)/tests/gtest/cmd-test.cpp $(GTEST_HEADERS) $(COMMANDER_SRCS)
+	$(CXX) $(INCLUDE) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/tests/gtest/cmd-test.cpp
+
+cmd-test: cmd-test.o fileIO.o gtest_main.a $(COMMANDER_SRCS)
+	$(CXX) $(INCLUDE) $(CPPFLAGS) $(CXXFLAGS) $^ -o $@ -lrt -lpthread
