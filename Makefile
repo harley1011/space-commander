@@ -1,18 +1,42 @@
 CC=g++
 MICROCC=microblazeel-xilinx-linux-gnu-g++
 BEAGLECC=arm-linux-gnueabi-g++
-CFLAGS=-Wall
+
+#
+# Paths
+#
+SPACE_LIB = ../space-lib
+CPPUTEST_HOME = ../space-commander
+
+#
+# Flags
+#
+CFLAGS += -Wall
+CPPFLAGS += -Wall -I$(CPPUTEST_HOME)/include
+CXXFLAGS += -include $(CPPUTEST_HOME)/include/CppUTest/MemoryLeakDetectorNewMacros.h
+CFLAGS += -include $(CPPUTEST_HOME)/include/CppUTest/MemoryLeakDetectorMallocMacros.h
 MICROCFLAGS=-mcpu=v8.40.b -mxl-barrel-shift -mxl-multiply-high -mxl-pattern-compare -mno-xl-soft-mul -mno-xl-soft-div -mxl-float-sqrt -mhard-float -mxl-float-convert -mlittle-endian -Wall
 DEBUGFLAGS=-ggdb -g -gdwarf-2 -g3 #gdwarf-2 + g3 provides macro info to gdb
-INCPATH=-I./include/
-INCTESTPATH=-I./tests/unit/stubs/ -I./tests/helpers/include/
-LIBPATH=-L./lib/
-LIBS=-lCppUTest -lCppUTestExt
-#The test builds have their own main provided by CppUTest so we need to exclude commander.cpp
+
+#
+# includes
+#
+INCPATH = -I./include/ -I$(SPACE_LIB)/shakespeare/inc
+INCTESTPATH = -I./tests/unit/stubs/ -I./tests/helpers/include/
+
+#
+# Libraries
+#
+LIBPATH=-L./lib/  -L$(SPACE_LIB)/shakespeare/lib
+LIBS=-lCppUTest -lCppUTestExt -lshakespeare
+
+#
+# The test builds have their own main provided by CppUTest so we need to exclude commander.cpp
+#
 DEBUG_SRC_FILES =`find src/ ! -name 'space-commander-main.cpp' -name '*.cpp'`
 
 buildBin:
-	$(CC) $(CFLAGS) $(INCPATH) $(LIBPATH) $(DEBUGFLAGS) -DPC src/*.cpp -o bin/space-commander
+	$(CC) $(CFLAGS) $(INCPATH) $(LIBPATH) $(DEBUGFLAGS) src/*.cpp -o bin/space-commander
 buildQ6:
 	$(MICROCC) $(MICROCFLAGS) $(INCPATH) src/*.cpp -o bin/space-commanderQ6
 buildBB:
@@ -24,7 +48,7 @@ buildUnitTests:
 
 
 %.o: %.cpp
-	$(CC) $(CFLAGS) $(INCPATH) $(LIBPATH) -DPC -c $^ -o $@
+	$(CC) $(CFLAGS) $(INCPATH) $(LIBPATH) -c $^ -o $@
 
 %.a: %.o
 	ar -cvq $@ $^
@@ -61,3 +85,29 @@ Net2Com-BB.a: src/Net2ComBB.o
 staticlibsQ6.tar: src/NamedPipe-mbcc.a src/Net2Com-mbcc.a
 	mv $^ ./
 	tar -cf $@ include/NamedPipe.h include/Net2Com.h NamedPipe-mbcc.a Net2Com-mbcc.a
+
+
+#
+#++++++++++++++++++++
+# 	CppUTest / PC
+#--------------------
+test: AllTests
+
+Date.o: src/Date.cpp include/Date.h
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(INCPATH) -c $< -o $@
+
+NamedPipe.o: src/NamedPipe.cpp
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(INCPATH) -c $< -o $@
+
+Net2Com.o: src/Net2Com.cpp include/Net2Com.h
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(INCPATH) -c $< -o $@
+
+AllTests: tests/unit/AllTests.cpp tests/unit/Net2Com-test.cpp tests/unit/Date-test.cpp Net2Com.o NamedPipe.o Date.o
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(INCPATH) $(LIBPATH) -o $@ $^ $(LIBS) -DDEBUG
+
+#
+#
+# Cleanup
+#
+clean:
+	rm -f *.o *~ ./bin/* AllTests
