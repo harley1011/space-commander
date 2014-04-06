@@ -7,6 +7,7 @@ BEAGLECC=arm-linux-gnueabi-g++
 #
 SPACE_LIB = ../space-lib
 CPPUTEST_HOME = ../space-commander
+SPACE_SCRIPT = ../space-script
 
 #
 # Flags
@@ -21,7 +22,7 @@ DEBUGFLAGS=-ggdb -g -gdwarf-2 -g3 #gdwarf-2 + g3 provides macro info to gdb
 #
 # includes
 #
-INCPATH = -I./include/ -I$(SPACE_LIB)/shakespeare/inc
+INCPATH = -I./include/ -I$(SPACE_LIB)/shakespeare/inc -I$(SPACE_SCRIPT)/include
 INCTESTPATH = -I./tests/unit/stubs/ -I./tests/helpers/include/
 
 #
@@ -91,20 +92,21 @@ staticlibsQ6.tar: src/NamedPipe-mbcc.a src/Net2Com-mbcc.a
 #++++++++++++++++++++
 # 	CppUTest / PC
 #--------------------
+OBJECTS = bin/Net2Com.o bin/NamedPipe.o bin/Date.o bin/command-factory.o bin/deletelog-command.o  bin/decode-command.o bin/getlog-command.o bin/gettime-command.o bin/reboot-command.o bin/settime-command.o bin/update-command.o bin/base64.o
+UNIT_TEST = tests/unit/Net2Com-test.cpp tests/unit/Date-test.cpp tests/unit/deletelog-command-test.cpp 
+
+all: bin/space-commander
+
 test: AllTests
 
-Date.o: src/Date.cpp include/Date.h
+bin/%.o: src/%.cpp
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(INCPATH) -c $< -o $@
 
-NamedPipe.o: src/NamedPipe.cpp
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(INCPATH) -c $< -o $@
-
-Net2Com.o: src/Net2Com.cpp include/Net2Com.h
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(INCPATH) -c $< -o $@
-
-AllTests: tests/unit/AllTests.cpp tests/unit/Net2Com-test.cpp tests/unit/Date-test.cpp Net2Com.o NamedPipe.o Date.o
+AllTests: tests/unit/AllTests.cpp  $(UNIT_TEST) $(OBJECTS)
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(INCPATH) $(LIBPATH) -o $@ $^ $(LIBS) -DDEBUG
 
+bin/space-commander: src/space-commander-main.cpp $(OBJECTS)
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(INCPATH) $(LIBPATH) -o $@ $^ $(LIBS)
 #
 #
 # Cleanup

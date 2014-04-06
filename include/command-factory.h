@@ -8,6 +8,7 @@
 #include "gettime-command.h"
 #include "decode-command.h"
 #include "reboot-command.h"
+#include "deletelog-command.h"
 
 class CommandFactory {
 public:
@@ -20,10 +21,11 @@ private:
     static ICommand* CreateGetTime(char* data); 
     static ICommand* CreateReboot(char* data);
     static ICommand* CreateDecode(char* data); 
+    static ICommand* CreateDeleteLog(char* data); 
         
     static int GetLength3(char* data, int offset);
     static int GetLength10(char* data, int offset);
-    static char* GetPath(char* data, size_t length, int offset);
+    static char* GetPath(char* data, size_t length, int offset);        // This method allocate memory on the heap. Free it!
 };
 
 #endif

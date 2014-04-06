@@ -25,9 +25,17 @@ ICommand* CommandFactory::CreateCommand(char * data) {
         case '6': {
             return CommandFactory::CreateDecode(data);
         }
+        case '7': {
+            return CommandFactory::CreateDeleteLog(data);
+        }
     }
 
     return NULL;
+}
+
+ICommand* CommandFactory::CreateDeleteLog(char* data) {
+    DeleteLogCommand* result = new DeleteLogCommand(&data[1]);
+    return result;
 }
 
 ICommand* CommandFactory::CreateGetLog(char* data) {
