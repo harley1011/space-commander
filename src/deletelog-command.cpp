@@ -15,7 +15,7 @@ DeleteLogCommand::DeleteLogCommand(const char* filename) {
     this->filename = (char*)malloc(sizeof(char) * filename_len);
 
     if (this->filename != NULL) {
-        snprintf(this->filename, filename_len, "%s", filename);
+        snprintf(this->filename, filename_len, "%s", filename); // Make a copy!
     }
 
 }
@@ -40,13 +40,13 @@ DeleteLogCommand::~DeleteLogCommand() {
 *           
 *-----------------------------------------------------------------------------*/
 void* DeleteLogCommand::Execute() {
-    char buffer[100] = {'\0'};
+    char buffer[CS1_MAX_PATH_LENGTH] = {'\0'};
     const char* good_str = "1 DeleteLogCommand : removed ";
     const char* bad_str = "0 DeleteLogCommand : failed "; 
 
     int size =  strlen(this->filename) + 1;
 
-    snprintf(buffer, 100, "%s/%s", CS1_LOGS, this->filename);
+    snprintf(buffer, CS1_MAX_PATH_LENGTH, "%s/%s", CS1_LOGS, this->filename);
 
     if (remove(buffer) == 0){
         size += strlen(good_str) + 1;
@@ -56,7 +56,7 @@ void* DeleteLogCommand::Execute() {
         sprintf(buffer, bad_str);
     }
     
-    strncat(buffer, this->filename, 100);
+    strncat(buffer, this->filename, CS1_MAX_PATH_LENGTH);
     char* result = (char*)malloc(sizeof(char) * size);
     snprintf(result, size, "%s", buffer); 
     return result;
