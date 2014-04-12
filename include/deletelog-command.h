@@ -11,9 +11,13 @@
 
 #include "icommand.h"
 
+#define LOG 0x0
+#define TGZ 0x1
+
 class DeleteLogCommand : public ICommand {
     private :
         char* filename;
+        char type;
 
 
     public :
@@ -21,6 +25,7 @@ class DeleteLogCommand : public ICommand {
         DeleteLogCommand(const char* filename);
         virtual void* Execute();
         virtual ~DeleteLogCommand();
+        char FindType();
 };
 
 #endif

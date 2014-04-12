@@ -1,9 +1,11 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>     // rmdir()
-#include "SpaceDecl.h"
+
 #include "CppUTest/TestHarness.h"
 #include "CppUTest/MemoryLeakDetectorMallocMacros.h"
+
+#include "SpaceDecl.h"
 #include "command-factory.h"
 #include "icommand.h"
 
@@ -21,12 +23,12 @@ TEST_GROUP(DeleteLogTestGroup){
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 *
-* NAME : DeleteLogTestGroup :: DeleteLog_Success
+* NAME : DeleteLogTestGroup :: Execute_FileIsDeleted
 * 
 * PURPOSE : Successfully delete a file. 
 *
 *-----------------------------------------------------------------------------*/
-TEST(DeleteLogTestGroup, DeleteLog_Success){
+TEST(DeleteLogTestGroup, Execute_FileIsDeleted){
     FILE* filetest = fopen(CS1_LOGS"/filetest.log", "w+");
     fprintf(filetest, "some text to test");
     fclose(filetest);
@@ -41,7 +43,7 @@ TEST(DeleteLogTestGroup, DeleteLog_Success){
     char status[2] = {'\0'};
     strncpy(status, result, 1);
 
-    CHECK_EQUAL(1, atoi(status));
+    CHECK_EQUAL(0, atoi(status));
 
     if (result != NULL){
         free(result);
@@ -53,4 +55,30 @@ TEST(DeleteLogTestGroup, DeleteLog_Success){
         command = NULL;
     }
 
+}
+
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*
+* NAME : DeleteLogTestGroup :: FindType_ReturnsLOG
+* 
+* PURPOSE : Successfully determines the type of the file 
+*
+*-----------------------------------------------------------------------------*/
+TEST(DeleteLogTestGroup, FindType_ReturnsLOG){
+    char data[] = "7filetest.log";      // Command number followed by the filename
+
+    DeleteLogCommand* command = new DeleteLogCommand(&data[1]);
+
+    int result = command->FindType();
+
+    #ifdef DEBUG
+    printf("result : %d\n", result);
+    #endif
+    
+    CHECK_EQUAL(0, result);
+
+    if (command != NULL){
+        delete command;
+        command = NULL;
+    }
 }
