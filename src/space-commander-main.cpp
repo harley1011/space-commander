@@ -54,7 +54,7 @@ int main() {
 
     while (true) {
         memset(info_buffer, 0, sizeof(char) * 255);
-        size_t bytes = commander->ReadFromInfoPipe(info_buffer, 255);
+        int bytes = commander->ReadFromInfoPipe(info_buffer, 255);
 
         if (bytes > 0) {
             for(int i = 0; i != bytes; i++) {
@@ -69,7 +69,7 @@ int main() {
                     case 254:
                     case 255: {
 
-                        size_t data_bytes = 0;
+                        int data_bytes = 0;
                         while (data_bytes == 0) {
                             data_bytes = commander->ReadFromDataPipe(buffer, read_total);
 
