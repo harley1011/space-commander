@@ -1,9 +1,11 @@
 #ifndef GETLOG_COMMAND_H
 #define GETLOG_COMMAND_H
 
-#include "icommand.h"
 #include <cstdlib>
 #include <string>
+
+#include "SpaceDecl.h"
+#include "icommand.h"
 
 using namespace std;
 
@@ -23,7 +25,7 @@ public:
 #ifdef PC
     const char* GetLogFolder() { return "/home/spaceconcordia/space/space-commander/logs"; }
 #else
-    const char* GetLogFolder() { return "/home/logs"; }
+    const char* GetLogFolder() { return CS1_LOGS; }
 #endif
 
     char GetSubSystem() { return subsystem; }

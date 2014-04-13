@@ -6,3 +6,4 @@ bin/
 *.o
 staticlibs.tar
 staticlibsQ6.tar
+AllTests
