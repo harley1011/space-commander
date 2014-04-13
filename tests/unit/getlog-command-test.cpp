@@ -17,7 +17,17 @@ TEST_GROUP(GetLogTestGroup){
 
 
 
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*
+* NAME : GetLogTestGroup  :: 
+* 
+* PURPOSE : 
+*
+*-----------------------------------------------------------------------------*/
 TEST(GetLogTestGroup, justTryingStuff){
-
+    char data[] = "30100";
+    
+    ICommand* command = CommandFactory::GetLogCommand(data);
+    char* result = (char*)command->Execute();
 
 }
