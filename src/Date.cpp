@@ -3,16 +3,30 @@
 #include "Date.h"
 
 
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*
+* NAME : Date 
+*
+*------------------------------------------------------------------------------*/
+Date::Date(){
+    this->year = 0;
+    this->month = 0;
+    this->day = 0;
+    this->time_t_format = 0;
+}
+
 Date::Date(int year, int month, int day){
     this->year = year;
     this->month = month;
     this->day = day;
 
     this->BuildString();
+    this->MakeTimeT();
 }
 
 Date::Date(time_t raw_time){
     struct tm* timeinfo = localtime(&raw_time);
+    this->time_t_format = raw_time;
 
     this->year = timeinfo->tm_year + 1900;
     this->month = timeinfo->tm_mon + 1;
@@ -28,15 +42,25 @@ Date::Date(time_t raw_time){
 * PURPOSE : returns the time_t corresponding to the Date
 *
 *------------------------------------------------------------------------------*/
-time_t Date::GetTimeT(void){
+time_t Date::GetTimeT(){
+    return this->time_t_format;
+}
+
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*
+* NAME : MakeTimeT
+*
+* PURPOSE : Builds the time_t corresponding to the Date
+*
+*------------------------------------------------------------------------------*/
+void Date::MakeTimeT(void){
     struct tm timeinfo = {0};
 
     timeinfo.tm_year = this->year - 1900;
     timeinfo.tm_mon  = this->month - 1;
     timeinfo.tm_mday = this->day;
 
-    return mktime(&timeinfo);
-
+    this->time_t_format =  mktime(&timeinfo);
 }
 
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

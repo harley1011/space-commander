@@ -93,7 +93,7 @@ staticlibsQ6.tar: src/NamedPipe-mbcc.a src/Net2Com-mbcc.a
 # 	CppUTest / PC
 #--------------------
 OBJECTS = bin/Net2Com.o bin/NamedPipe.o bin/Date.o bin/command-factory.o bin/deletelog-command.o  bin/decode-command.o bin/getlog-command.o bin/gettime-command.o bin/reboot-command.o bin/settime-command.o bin/update-command.o bin/base64.o
-UNIT_TEST = tests/unit/Net2Com-test.cpp tests/unit/Date-test.cpp tests/unit/deletelog-command-test.cpp 
+UNIT_TEST = tests/unit/Net2Com-test.cpp tests/unit/Utl-test.cpp tests/unit/deletelog-command-test.cpp  tests/unit/getlog-command-test.cpp
 
 all: bin/space-commander
 
@@ -103,7 +103,7 @@ bin/%.o: src/%.cpp
 	$(CC) $(CFLAGS) $(MEM_LEAK_MACRO) $(CPPFLAGS) $(CXXFLAGS) $(INCPATH) -c $< -o $@
 
 AllTests: tests/unit/AllTests.cpp  $(UNIT_TEST) $(OBJECTS)
-	$(CC) $(CFLAGS) $(MEM_LEAK_MACRO) $(CPPFLAGS) $(CXXFLAGS) $(INCPATH) $(LIBPATH) -o $@ $^ $(LIBS) -DDEBUG
+	$(CC) $(CFLAGS) $(MEM_LEAK_MACRO) $(CPPFLAGS) $(CXXFLAGS) $(INCPATH) $(LIBPATH) -o $@ $^ $(LIBS)
 
 bin/space-commander: src/space-commander-main.cpp $(OBJECTS)
 	$(CC) $(CFLAGS) $(MEM_LEAK_MACRO) $(CPPFLAGS) $(CXXFLAGS) $(INCPATH) $(LIBPATH) -o $@ $^ $(LIBS)
