@@ -122,12 +122,12 @@ int main() {
 
                                             delete command;
                                             command = NULL;
-                                         } else {
+                                        } else {
                                             commander->WriteToInfoPipe(ERROR_CREATING_COMMAND);
-                                         }
+                                        }
 
-                                         free(previous_command_buffer);
-                                         previous_command_buffer = NULL;
+                                        free(previous_command_buffer);
+                                        previous_command_buffer = NULL;
 
                                     }
                                 } else {
