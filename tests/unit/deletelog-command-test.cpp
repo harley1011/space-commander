@@ -20,6 +20,16 @@ TEST_GROUP(DeleteLogTestGroup){
     }
 };
 
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*
+* NAME : DeleteLogTestGroup :: SendDeleteCommandUsingThePipes_FileIsDeleted
+* 
+* PURPOSE : 
+*
+*-----------------------------------------------------------------------------*/
+TEST(DeleteLogTestGroup, SendDeleteCommandUsingThePipes_FileIsDeleted){
+    FAIL("TODO : SendDeleteCommandUsingThePipes_FileIsDeleted");    
+}
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 *
@@ -29,7 +39,8 @@ TEST_GROUP(DeleteLogTestGroup){
 *
 *-----------------------------------------------------------------------------*/
 TEST(DeleteLogTestGroup, Execute_FileIsDeleted){
-    FILE* filetest = fopen(CS1_LOGS"/filetest.log", "w+");
+    const char* filetest_path = CS1_LOGS"/filetest.log";
+    FILE* filetest = fopen(filetest_path, "w+");
     fprintf(filetest, "some text to test");
     fclose(filetest);
 
@@ -43,6 +54,7 @@ TEST(DeleteLogTestGroup, Execute_FileIsDeleted){
     char status[2] = {'\0'};
     strncpy(status, result, 1);
 
+    CHECK_EQUAL(-1, access(filetest_path, F_OK));
     CHECK_EQUAL(0, atoi(status));
 
     if (result != NULL){
@@ -71,10 +83,6 @@ TEST(DeleteLogTestGroup, FindType_ReturnsLOG){
 
     int result = command->FindType();
 
-    #ifdef DEBUG
-    printf("result : %d\n", result);
-    #endif
-    
     CHECK_EQUAL(0, result);
 
     if (command != NULL){
