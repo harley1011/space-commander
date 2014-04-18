@@ -86,13 +86,9 @@ void* DeleteLogCommand::Execute() {
 * 
 *-----------------------------------------------------------------------------*/
 char DeleteLogCommand::FindType(){
-    int length = strlen(this->filename);
-    const int EXT_SIZE = 3;
-    
     this->type = LOG;
-    char* ext = this->filename + length - EXT_SIZE; // find the last three character of the string
 
-    if (strncmp(ext, "tgz", 3) == 0){
+    if (strstr(this->filename, ".tgz")){
         this->type = TGZ;
     }
 
