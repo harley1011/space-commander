@@ -9,6 +9,8 @@
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 *
 * NAME : DeleteLogCommand
+*
+* ARGUMENTS : filename  : input - null terminated string
 * 
 *-----------------------------------------------------------------------------*/
 DeleteLogCommand::DeleteLogCommand(const char* filename) {
