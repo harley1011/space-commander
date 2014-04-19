@@ -1,3 +1,12 @@
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*
+* AUTHORS : Space Concordia 2014, Joseph
+*
+* TITLE :  class GetLogCommand
+*
+* DESCRIPTION : Retreive a log archive.
+*
+*----------------------------------------------------------------------------*/
 #ifndef GETLOG_COMMAND_H
 #define GETLOG_COMMAND_H
 
@@ -5,35 +14,39 @@
 #include <string>
 
 #include "SpaceDecl.h"
+#include "Date.h"
+#include "subsystem.h"
 #include "icommand.h"
 
 using namespace std;
 
+#define OPT_NOOPT 0x00
+#define OPT_SUB 0x01
+#define OPT_SIZE 0x02
+#define OPT_DATE 0x04
+
+#define OPT_ISNOOPT(x)  ((x) == OPT_NOOPT)
+#define OPT_ISSUB(x)    (((x) & OPT_SUB) == OPT_SUB)
+#define OPT_ISSIZE(x)   (((x) & OPT_SIZE) == OPT_SIZE)
+#define OPT_ISDATE(x)   (((x) & OPT_DATE) == OPT_DATE)
+
+
 class GetLogCommand : public ICommand {
-public:
-    static const size_t MAX_LENGTH;
+    private :
+        char opt_byte;
+        char subsystem;     // OPT_SUB 
+        int size;           // OPT_SIZE
+        Date date;          // OPT_DATE
 
-    GetLogCommand(char subsystem, size_t length) {
-        this->subsystem  = subsystem;
-        this->length     = length;
-    };
 
-    ~GetLogCommand() {}
+    public :
+        GetLogCommand();
+        GetLogCommand(char opt_byte, char subsystem, size_t size, time_t time);
+        ~GetLogCommand();
+        void* Execute();
 
-    void* Execute();
+        static time_t getFileLastModifTimeT(const char *path);
 
-#ifdef PC
-    const char* GetLogFolder() { return "/home/spaceconcordia/space/space-commander/logs"; }
-#else
-    const char* GetLogFolder() { return CS1_LOGS; }
-#endif
 
-    char GetSubSystem() { return subsystem; }
-    size_t GetLength()  { return length; }
-private:
-    char* ReadLogFile(char* filename, size_t length);
-    char* GetLogFilename(char subsystem);
-    char subsystem;
-    size_t length;
 };
 #endif

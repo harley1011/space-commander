@@ -1,10 +1,16 @@
-#include "command-factory.h"
 #include <cstddef>
 #include <stdlib.h>
 #include <cstring>
 
+#include "SpaceDecl.h"
+#include "SpaceString.h"
+#include "command-factory.h"
+
 ICommand* CommandFactory::CreateCommand(char * data) {
-    if (data == NULL) { return NULL; }
+    if (data == NULL) { 
+        fprintf(stderr, "NULL argument passed to CreateCommand() in %s\n", __FILE__);
+        return NULL; 
+    }
 
     switch(data[0]) {
         case '0': {
@@ -17,6 +23,13 @@ ICommand* CommandFactory::CreateCommand(char * data) {
             return CommandFactory::CreateUpdate(data);
         }
         case '3': {
+            /*
+            * data[0]   :   Command number byte.
+            * data[1]   :   Option byte - specifies if options are present or not
+            * ... [2]   :   Subsystem  
+            *   [3-6]   :   Size
+            *   [7-10]  :   Date as a time_t
+            */
             return CommandFactory::CreateGetLog(data);
         }
         case '4': {
@@ -38,10 +51,14 @@ ICommand* CommandFactory::CreateDeleteLog(char* data) {
     return result;
 }
 
-ICommand* CommandFactory::CreateGetLog(char* data) {
-    int bytes = GetLength3(data, 2);
+ICommand* CommandFactory::CreateGetLog(char* data) {    // 0x33 or '3'
+    char opt_byte = data[1];
+    char subsystem = data[2];
+    size_t size = SpaceString::getUInt(data + 3);
+    time_t raw_time = SpaceString::getUInt(data + 7);
 
-    GetLogCommand* result = new GetLogCommand(data[1], (size_t)bytes);
+    GetLogCommand* result = new GetLogCommand(opt_byte, subsystem, size, raw_time);
+
     return result;
 }
 

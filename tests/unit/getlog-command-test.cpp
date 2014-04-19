@@ -7,11 +7,15 @@
 * DESCRIPTION : Tests the GetLogCommand
 *
 *----------------------------------------------------------------------------*/
+#include <time.h>
+#include <unistd.h>
+
 #include "CppUTest/TestHarness.h"
 #include "CppUTest/MemoryLeakDetectorMallocMacros.h"
 
 #include "SpaceDecl.h"
 #include "command-factory.h"
+#include "getlog-command.h"
 #include "icommand.h"
 
 
@@ -26,17 +30,47 @@ TEST_GROUP(GetLogTestGroup){
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 *
-* NAME : GetLogTestGroup  :: 
+* NAME : GetLogTestGroup  :: getFileLastModifTimeT_returnsCorrectTimeT
 * 
-* PURPOSE : 
-*
 *-----------------------------------------------------------------------------*/
-/*
-TEST(GetLogTestGroup, justTryingStuff){
-    FAIL("TODO");
-    char data[] = "30100";
-    
-    ICommand* command = CommandFactory::CreateCommand(data);
-   char* result = (char*)command->Execute();
+TEST(GetLogTestGroup, Execute_OPT_NOOPT_returnsOldestTgz){
+    char data[11] = {'\0'};
+    data[0] = 0x33;
+    ICommand *command = CommandFactory::CreateCommand(data);
+
+    command->Execute();
+    FAIL("Refactoring of GetLogCommand in progress...TODO");
+
+    if (command != NULL){
+        delete command;
+        command = NULL;
+    }
 }
-*/
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*
+* NAME : GetLogTestGroup  :: getFileLastModifTimeT_returnsCorrectTimeT
+* 
+*-----------------------------------------------------------------------------*/
+TEST(GetLogTestGroup, getFileLastModifTimeT_returnsCorrectTimeT){
+    const char* path = "aFile.txt";
+    FILE* file = fopen(path, "w+");
+
+    if (file != NULL){
+        fclose(file);
+        time_t fileCreationDate = GetLogCommand::getFileLastModifTimeT(path);
+        struct tm* timeinfo = localtime(&fileCreationDate);
+
+        time_t currentTime = time(NULL);
+        struct tm* current_tm = localtime(&currentTime);
+
+        CHECK_EQUAL(current_tm->tm_year, timeinfo->tm_year);
+        CHECK_EQUAL(current_tm->tm_mon, timeinfo->tm_mon);
+        CHECK_EQUAL(current_tm->tm_mday, timeinfo->tm_mday);
+        CHECK_EQUAL(current_tm->tm_hour, timeinfo->tm_hour);
+        CHECK_EQUAL(current_tm->tm_min, timeinfo->tm_min);
+
+        remove(path);
+    }else{
+        FAIL("Couldn't open the file");
+    }
+}
