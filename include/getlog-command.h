@@ -45,7 +45,8 @@ class GetLogCommand : public ICommand {
         ~GetLogCommand();
         void* Execute();
 
-        static time_t getFileLastModifTimeT(const char *path);
+        static time_t GetFileLastModifTimeT(const char *path);
+        static char* FindOldestFile(const char* directory_path);
 
 
 };

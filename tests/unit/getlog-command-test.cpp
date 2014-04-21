@@ -9,6 +9,8 @@
 *----------------------------------------------------------------------------*/
 #include <time.h>
 #include <unistd.h>
+#include <dirent.h>     // DIR
+#include <sys/stat.h>
 
 #include "CppUTest/TestHarness.h"
 #include "CppUTest/MemoryLeakDetectorMallocMacros.h"
@@ -17,20 +19,54 @@
 #include "command-factory.h"
 #include "getlog-command.h"
 #include "icommand.h"
+#include "fileIO.h"
 
+
+#define UNIT_CS1_TGZ "./unit_tgz"
 
 TEST_GROUP(GetLogTestGroup){
     void setup(){
+        mkdir(UNIT_CS1_TGZ, S_IRWXU);
 
     }
     void teardown(){
-
+        DeleteDirectoryContent(UNIT_CS1_TGZ);
+        rmdir(UNIT_CS1_TGZ);
     }
 };
 
+void create_file(const char* path);
+void create_file(const char* path, const char* msg){
+    FILE* file = fopen(path, "w+");
+    fprintf(file, "%s", msg);
+    fclose(file);
+}
+
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 *
-* NAME : GetLogTestGroup  :: getFileLastModifTimeT_returnsCorrectTimeT
+* NAME : GetLogTestGroup  :: FindOldestFile_returnsTheCorrectFilename
+* 
+*-----------------------------------------------------------------------------*/
+TEST(GetLogTestGroup, FindOldestFile_returnsTheCorrectFilename){
+    create_file(UNIT_CS1_TGZ"/a.txt", "file a");
+    usleep(1000000);
+    create_file(UNIT_CS1_TGZ"/b.txt", "file b");
+    usleep(1000000);
+    create_file(UNIT_CS1_TGZ"/c.txt", "file c");
+    usleep(5000);
+
+    char* oldestFile = GetLogCommand::FindOldestFile(UNIT_CS1_TGZ);
+
+    STRCMP_EQUAL("a.txt", oldestFile);
+
+    if (oldestFile != 0){
+        free(oldestFile);
+        oldestFile = 0;
+    }
+}
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*
+* NAME : GetLogTestGroup  :: GetFileLastModifTimeT_returnsCorrectTimeT
 * 
 *-----------------------------------------------------------------------------*/
 TEST(GetLogTestGroup, Execute_OPT_NOOPT_returnsOldestTgz){
@@ -48,16 +84,16 @@ TEST(GetLogTestGroup, Execute_OPT_NOOPT_returnsOldestTgz){
 }
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 *
-* NAME : GetLogTestGroup  :: getFileLastModifTimeT_returnsCorrectTimeT
+* NAME : GetLogTestGroup  :: GetFileLastModifTimeT_returnsCorrectTimeT
 * 
 *-----------------------------------------------------------------------------*/
-TEST(GetLogTestGroup, getFileLastModifTimeT_returnsCorrectTimeT){
+TEST(GetLogTestGroup, GetFileLastModifTimeT_returnsCorrectTimeT){
     const char* path = "aFile.txt";
     FILE* file = fopen(path, "w+");
 
     if (file != NULL){
         fclose(file);
-        time_t fileCreationDate = GetLogCommand::getFileLastModifTimeT(path);
+        time_t fileCreationDate = GetLogCommand::GetFileLastModifTimeT(path);
         struct tm* timeinfo = localtime(&fileCreationDate);
 
         time_t currentTime = time(NULL);

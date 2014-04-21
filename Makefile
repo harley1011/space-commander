@@ -6,6 +6,7 @@ BEAGLECC=arm-linux-gnueabi-g++
 # Paths
 #
 SPACE_LIB = ../space-lib
+SPACE_UPTDATER = ../space-updater
 CPPUTEST_HOME = ../space-commander
 SPACE_SCRIPT = ../space-script
 
@@ -22,7 +23,7 @@ DEBUGFLAGS=-ggdb -g -gdwarf-2 -g3 #gdwarf-2 + g3 provides macro info to gdb
 #
 # includes
 #
-INCPATH = -I./include/ -I$(SPACE_LIB)/shakespeare/inc -I$(SPACE_SCRIPT)/include
+INCPATH = -I./include/ -I$(SPACE_LIB)/shakespeare/inc -I$(SPACE_SCRIPT)/include -I$(SPACE_UPTDATER)/include
 INCTESTPATH = -I./tests/unit/stubs/ -I./tests/helpers/include/
 
 #
@@ -100,9 +101,12 @@ all: bin/space-commander
 test: AllTests
 
 bin/%.o: src/%.cpp
-	$(CC) $(CFLAGS) $(MEM_LEAK_MACRO) $(CPPFLAGS) $(CXXFLAGS) $(INCPATH) -c $< -o $@
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(INCPATH) -c $< -o $@
+	
+bin/fileIO.o: $(SPACE_UPTDATER)/src/fileIO.cpp $(SPACE_UPTDATER)/include/fileIO.h
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(INCPATH) -c $< -o $@
 
-AllTests: tests/unit/AllTests.cpp  $(UNIT_TEST) $(OBJECTS)
+AllTests: tests/unit/AllTests.cpp  $(UNIT_TEST) $(OBJECTS) bin/fileIO.o	
 	$(CC) $(CFLAGS) $(MEM_LEAK_MACRO) $(CPPFLAGS) $(CXXFLAGS) $(INCPATH) $(LIBPATH) -o $@ $^ $(LIBS)
 
 bin/space-commander: src/space-commander-main.cpp $(OBJECTS)
