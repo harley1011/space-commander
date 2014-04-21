@@ -108,6 +108,8 @@ char* GetLogCommand::FindOldestFile(const char* directory_path){
             }
         }
     }
+    
+    // Have to close the DIR!!! closedir()   TODO
 
     return oldest_filename; 
 }
