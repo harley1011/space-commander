@@ -34,7 +34,7 @@ int I2CDevice::I2CRead(char* filename)
 {
     FILE* file;
     char i2cBuffer[I2C_MAX_BUF_SIZE];
-    if ( (file = fopen(filename,"r")) == null )
+    if ( (file = fopen(filename,"r")) == NULL )
     {  
         char* errorMsg;
         sprintf(errorMsg,"Fopen failed to open I2C device at path %s and returned error message %s \n",filename, strerror(errno));
@@ -42,15 +42,15 @@ int I2CDevice::I2CRead(char* filename)
         //return CS1_FAILURE;
         return -1;
     }
-    if ((fgets(i2cBuffer,I2C_MAX_BUF_SIZE,file)))
+    if ((fgets(i2cBuffer,I2C_MAX_BUF_SIZE,file))== NULL)
     {
         char* errorMsg;
         sprintf(errorMsg,"Fgets failed to read I2C device at path %s and returned error message %s \n",filename, strerror(errno));
         //Shakespeare::log(Priority::ERROR,s_cs1_subsystems[Hardware],errorMsg);
     }
     fclose(file);  
-    printf("The value read is %s",readBuff);
-    
+    printf("The value read is %s",i2cBuffer);
+  
     return 1;
 }
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
