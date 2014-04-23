@@ -4,16 +4,9 @@
 #include <linux/rtc.h>
 
 #define I2C_MAX_BUF_SIZE 50
-class I2CDevice {
-public:
-    I2CDevice(int i2c_bus);
-    int I2CRead(char* filename);
+namespace I2CDevice {
+    int I2CRead(char* filename, char* i2c_buffer);
     int I2CWrite();
-    int I2CWriteToRTC(struct rtc_time rt); 
-private:
-    bool rtc_device;
-    int i2c_bus;
-    char* filename;
-    char* reg_buffer;
+    int I2CWriteToRTC(struct rtc_time rt,int i2c_bus); 
 };
 #endif
