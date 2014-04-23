@@ -15,18 +15,6 @@
 *
 * NAME : I2CDevice
 * 
-* PURPOSE : Constructor for reading from i2c devices file handlers
-*
-*-----------------------------------------------------------------------------*/
-I2CDevice::I2CDevice(int i2c_bus, char* filename)
-{
-    this->i2c_bus = i2c_bus;
-    this->filename = filename;
-}
-/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-*
-* NAME : I2CDevice
-* 
 * PURPOSE : Constructor for rd/wr to i2c devices
 *
 *-----------------------------------------------------------------------------*/
@@ -44,14 +32,15 @@ I2CDevice::I2CDevice(int i2c_bus)
 
 int I2CDevice::I2CRead(char* filename)
 {
-    FILE* file = fopen(filename,O_RDONLY);
+    int file = open(filename,O_RDONLY);
     char readBuff[100];
     if ( file < 0 )
-        printf("Fopen failed and returned errno %s \n", sterror(errno));
+        printf("Fopen failed and returned errno %s \n", strerror(errno));
     else
     {
-        fgets(readBuff,10,file);
-        fclose(file);
+	read(file,readBuff,1);
+       // fgets(readBuff,10,file);
+        close(file);
     }
     printf("The value read is %s",readBuff);
 //    file = ioctl(file,I2C_SLAVE,answer); 

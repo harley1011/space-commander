@@ -12,7 +12,10 @@ int main()
         10,
         105};
 
-    i2cDevice.I2CWriteToRTC(rt);
-
+//    i2cDevice.I2CWriteToRTC(rt);
+	
+	//char* filename = "/sys/bus/i2c/devices/1-0077/pressure0_input";
+	char* filename = "/root/text.txt";
+	i2cDevice.I2CRead(filename);
 
 }
