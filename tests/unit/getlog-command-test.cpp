@@ -16,22 +16,23 @@
 #include "CppUTest/MemoryLeakDetectorMallocMacros.h"
 
 #include "SpaceDecl.h"
+
 #include "command-factory.h"
 #include "getlog-command.h"
 #include "icommand.h"
 #include "fileIO.h"
+#include "commands.h"
 
-
-#define UNIT_CS1_TGZ "./unit_tgz"
+static char command_buf[11] = {'\0'};
 
 TEST_GROUP(GetLogTestGroup){
     void setup(){
-        mkdir(UNIT_CS1_TGZ, S_IRWXU);
+        mkdir(CS1_TGZ, S_IRWXU);
 
     }
     void teardown(){
-        DeleteDirectoryContent(UNIT_CS1_TGZ);
-        rmdir(UNIT_CS1_TGZ);
+        DeleteDirectoryContent(CS1_TGZ);
+        rmdir(CS1_TGZ);
     }
 };
 
@@ -44,18 +45,71 @@ void create_file(const char* path, const char* msg){
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 *
+* GROUP : GetLogTestGroup
+*
+* NAME : GetNextFile_NOOPT_returnsOldestFilename 
+* 
+*-----------------------------------------------------------------------------*/
+TEST(GetLogTestGroup, GetNextFile_NOOPT_returnsOldestFilename) {
+    create_file(CS1_TGZ"/a.txt", "file a");
+    usleep(1000000);
+    create_file(CS1_TGZ"/b.txt", "file b");
+    usleep(1000000);
+    create_file(CS1_TGZ"/c.txt", "file c");
+    usleep(5000);
+
+    command_buf[0] = GETLOG_CMD;
+    GetLogCommand *command = (GetLogCommand*)CommandFactory::CreateCommand(command_buf);
+
+    char* oldest_file = command->GetNextFile();
+    STRCMP_EQUAL("a.txt", oldest_file);
+
+    if (command != NULL){
+        delete command;
+        command = NULL;
+    }
+}
+
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*
+* GROUP : GetLogTestGroup
+*
+* NAME : FindOldestFile_OPT_SUB_returnsCorrectFilename 
+* 
+*-----------------------------------------------------------------------------*/
+TEST(GetLogTestGroup, FindOldestFile_OPT_SUB_returnsCorrectFilename) {
+    create_file(CS1_TGZ"/SubA20140101.txt", "file a");
+    usleep(1000000);
+    create_file(CS1_TGZ"/SubA20140102.txt", "file b");
+    usleep(1000000);
+    create_file(CS1_TGZ"/SubC20140101.txt", "file c");
+    usleep(5000);
+
+    char* oldestFile = GetLogCommand::FindOldestFile(CS1_TGZ, "SubA");
+
+    STRCMP_EQUAL("SubA20140101.txt", oldestFile);
+
+    if (oldestFile != 0){
+        free(oldestFile);
+        oldestFile = 0;
+    }
+}
+
+
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*
 * NAME : GetLogTestGroup  :: FindOldestFile_returnsTheCorrectFilename
 * 
 *-----------------------------------------------------------------------------*/
 TEST(GetLogTestGroup, FindOldestFile_returnsTheCorrectFilename){
-    create_file(UNIT_CS1_TGZ"/a.txt", "file a");
+    create_file(CS1_TGZ"/a.txt", "file a");
     usleep(1000000);
-    create_file(UNIT_CS1_TGZ"/b.txt", "file b");
+    create_file(CS1_TGZ"/b.txt", "file b");
     usleep(1000000);
-    create_file(UNIT_CS1_TGZ"/c.txt", "file c");
+    create_file(CS1_TGZ"/c.txt", "file c");
     usleep(5000);
 
-    char* oldestFile = GetLogCommand::FindOldestFile(UNIT_CS1_TGZ);
+    char* oldestFile = GetLogCommand::FindOldestFile(CS1_TGZ, NULL);
 
     STRCMP_EQUAL("a.txt", oldestFile);
 
@@ -82,6 +136,7 @@ TEST(GetLogTestGroup, Execute_OPT_NOOPT_returnsOldestTgz){
         command = NULL;
     }
 }
+
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 *
 * NAME : GetLogTestGroup  :: GetFileLastModifTimeT_returnsCorrectTimeT
@@ -109,4 +164,39 @@ TEST(GetLogTestGroup, GetFileLastModifTimeT_returnsCorrectTimeT){
     }else{
         FAIL("Couldn't open the file");
     }
+}
+
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*
+* GROUP : GetLogTestGroup
+*
+* NAME : GetPath_returnsCorrectPath
+* 
+*-----------------------------------------------------------------------------*/
+TEST(GetLogTestGroup, GetPath_returnsCorrectPath) {
+    const char* dir = "/my/directory";
+    const char* file = "the_file.file";
+    const char* expected = "/my/directory/the_file.file";
+
+    char buffer[CS1_PATH_MAX];
+
+    STRCMP_EQUAL(expected, GetLogCommand::GetPath(dir, file, buffer));
+}
+
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*
+* GROUP : GetLogTestGroup
+*
+* NAME : prefixMatches_returnsTrue
+* 
+*-----------------------------------------------------------------------------*/
+TEST(GetLogTestGroup, prefixMatches_returnsTrue) {
+    const char* haystack = "StarMoonStorm";
+    const char* needle1 = "";
+    const char* needle2 = "Star";
+    const char* needle3 = "NotThere";
+    
+    CHECK(GetLogCommand::prefixMatches(haystack, needle1));
+    CHECK(GetLogCommand::prefixMatches(haystack, needle2));
+    CHECK(GetLogCommand::prefixMatches(haystack, needle3) == 0);
 }

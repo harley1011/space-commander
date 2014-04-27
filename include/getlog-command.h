@@ -1,10 +1,28 @@
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 *
-* AUTHORS : Space Concordia 2014, Joseph
+* AUTHORS : Space Concordia 2014, Joseph 
+*           (inspired by the previous version : getlog-command-cpp-obsolete201404)
 *
-* TITLE :  class GetLogCommand
+* TITLE : getlog-command.h 
 *
 * DESCRIPTION : Retreive a log archive.
+*
+*              - Format of the GetLogCommand :  
+*                   [0]   :   Command number byte.
+*                   [1]   :   Option byte - specifies if options are present or not
+*                   [2]   :   Subsystem  
+*                 [3-6]   :   Size
+*                [7-10]   :   Date as a time_t
+*
+*       Execute() :
+*               if there is no option specified     
+*                       - Returns the oldest file present in CS1_TGZ
+*               if only Subsystem is specified      
+*                       - Returns the oldest file belonging to that subsystem
+*               if only Size is specified           
+*                       -   Returns the floor(Size / CS1_TGZ_MAX) oldest files in CS1_TGZ
+*               if only Date is specified
+*                       -   Returns the first file that matches this Date  in CS1_TGZ
 *
 *----------------------------------------------------------------------------*/
 #ifndef GETLOG_COMMAND_H
@@ -45,8 +63,12 @@ class GetLogCommand : public ICommand {
         ~GetLogCommand();
         void* Execute();
 
+        char* GetNextFile(void);
+
         static time_t GetFileLastModifTimeT(const char *path);
-        static char* FindOldestFile(const char* directory_path);
+        static char* FindOldestFile(const char* directory_path, const char* pattern);
+        static char* GetPath(const char* dir, const char* file, char* buffer);
+        static bool prefixMatches(const char* filename, const char* pattern);
 
 
 };

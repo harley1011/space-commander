@@ -8,15 +8,19 @@
 #include "SpaceDecl.h"
 #include "command-factory.h"
 #include "icommand.h"
-
-#define free(a) cpputest_free_location(a, __FILE__, __LINE__)
+#include "fileIO.h"
 
 TEST_GROUP(DeleteLogTestGroup){
     void setup(){
-
+        mkdir(CS1_TGZ, S_IRWXU);
+        mkdir(CS1_LOGS, S_IRWXU);
     }
     void teardown(){
+        DeleteDirectoryContent(CS1_TGZ);
+        rmdir(CS1_TGZ);
 
+        DeleteDirectoryContent(CS1_LOGS);
+        rmdir(CS1_LOGS);
     }
 };
 
@@ -48,8 +52,6 @@ TEST(DeleteLogTestGroup, Execute_FileIsDeleted){
     
     ICommand* command = CommandFactory::CreateCommand(data);
     char* result = (char*)command->Execute();
-
-    printf("%s\n", result);
 
     char status[2] = {'\0'};
     strncpy(status, result, 1);

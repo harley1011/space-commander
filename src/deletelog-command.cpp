@@ -47,7 +47,7 @@ DeleteLogCommand::~DeleteLogCommand() {
 *           
 *-----------------------------------------------------------------------------*/
 void* DeleteLogCommand::Execute() {
-    char buffer[CS1_MAX_PATH_LENGTH] = {'\0'};
+    char buffer[CS1_PATH_MAX] = {'\0'};
     const char* good_str = "0 DeleteLogCommand : removed ";
     const char* bad_str = "1 DeleteLogCommand : failed "; 
     const char* folder = 0;
@@ -61,7 +61,7 @@ void* DeleteLogCommand::Execute() {
             break;
     }
 
-    snprintf(buffer, CS1_MAX_PATH_LENGTH, "%s/%s", folder, this->filename);
+    snprintf(buffer, CS1_PATH_MAX, "%s/%s", folder, this->filename);
 
     if (remove(buffer) == 0){
         size += strlen(good_str) + 1;
@@ -71,7 +71,7 @@ void* DeleteLogCommand::Execute() {
         sprintf(buffer, "%s",  bad_str);
     }
     
-    strncat(buffer, this->filename, CS1_MAX_PATH_LENGTH);
+    strncat(buffer, this->filename, CS1_PATH_MAX);
     char* result = (char*)malloc(sizeof(char) * size);
     snprintf(result, size, "%s", buffer); 
     return result;
