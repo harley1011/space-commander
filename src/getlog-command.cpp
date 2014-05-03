@@ -8,8 +8,10 @@
 
 #include <assert.h>
 
+#include "subsystems.h"
 #include "getlog-command.h"
 
+extern const char* s_cs1_subsystems[];  // defined in sybsystems.cpp
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 *
@@ -71,19 +73,25 @@ char* GetLogCommand::GetNextFile(void) {
     static char filename[CS1_NAME_MAX] = {'\0'};
     char* buf = 0;
 
-    if (OPT_ISNOOPT(this->opt_byte)) { 
+    if (OPT_ISNOOPT(this->opt_byte)) 
+    { 
         // 1. No Options are specified, retreive the oldest package.
         fprintf(stdout, "Execute GetLogCommand with OPT_NOOPT : Finding oldest tgz...\n");
         buf = GetLogCommand::FindOldestFile(CS1_TGZ, NULL);     // Pass NULL to match ANY Sub
-    } else if (OPT_ISSUB(this->opt_byte)) {
+    } 
+    else if (OPT_ISSUB(this->opt_byte) && !OPT_ISDATE(this->opt_byte)) 
+    {
+        // 2. The Subsystem is defined, retreive the oldest package that belongs to that subsystem.
         fprintf(stdout, "Execute GetLogCommand with OPT_SUB : Finding oldest tgz that matches SUB...\n");
-
-    } else if (OPT_ISSIZE(this->opt_byte)) {
+        buf = GetLogCommand::FindOldestFile(CS1_TGZ, s_cs1_subsystems[(size_t)this->subsystem]);
+    } 
+    else if (OPT_ISSIZE(this->opt_byte)) 
+    {
 
     }
     
     if (buf) { 
-        assert (strlen(buf) < CS1_NAME_MAX);
+        assert(strlen(buf) < CS1_NAME_MAX);
         strcpy(filename, buf);
 
         free (buf);

@@ -24,11 +24,11 @@ ICommand* CommandFactory::CreateCommand(char * data) {
         }
         case '3': {
             /*
-            * data[0]   :   Command number byte.
-            * data[1]   :   Option byte - specifies if options are present or not
-            * ... [2]   :   Subsystem  
-            *   [3-6]   :   Size
-            *   [7-10]  :   Date as a time_t
+            * data[0]   :   Command number
+            * data[1]   :   Option      - specifies if options are present or not
+            * ... [2]   :   Subsystem   - see subsystems.h 
+            *   [3-6]   :   Size        - 
+            *   [7-10]  :   Date        - time_t
             */
             return CommandFactory::CreateGetLog(data);
         }
