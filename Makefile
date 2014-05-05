@@ -23,7 +23,7 @@ DEBUGFLAGS=-ggdb -g -gdwarf-2 -g3 #gdwarf-2 + g3 provides macro info to gdb
 #
 # includes
 #
-INCPATH = -I./include/ -I$(SPACE_LIB)/shakespeare/inc -I$(SPACE_SCRIPT)/include -I$(SPACE_UPTDATER)/include
+INCPATH = -I./include/ -I$(SPACE_LIB)/shakespeare/inc -I$(SPACE_SCRIPT)/include -I$(SPACE_UPTDATER)/include -I$(SPACE_SCRIPT)/tgz-wizard/include
 INCTESTPATH = -I./tests/unit/stubs/ -I./tests/helpers/include/
 
 #
@@ -116,14 +116,18 @@ bin/%.o: src/%.cpp
 bin/fileIO.o: $(SPACE_UPTDATER)/src/fileIO.cpp $(SPACE_UPTDATER)/include/fileIO.h
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(INCPATH) -c $< -o $@ $(ENV)
 
-AllTests: tests/unit/AllTests.cpp  $(UNIT_TEST) $(OBJECTS) bin/fileIO.o	
+bin/dirUtl.o: $(SPACE_SCRIPT)/tgz-wizard/src/dirUtl.cpp $(SPACE_SCRIPT)/tgz-wizard/include/dirUtl.h
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(INCPATH) -c $< -o $@ $(ENV)
+
+AllTests: tests/unit/AllTests.cpp  $(UNIT_TEST) $(OBJECTS) bin/fileIO.o	 bin/dirUtl.o
 	$(CC) $(CFLAGS) $(MEM_LEAK_MACRO) $(CPPFLAGS) $(CXXFLAGS) $(INCPATH) $(LIBPATH) -o $@ $^ $(LIBS) $(ENV)
 
 bin/space-commander: src/space-commander-main.cpp $(OBJECTS)
 	$(CC) $(CFLAGS) $(MEM_LEAK_MACRO) $(CPPFLAGS) $(CXXFLAGS) $(INCPATH) $(LIBPATH) -o $@ $^ $(LIBS) $(ENV)
 #
 #
+#++++++++++++++++++++
 # Cleanup
-#
+#--------------------
 clean:
 	rm -f *.o *~ ./bin/* AllTests

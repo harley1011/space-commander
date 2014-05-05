@@ -17,19 +17,25 @@
 
 #include "SpaceDecl.h"
 
+#include "SpaceString.h"
 #include "command-factory.h"
 #include "getlog-command.h"
 #include "icommand.h"
 #include "fileIO.h"
 #include "commands.h"
 #include "subsystems.h"
+#include "dirUtl.h"
 
-static char command_buf[11] = {'\0'};
+static char command_buf[GETLOG_CMD_SIZE] = {'\0'};
+
+static void create_file(const char* path, const char* msg);
+
 
 TEST_GROUP(GetLogTestGroup)
 {
     void setup(){
         mkdir(CS1_TGZ, S_IRWXU);
+        memset(command_buf, 0, GETLOG_CMD_SIZE);
 
     }
     void teardown(){
@@ -38,12 +44,84 @@ TEST_GROUP(GetLogTestGroup)
     }
 };
 
-void create_file(const char* path);
 void create_file(const char* path, const char* msg)
 {
     FILE* file = fopen(path, "w+");
     fprintf(file, "%s", msg);
     fclose(file);
+}
+
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*
+* GROUP : GetLogTestGroup
+*
+* NAME : Execute_OPT_NOOPT_returnsOldestTgz 
+* 
+*-----------------------------------------------------------------------------*/
+TEST(GetLogTestGroup, Execute_OPT_NOOPT_returnsOldestTgz)
+{
+    const char* path = CS1_TGZ"/Watch-Puppy20140101.txt";  
+    create_file(CS1_TGZ"/Watch-Puppy20140101.txt", "file a");
+    usleep(1000000);
+    create_file(CS1_TGZ"/Updater20140102.txt", "file b");
+    usleep(1000000);
+    create_file(CS1_TGZ"/Updater20140103.txt", "file c");
+    usleep(5000);
+
+    char* result = 0;
+    const char* dest = CS1_TGZ"/Watch-Puppy20140101.txt-copy";
+
+    GetLogCommand::Build_GetLogCommand(command_buf, OPT_NOOPT, 0, 0, 0);
+    ICommand *command = CommandFactory::CreateCommand(command_buf);
+    result = (char*)command->Execute();
+
+    FILE *pFile = fopen(dest, "wb");
+
+    if (pFile) {
+        fwrite(result, 1, 6, pFile);        // TODO fix this to read until EOF, or add the size to the result buffer
+        fclose(pFile);
+    }
+
+    CHECK(diff(dest, path));     
+
+    // Cleanup
+    if (command){
+        delete command;
+        command = NULL;
+    }
+
+    if (result) {
+        free(result);
+        result = 0;
+    }
+}
+
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*
+* GROUP : GetLogTestGroup
+*
+* NAME : ReadFile_FromStartToEnd_success 
+* 
+*-----------------------------------------------------------------------------*/
+TEST(GetLogTestGroup, ReadFile_FromStartToEnd_success)
+{
+    char buffer[CS1_TGZ_MAX + 50] = {0};
+    const char* path = CS1_TGZ"/Updater20140101.txt";
+    const char* dest = CS1_TGZ"/Updater20140101.txt-copy";
+    create_file(path, "data");
+
+    size_t bytes = GetLogCommand::ReadFile_FromStartToEnd(buffer, path, 0, CS1_TGZ_MAX);
+
+    fprintf(stderr, "buffer : %s\n", buffer);
+
+    FILE *pFile = fopen(dest, "wb");
+
+    if (pFile) {
+        fwrite(buffer, 1, bytes, pFile);
+        fclose(pFile);
+    }
+
+   CHECK(diff(dest, path));     
 }
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -135,8 +213,10 @@ TEST(GetLogTestGroup, FindOldestFile_OPT_SUB_returnsCorrectFilename)
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 *
-* NAME : GetLogTestGroup  :: FindOldestFile_returnsTheCorrectFilename
-* 
+* GROUP : GetLogTestGroup
+*
+* NAME : FindOldestFile_returnsTheCorrectFilename 
+*
 *-----------------------------------------------------------------------------*/
 TEST(GetLogTestGroup, FindOldestFile_returnsTheCorrectFilename)
 {
@@ -156,25 +236,7 @@ TEST(GetLogTestGroup, FindOldestFile_returnsTheCorrectFilename)
         oldestFile = 0;
     }
 }
-/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-*
-* NAME : GetLogTestGroup  :: GetFileLastModifTimeT_returnsCorrectTimeT
-* 
-*-----------------------------------------------------------------------------*/
-TEST(GetLogTestGroup, Execute_OPT_NOOPT_returnsOldestTgz)
-{
-    char data[11] = {'\0'};
-    data[0] = 0x33;
-    ICommand *command = CommandFactory::CreateCommand(data);
 
-    command->Execute();
-    FAIL("Refactoring of GetLogCommand in progress...TODO");
-
-    if (command != NULL){
-        delete command;
-        command = NULL;
-    }
-}
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 *
@@ -241,4 +303,25 @@ TEST(GetLogTestGroup, prefixMatches_returnsTrue)
     CHECK(GetLogCommand::prefixMatches(haystack, needle1));
     CHECK(GetLogCommand::prefixMatches(haystack, needle2));
     CHECK(GetLogCommand::prefixMatches(haystack, needle3) == 0);
+}
+
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*
+* GROUP : GetLogTestGroup
+*
+* NAME : Build_GetLogCommand 
+* 
+*-----------------------------------------------------------------------------*/
+TEST(GetLogTestGroup, Build_GetLogCommand_returnsCorrectCmd)
+{
+    char expected[GETLOG_CMD_SIZE] = {0};
+    expected[0] = GETLOG_CMD;
+    expected[1] = OPT_SUB | OPT_SIZE | OPT_DATE;
+    expected[2] = UPDATER; 
+    SpaceString::get4Char(expected + 3, 666);
+    SpaceString::get4Char(expected + 7, 666);
+    
+    GetLogCommand::Build_GetLogCommand(command_buf, OPT_SUB | OPT_SIZE | OPT_DATE, UPDATER, 666, 666);
+
+    CHECK_EQUAL(memcmp(expected, command_buf, GETLOG_CMD_SIZE), 0);
 }
