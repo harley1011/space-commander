@@ -33,7 +33,7 @@ TEST(SpaceStringTestGroup, get4Char_returnCorrectCStr)
     char cstr[4] = {0};
     size_t uint = 2882400000LL;
 
-    SpaceString::get4Char(uint, cstr),
+    SpaceString::get4Char(uint, cstr);
 
     CHECK_EQUAL(memcmp(expected_cstr, cstr, 4), 0);
 }
