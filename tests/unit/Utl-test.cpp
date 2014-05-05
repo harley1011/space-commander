@@ -7,6 +7,7 @@
 * DESCRIPTION : Contains Unit tests for the utility classes.
 *
 *----------------------------------------------------------------------------*/
+#include <stdio.h>
 #include "CppUTest/TestHarness.h"
 #include "Date.h"
 #include "SpaceString.h"
@@ -21,12 +22,30 @@ TEST_GROUP(SpaceStringTestGroup){
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 *
+* GROUP : SpaceStringTestGroup 
+*
+* NAME  : get4Char_returnCorrectCStr
+* 
+*-----------------------------------------------------------------------------*/
+TEST(SpaceStringTestGroup, get4Char_returnCorrectCStr)
+{
+    char expected_cstr[4] = { 0x00, 0xEF, 0xCD, 0xAB };
+    char cstr[4] = {0};
+    size_t uint = 2882400000LL;
+
+    SpaceString::get4Char(uint, cstr),
+
+    CHECK_EQUAL(memcmp(expected_cstr, cstr, 4), 0);
+}
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*
 * NAME : SpaceStringTestGroup :: getUInt_returnCorrectIntegerValue
 * 
 * PURPOSE :
 *
 *-----------------------------------------------------------------------------*/
-TEST(SpaceStringTestGroup, getUInt_returnCorrectIntegerValue){
+TEST(SpaceStringTestGroup, getUInt_returnCorrectIntegerValue)
+{
     char cstr[4] = { 0x00, 0xEF, 0xCD, 0xAB };
     size_t expected = 2882400000LL;
 

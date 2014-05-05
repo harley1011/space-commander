@@ -13,19 +13,14 @@
 #include <string.h>
 class SpaceString{
 
-    public:
-
-    static size_t getUInt(char cstr[4]){
-        union SizeUnion {
-            unsigned int size;
+    private :
+        union Converter_uint_4char {
+            unsigned int uint;
             char cstr[4];
         };
 
-        SizeUnion converter = {0};
-
-        memcpy(converter.cstr, cstr, 4);
-
-        return converter.size;
-    }
+    public:
+        static char* get4Char(unsigned int uint, char char_buf[4]);
+        static size_t getUInt(char cstr[4]);
 };
 #endif
