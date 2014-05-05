@@ -96,7 +96,7 @@ staticlibsQ6.tar: src/NamedPipe-mbcc.a src/Net2Com-mbcc.a
 #
 # All Object files, do not use wildcard, add the ones you need explicitly!
 #
-OBJECTS = bin/Net2Com.o bin/NamedPipe.o bin/Date.o bin/command-factory.o bin/deletelog-command.o  bin/decode-command.o bin/getlog-command.o bin/gettime-command.o bin/reboot-command.o bin/settime-command.o bin/update-command.o bin/base64.o bin/subsystems.o
+OBJECTS = bin/Net2Com.o bin/NamedPipe.o bin/Date.o bin/command-factory.o bin/deletelog-command.o  bin/decode-command.o bin/getlog-command.o bin/gettime-command.o bin/reboot-command.o bin/settime-command.o bin/update-command.o bin/base64.o bin/subsystems.o bin/SpaceString.o
 #
 # CppUTest files, no wildcard, add files explicitly!
 #
