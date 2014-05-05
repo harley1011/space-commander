@@ -13,7 +13,7 @@ size_t SpaceString::getUInt(char cstr[4])
     return converter.uint;
 }
 
-char* SpaceString::get4Char(unsigned int uint, char char_buf[4])
+char* SpaceString::get4Char(char char_buf[4], unsigned int uint)
 {
     Converter_uint_4char converter = {0};    
     

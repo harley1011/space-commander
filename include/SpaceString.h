@@ -20,7 +20,7 @@ class SpaceString{
         };
 
     public:
-        static char* get4Char(unsigned int uint, char char_buf[4]);
+        static char* get4Char(char char_buf[4], unsigned int uint);
         static size_t getUInt(char cstr[4]);
 };
 #endif
