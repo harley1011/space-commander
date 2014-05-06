@@ -111,19 +111,19 @@ all: bin/space-commander
 test: AllTests
 
 bin/%.o: src/%.cpp
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(INCPATH) -c $< -o $@ $(ENV)
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCPATH) -c $< -o $@ $(ENV)
 	
 bin/fileIO.o: $(SPACE_UPTDATER)/src/fileIO.cpp $(SPACE_UPTDATER)/include/fileIO.h
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(INCPATH) -c $< -o $@ $(ENV)
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCPATH) -c $< -o $@ $(ENV)
 
 bin/dirUtl.o: $(SPACE_SCRIPT)/tgz-wizard/src/dirUtl.cpp $(SPACE_SCRIPT)/tgz-wizard/include/dirUtl.h
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(INCPATH) -c $< -o $@ $(ENV)
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCPATH) -c $< -o $@ $(ENV)
 
 AllTests: tests/unit/AllTests.cpp  $(UNIT_TEST) $(OBJECTS) bin/fileIO.o	 bin/dirUtl.o
-	$(CC) $(CFLAGS) $(MEM_LEAK_MACRO) $(CPPFLAGS) $(CXXFLAGS) $(INCPATH) $(LIBPATH) -o $@ $^ $(LIBS) $(ENV)
+	$(CC) $(CFLAGS) $(MEM_LEAK_MACRO) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCPATH) $(LIBPATH) -o $@ $^ $(LIBS) $(ENV)
 
 bin/space-commander: src/space-commander-main.cpp $(OBJECTS)
-	$(CC) $(CFLAGS) $(MEM_LEAK_MACRO) $(CPPFLAGS) $(CXXFLAGS) $(INCPATH) $(LIBPATH) -o $@ $^ $(LIBS) $(ENV)
+	$(CC) $(CFLAGS) $(MEM_LEAK_MACRO) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCPATH) $(LIBPATH) -o $@ $^ $(LIBS) $(ENV)
 #
 #
 #++++++++++++++++++++

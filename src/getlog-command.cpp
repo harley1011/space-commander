@@ -26,6 +26,7 @@ GetLogCommand::GetLogCommand()
     this->size = CS1_MAX_FRAME_SIZE;        // Max number of bytes to retreive.  size / tgz-part-size = number of frames
     this->date = Date();                    // Default to oldest possible log file.
     this->subsystem = 0x0;
+    this->number_of_processed_files = 0;
 }
 
 GetLogCommand::GetLogCommand(char opt_byte, char subsystem, size_t size, time_t time)
@@ -34,6 +35,7 @@ GetLogCommand::GetLogCommand(char opt_byte, char subsystem, size_t size, time_t 
     this->subsystem = subsystem;
     this->size = size;
     this->date = Date(time);
+    this->number_of_processed_files = 0;
 }
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -57,7 +59,7 @@ GetLogCommand::~GetLogCommand()
 *-----------------------------------------------------------------------------*/
 void* GetLogCommand::Execute()
 {
-    /* TODO IN PROGRESS
+    /* TODO IN PROGRESS : add [INFO] and [END] bytes.
     * result : [INFO] + [TGZ DATA] + [END]
     * INFO : use inode instead of filename to limit the size
     */
@@ -65,17 +67,22 @@ void* GetLogCommand::Execute()
     char *result = 0;
 
     char filepath[CS1_PATH_MAX] = {'\0'};
+    char buffer[CS1_TGZ_MAX] = {'\0'};
     char *file_to_retreive = 0;
-    char buffer[CS1_TGZ_MAX] = {0};
     size_t bytes = 0;
+    size_t number_of_files_to_retreive = 1;         // defaults to 1
 
-    file_to_retreive = this->GetNextFile();
+    if (OPT_ISSIZE(this->opt_byte)) { 
+        number_of_files_to_retreive = this->size / CS1_TGZ_MAX;
+    }
 
-    strcpy(filepath, CS1_TGZ);
-    strcat(filepath, "/");
-    strcat(filepath, file_to_retreive);
+    while (number_of_files_to_retreive) {           // TODO now we are retreiving the same files n times!
+        file_to_retreive = this->GetNextFile();
+        GetLogCommand::BuildPath(filepath, CS1_TGZ, file_to_retreive);
+        bytes += GetLogCommand::ReadFile(buffer + bytes, filepath); 
 
-    bytes = GetLogCommand::ReadFile(buffer, filepath); 
+        number_of_files_to_retreive--; 
+    }
 
     // allocate the result buffer
     result = (char*)malloc(sizeof(char) * bytes);
@@ -95,18 +102,23 @@ void* GetLogCommand::Execute()
 * NAME : ReadFile
 * 
 * PURPOSE : Reads the specefied file into the specified buffer.
+*           N.B. max size is CS1_TGZ_MAX
 *
 *-----------------------------------------------------------------------------*/
 size_t GetLogCommand::ReadFile(char *buffer, const char *filename)
 {
-    return GetLogCommand::ReadFile_FromStartToEnd(buffer, filename, START, CS1_TGZ_MAX - GETLOG_INFO_SIZE);
+    return GetLogCommand::ReadFile_FromStartToEnd(buffer, filename, START, CS1_TGZ_MAX);
 }
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 *
 * NAME : ReadFile_FromStartToEnd
 * 
-* PURPOSE : 
+* PURPOSE : Reads 'filename' starting from byte 'start' to byte 'start + size'
+*           into 'buffer', use this function if the hability to retreive
+*           partial files is needed. 
+*
+* RETURN : The number of bytes read into buffer.
 *
 *-----------------------------------------------------------------------------*/
 size_t GetLogCommand::ReadFile_FromStartToEnd(char *buffer, const char *filename, size_t start, size_t size)
@@ -115,12 +127,12 @@ size_t GetLogCommand::ReadFile_FromStartToEnd(char *buffer, const char *filename
     size_t bytes = 0;
 
     if (!buffer) {
-        fprintf(stderr, "[ERROR] GetLogCommand::ReadFile_FromStartToEnd - The output buffer is NULL.\n");
+        fprintf(stderr, "[ERROR] %s:%d - The output buffer is NULL.\n", __func__, __LINE__);
         return bytes;
     }
 
     if (!pFile) {
-        fprintf(stderr, "[ERROR] GetLogCommand::ReadFile_FromStartToEnd - Cannot fopen the file.\n");
+        fprintf(stderr, "[ERROR] %s:%d - Cannot fopen the file.\n", __func__, __LINE__);
         return bytes;
     }
 
@@ -166,6 +178,7 @@ char* GetLogCommand::GetNextFile(void)
     } 
     else if (OPT_ISSUB(this->opt_byte) && OPT_ISDATE(this->opt_byte)) 
     {
+        // Assuming there is only one file with this SUB and this DATE <- NOT TRUE!
 
     }
     
@@ -203,7 +216,7 @@ char* GetLogCommand::FindOldestFile(const char* directory_path, const char* patt
 
     while ((dir_entry = readdir(dir))) { 
         if (dir_entry->d_type == DT_REG && GetLogCommand::prefixMatches(dir_entry->d_name, pattern)) { 
-            GetLogCommand::GetPath(directory_path, dir_entry->d_name, buffer);
+            GetLogCommand::BuildPath(buffer, directory_path, dir_entry->d_name);
 
             current_timeT = GetLogCommand::GetFileLastModifTimeT(buffer); 
 
@@ -224,6 +237,22 @@ char* GetLogCommand::FindOldestFile(const char* directory_path, const char* patt
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 *
+* NAME : MarkAsProcessed 
+* 
+* PURPOSE : 
+*
+*-----------------------------------------------------------------------------*/
+void GetLogCommand::MarkAsProcessed(const char *filepath) 
+{
+    struct stat attr;
+    stat(filepath, &attr);
+
+    this->processed_files[this->number_of_processed_files] = attr.st_ino;
+    this->number_of_processed_files++;
+}
+
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*
 * NAME : GetFileLastModifTimeT 
 * 
 * PURPOSE : return the time_t corresponding to the last modification date of 
@@ -235,23 +264,6 @@ time_t GetLogCommand::GetFileLastModifTimeT(const char *path)
     struct stat attr;
     stat(path, &attr);
     return attr.st_mtime;
-}
-
-/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-*
-* NAME : GetPath 
-* 
-* PURPOSE : Builds the path dir/file and saves it into buffer. 
-*           N.B. Make sure buffer is large enough (CS1_PATH_MAX)
-*
-*-----------------------------------------------------------------------------*/
-char* GetLogCommand::GetPath(const char* dir, const char* file, char* buffer) 
-{
-    strncpy(buffer, dir, strlen(dir) + 1);
-    strncat(buffer, "/", strlen("/"));
-    strncat(buffer, file, strlen(file)); 
-
-    return buffer;
 }
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -278,7 +290,7 @@ bool GetLogCommand::prefixMatches(const char* filename, const char* pattern)
 *
 * NAME : Build_GetLogCommand 
 * 
-* PURPOSE : 
+* PURPOSE : Builds a GetLogCommand and saves it into 'command_buf'
 *
 *-----------------------------------------------------------------------------*/
 char* GetLogCommand::Build_GetLogCommand(char command_buf[GETLOG_CMD_SIZE], char opt_byte, char subsystem, size_t size, time_t date) 
@@ -290,4 +302,23 @@ char* GetLogCommand::Build_GetLogCommand(char command_buf[GETLOG_CMD_SIZE], char
    SpaceString::get4Char(command_buf + 7, date);
 
    return command_buf;
+}
+
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*
+* NAME : BuildPath 
+* 
+* PURPOSE : Builds a path 'dir/file' and saves it into 'path_buf', the caller
+*           has to make sure path_buf is large enough.
+*
+*-----------------------------------------------------------------------------*/
+char* GetLogCommand::BuildPath(char *path_buf, const char* dir, const char* file)
+{
+    assert(strlen(dir) + strlen(file) + 1 < CS1_PATH_MAX);
+
+    strcpy(path_buf, dir);
+    strcat(path_buf, "/");
+    strcat(path_buf, file);
+
+    return path_buf;
 }

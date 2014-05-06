@@ -51,6 +51,55 @@ void create_file(const char* path, const char* msg)
     fclose(file);
 }
 
+TEST(GetLogTestGroup, Execute_OPT_NOOPT_get2TGZ_returns2OldestTgz)
+{
+    const char* path = CS1_TGZ"/Watch-Puppy20140101.txt";  
+
+    create_file(CS1_TGZ"/Watch-Puppy20140101.txt", "file a");
+    usleep(1000000);
+    create_file(CS1_TGZ"/Updater20140102.txt", "file b");
+    usleep(1000000);
+    create_file(CS1_TGZ"/Updater20140103.txt", "file c");
+    usleep(5000);
+
+    char* result = 0;
+    const char* dest = CS1_TGZ"/Watch-Puppy20140101.txt-copy";
+    const char* dest2 = CS1_TGZ"/Watch-Puppy20140101.txt-copy-2";
+
+    GetLogCommand::Build_GetLogCommand(command_buf, OPT_SIZE, 0, (size_t)CS1_MAX_FRAME_SIZE * 2, 0);
+    ICommand *command = CommandFactory::CreateCommand(command_buf);
+    result = (char*)command->Execute();
+
+    FILE *pFile = fopen(dest, "wb");
+
+    if (pFile) {
+        fwrite(result, 1, 6, pFile);        // TODO fix this to read until EOF, or add the size to the result buffer
+        fclose(pFile);
+    }
+
+    pFile = fopen(dest2, "wb");
+
+    if (pFile) {
+        fwrite(result + 6, 1, 6, pFile);        // TODO fix this to read until EOF, or add the size to the result buffer
+        fclose(pFile);
+    }
+
+    CHECK(diff(dest, path));     
+    CHECK(diff(dest2, path));     
+
+    // Cleanup
+    if (command){
+        delete command;
+        command = NULL;
+    }
+
+    if (result) {
+        free(result);
+        result = 0;
+    }
+
+}
+
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 *
 * GROUP : GetLogTestGroup
@@ -111,8 +160,6 @@ TEST(GetLogTestGroup, ReadFile_FromStartToEnd_success)
     create_file(path, "data");
 
     size_t bytes = GetLogCommand::ReadFile_FromStartToEnd(buffer, path, 0, CS1_TGZ_MAX);
-
-    fprintf(stderr, "buffer : %s\n", buffer);
 
     FILE *pFile = fopen(dest, "wb");
 
@@ -272,10 +319,10 @@ TEST(GetLogTestGroup, GetFileLastModifTimeT_returnsCorrectTimeT)
 *
 * GROUP : GetLogTestGroup
 *
-* NAME : GetPath_returnsCorrectPath
+* NAME : BuildPath_returnsCorrectPath
 * 
 *-----------------------------------------------------------------------------*/
-TEST(GetLogTestGroup, GetPath_returnsCorrectPath) 
+TEST(GetLogTestGroup, BuildPath_returnsCorrectPath) 
 {
     const char* dir = "/my/directory";
     const char* file = "the_file.file";
@@ -283,7 +330,7 @@ TEST(GetLogTestGroup, GetPath_returnsCorrectPath)
 
     char buffer[CS1_PATH_MAX];
 
-    STRCMP_EQUAL(expected, GetLogCommand::GetPath(dir, file, buffer));
+    STRCMP_EQUAL(expected, GetLogCommand::BuildPath(buffer, dir, file));
 }
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
