@@ -65,7 +65,7 @@ class GetLogCommand : public ICommand {
         Date date;          // OPT_DATE
 
         size_t number_of_processed_files;
-        time_t processed_files[MAX_NUMBER_OF_FILES_PER_CMD];
+        unsigned long processed_files[MAX_NUMBER_OF_FILES_PER_CMD];
 
 
     public :
@@ -77,15 +77,14 @@ class GetLogCommand : public ICommand {
         char* GetNextFile(void);
         size_t ReadFile(char *buffer, const char *filename);
         void MarkAsProcessed(const char *filepath);
+        bool isFileProcessed(const char *filepath);
+        bool isFileProcessed(unsigned long inode);
+        char* FindOldestFile(const char* directory_path, const char* pattern);
 
         static size_t ReadFile_FromStartToEnd(char *buffer, const char *filename, size_t start, 
                                                                                     size_t size);
-
         static time_t GetFileLastModifTimeT(const char *path);
-        static char* FindOldestFile(const char* directory_path, const char* pattern);
         static bool prefixMatches(const char* filename, const char* pattern);
-
-
         static char* Build_GetLogCommand(char command_buf[GETLOG_CMD_SIZE], char opt_byte, 
                                                         char subsystem, size_t size, time_t date);
         static char* BuildPath(char *path_buf, const char* dir, const char* file);

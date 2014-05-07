@@ -54,8 +54,9 @@ void create_file(const char* path, const char* msg)
 TEST(GetLogTestGroup, Execute_OPT_NOOPT_get2TGZ_returns2OldestTgz)
 {
     const char* path = CS1_TGZ"/Watch-Puppy20140101.txt";  
+    const char* path2 = CS1_TGZ"/Updater20140102.txt";  
 
-    create_file(CS1_TGZ"/Watch-Puppy20140101.txt", "file a");
+    create_file(CS1_TGZ"/Watch-Puppy20140101.txt", "Qile a");
     usleep(1000000);
     create_file(CS1_TGZ"/Updater20140102.txt", "file b");
     usleep(1000000);
@@ -64,7 +65,7 @@ TEST(GetLogTestGroup, Execute_OPT_NOOPT_get2TGZ_returns2OldestTgz)
 
     char* result = 0;
     const char* dest = CS1_TGZ"/Watch-Puppy20140101.txt-copy";
-    const char* dest2 = CS1_TGZ"/Watch-Puppy20140101.txt-copy-2";
+    const char* dest2 = CS1_TGZ"/Updater20140102.txt-copy";
 
     GetLogCommand::Build_GetLogCommand(command_buf, OPT_SIZE, 0, (size_t)CS1_MAX_FRAME_SIZE * 2, 0);
     ICommand *command = CommandFactory::CreateCommand(command_buf);
@@ -85,7 +86,7 @@ TEST(GetLogTestGroup, Execute_OPT_NOOPT_get2TGZ_returns2OldestTgz)
     }
 
     CHECK(diff(dest, path));     
-    CHECK(diff(dest2, path));     
+    CHECK(diff(dest2, path2));     
 
     // Cleanup
     if (command){
@@ -240,6 +241,8 @@ TEST(GetLogTestGroup, GetNextFile_NOOPT_returnsOldestFilename)
 *-----------------------------------------------------------------------------*/
 TEST(GetLogTestGroup, FindOldestFile_OPT_SUB_returnsCorrectFilename) 
 {
+    GetLogCommand command;
+
     create_file(CS1_TGZ"/SubA20140101.txt", "file a");
     usleep(1000000);
     create_file(CS1_TGZ"/SubA20140102.txt", "file b");
@@ -247,7 +250,7 @@ TEST(GetLogTestGroup, FindOldestFile_OPT_SUB_returnsCorrectFilename)
     create_file(CS1_TGZ"/SubC20140101.txt", "file c");
     usleep(5000);
 
-    char* oldestFile = GetLogCommand::FindOldestFile(CS1_TGZ, "SubA");
+    char* oldestFile = command.FindOldestFile(CS1_TGZ, "SubA");
 
     STRCMP_EQUAL("SubA20140101.txt", oldestFile);
 
@@ -267,6 +270,8 @@ TEST(GetLogTestGroup, FindOldestFile_OPT_SUB_returnsCorrectFilename)
 *-----------------------------------------------------------------------------*/
 TEST(GetLogTestGroup, FindOldestFile_returnsTheCorrectFilename)
 {
+    GetLogCommand command;
+
     create_file(CS1_TGZ"/a.txt", "file a");
     usleep(1000000);
     create_file(CS1_TGZ"/b.txt", "file b");
@@ -274,7 +279,7 @@ TEST(GetLogTestGroup, FindOldestFile_returnsTheCorrectFilename)
     create_file(CS1_TGZ"/c.txt", "file c");
     usleep(5000);
 
-    char* oldestFile = GetLogCommand::FindOldestFile(CS1_TGZ, NULL);
+    char* oldestFile = command.FindOldestFile(CS1_TGZ, NULL);
 
     STRCMP_EQUAL("a.txt", oldestFile);
 

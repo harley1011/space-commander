@@ -59,7 +59,7 @@ GetLogCommand::~GetLogCommand()
 *-----------------------------------------------------------------------------*/
 void* GetLogCommand::Execute()
 {
-    /* TODO IN PROGRESS : add [INFO] and [END] bytes.
+    /* TODO IN PROGRESS : add [INFO] and [END] bytes before and after EACH file read into result buffer.
     * result : [INFO] + [TGZ DATA] + [END]
     * INFO : use inode instead of filename to limit the size
     */
@@ -76,12 +76,16 @@ void* GetLogCommand::Execute()
         number_of_files_to_retreive = this->size / CS1_TGZ_MAX;
     }
 
-    while (number_of_files_to_retreive) {           // TODO now we are retreiving the same files n times!
+    while (number_of_files_to_retreive) { 
         file_to_retreive = this->GetNextFile();
+#ifdef DEBUG
+        fprintf(stderr, "[DEBUG] %s() - file_to_retreive : %s\n", __func__, file_to_retreive);
+#endif
         GetLogCommand::BuildPath(filepath, CS1_TGZ, file_to_retreive);
         bytes += GetLogCommand::ReadFile(buffer + bytes, filepath); 
 
         number_of_files_to_retreive--; 
+        this->MarkAsProcessed(filepath);
     }
 
     // allocate the result buffer
@@ -215,7 +219,10 @@ char* GetLogCommand::FindOldestFile(const char* directory_path, const char* patt
     dir = opendir(directory_path);
 
     while ((dir_entry = readdir(dir))) { 
-        if (dir_entry->d_type == DT_REG && GetLogCommand::prefixMatches(dir_entry->d_name, pattern)) { 
+        if (dir_entry->d_type == DT_REG // is a regular file
+                && !this->isFileProcessed(dir_entry->d_ino) // is NOT processed
+                    && GetLogCommand::prefixMatches(dir_entry->d_name, pattern)) 
+        { 
             GetLogCommand::BuildPath(buffer, directory_path, dir_entry->d_name);
 
             current_timeT = GetLogCommand::GetFileLastModifTimeT(buffer); 
@@ -239,7 +246,7 @@ char* GetLogCommand::FindOldestFile(const char* directory_path, const char* patt
 *
 * NAME : MarkAsProcessed 
 * 
-* PURPOSE : 
+* PURPOSE : Add the inode of a file to the processed_files array
 *
 *-----------------------------------------------------------------------------*/
 void GetLogCommand::MarkAsProcessed(const char *filepath) 
@@ -247,9 +254,43 @@ void GetLogCommand::MarkAsProcessed(const char *filepath)
     struct stat attr;
     stat(filepath, &attr);
 
+#ifdef DEBUG
+    fprintf(stderr, "[DEBUG] %s() - inode %d\n", __func__, attr.st_ino);
+#endif
     this->processed_files[this->number_of_processed_files] = attr.st_ino;
     this->number_of_processed_files++;
 }
+
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*
+* NAME : isFileProcessed 
+* 
+* PURPOSE : Checks if a file has been processed
+*
+*-----------------------------------------------------------------------------*/
+bool GetLogCommand::isFileProcessed(unsigned long inode) 
+{
+    for (size_t i = 0; i < this->number_of_processed_files; i++) {
+        if (inode == this->processed_files[i]) {
+#ifdef DEBUG
+            fprintf(stderr, "[DEBUG] %s() - inode %d\n", __func__, inode);
+#endif
+            return true;
+        }
+    }
+    
+    return false;
+}
+
+/* Jacket over the preceding function, to accept the file path */
+bool GetLogCommand::isFileProcessed(const char *filepath)
+{
+    struct stat attr;
+    stat(filepath, &attr);
+
+    return this->isFileProcessed(attr.st_ino);
+}
+
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 *
