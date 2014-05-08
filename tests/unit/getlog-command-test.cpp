@@ -56,7 +56,7 @@ TEST(GetLogTestGroup, Execute_OPT_NOOPT_get2TGZ_returns2OldestTgz)
     const char* path = CS1_TGZ"/Watch-Puppy20140101.txt";  
     const char* path2 = CS1_TGZ"/Updater20140102.txt";  
 
-    create_file(CS1_TGZ"/Watch-Puppy20140101.txt", "Qile a");
+    create_file(CS1_TGZ"/Watch-Puppy20140101.txt", "file a");
     usleep(1000000);
     create_file(CS1_TGZ"/Updater20140102.txt", "file b");
     usleep(1000000);
