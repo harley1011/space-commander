@@ -44,11 +44,6 @@ buildQ6:
 buildBB:
 	$(BEAGLECC) $(INCPATH) $(DEBUGFLAGS) src/*.cpp -o bin/space-commanderBB
 
-buildAllTests: buildUnitTests
-buildUnitTests:
-	$(CC) $(CFLAGS) $(DEBUGFLAGS) $(INCPATH) $(INCTESTPATH) $(LIBPATH) src/*.cpp tests/unit/*.cpp -o bin/AllUnitTests $(LIBS)
-
-
 %.o: %.cpp
 	$(CC) $(CFLAGS) $(INCPATH) $(LIBPATH) -c $^ -o $@
 
