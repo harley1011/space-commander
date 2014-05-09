@@ -80,6 +80,7 @@ class GetLogCommand : public ICommand {
         bool isFileProcessed(const char *filepath);
         bool isFileProcessed(unsigned long inode);
         char* FindOldestFile(const char* directory_path, const char* pattern);
+        char* GetInfoBytes(char *buffer, const char *filepath);
 
         static size_t ReadFile_FromStartToEnd(char *buffer, const char *filename, size_t start, 
                                                                                     size_t size);
@@ -88,6 +89,7 @@ class GetLogCommand : public ICommand {
         static char* Build_GetLogCommand(char command_buf[GETLOG_CMD_SIZE], char opt_byte, 
                                                         char subsystem, size_t size, time_t date);
         static char* BuildPath(char *path_buf, const char* dir, const char* file);
+        static ino_t GetInoT(const char *filepath);
 
 };
 #endif

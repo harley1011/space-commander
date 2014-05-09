@@ -1,4 +1,13 @@
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*
+* AUTHORS : Space Concordia 2014, Joseph 
+*           (inspired by the previous version : getlog-command-cpp-obsolete201404)
+*
+* TITLE : getlog-command.cpp
+*
+*----------------------------------------------------------------------------*/
 #include <stdio.h>
+#include <unistd.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <dirent.h>
@@ -85,7 +94,11 @@ void* GetLogCommand::Execute()
         bytes += GetLogCommand::ReadFile(buffer + bytes, filepath); 
 
         number_of_files_to_retreive--; 
-        this->MarkAsProcessed(filepath);
+        this->MarkAsProcessed(filepath); /* 'filepath' is considered as processed for this instance of the GetLogCommand
+                                         *  if you send a new GetLogCommand with the same parameters, 'filepath' will not
+                                         *  be considered as processed. i.e. the processed_files array belongs to this 
+                                         *  instance only
+                                         */
     }
 
     // allocate the result buffer
@@ -353,7 +366,7 @@ char* GetLogCommand::Build_GetLogCommand(char command_buf[GETLOG_CMD_SIZE], char
 *           has to make sure path_buf is large enough.
 *
 *-----------------------------------------------------------------------------*/
-char* GetLogCommand::BuildPath(char *path_buf, const char* dir, const char* file)
+char* GetLogCommand::BuildPath(char *path_buf, const char *dir, const char *file)
 {
     assert(strlen(dir) + strlen(file) + 1 < CS1_PATH_MAX);
 
@@ -362,4 +375,36 @@ char* GetLogCommand::BuildPath(char *path_buf, const char* dir, const char* file
     strcat(path_buf, file);
 
     return path_buf;
+}
+
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*
+* NAME : GetInfoBytes 
+* 
+* PURPOSE : Builds and saves the info bytes for the file 'filepath' at the 
+*           location pointed to by 'buffer' 
+*
+* DESCRIPTION : [ino_t] - inode off the file, to uniquely identify
+*                          it and be able to call the DeleteLogCommand with it.
+*               [checksum] - TODO
+*
+*-----------------------------------------------------------------------------*/
+char* GetLogCommand::GetInfoBytes(char *buffer, const char *filepath) 
+{
+
+}
+
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*
+* NAME : GetInoT
+* 
+* PURPOSE : Returns the ino_t associated with the file at 'filepath'
+*
+*-----------------------------------------------------------------------------*/
+ino_t GetLogCommand::GetInoT(const char *filepath)
+{
+    struct stat attr;
+    stat(filepath, &attr);
+
+    return attr.st_ino;
 }
