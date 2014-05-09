@@ -391,7 +391,13 @@ char* GetLogCommand::BuildPath(char *path_buf, const char *dir, const char *file
 *-----------------------------------------------------------------------------*/
 char* GetLogCommand::GetInfoBytes(char *buffer, const char *filepath) 
 {
+    char info_bytes[GETLOG_INFO_SIZE] = {'\0'};
 
+    ino_t inode = GetLogCommand::GetInoT(filepath); // get the inode of the file
+    SpaceString::get4Char(info_bytes, inode);       // saves it in the buffer
+
+    strncpy(buffer, info_bytes, 4);
+    return buffer;
 }
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

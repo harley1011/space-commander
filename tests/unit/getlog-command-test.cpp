@@ -10,6 +10,7 @@
 #include <time.h>
 #include <unistd.h>
 #include <dirent.h>     // DIR
+#include <sys/types.h>
 #include <sys/stat.h>
 
 #include "CppUTest/TestHarness.h"
@@ -51,6 +52,36 @@ void create_file(const char* path, const char* msg)
     fclose(file);
 }
 
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*
+* GROUP : GetLogTestGroup
+*
+* NAME : GetInfoBytes_returnsCorrectInfoBytes
+* 
+*-----------------------------------------------------------------------------*/
+TEST(GetLogTestGroup, GetInfoBytes_returnsCorrectInfoBytes)
+{
+    const char *filepath = CS1_TGZ"/Watch-Puppy20140101.tgz";
+    char buffer[GETLOG_INFO_SIZE];
+
+    create_file(filepath, "file a");
+
+    struct stat attr;
+    stat(filepath, &attr);
+
+    GetLogCommand::GetInfoBytes(buffer, filepath);
+    ino_t inode = SpaceString::getUInt(buffer);     // for now, there is only the inode (4 bytes) to check
+
+    CHECK(inode == attr.st_ino);
+}
+
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*
+* GROUP : GetLogTestGroup
+*
+* NAME : Execute_OPT_NOOPT_get2TGZ_returns2OldestTgz 
+* 
+*-----------------------------------------------------------------------------*/
 TEST(GetLogTestGroup, Execute_OPT_NOOPT_get2TGZ_returns2OldestTgz)
 {
     const char* path = CS1_TGZ"/Watch-Puppy20140101.txt";  
