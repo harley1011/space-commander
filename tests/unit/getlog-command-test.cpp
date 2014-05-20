@@ -124,7 +124,7 @@ TEST(GetLogTestGroup, Execute_OPT_NOOPT_get2TGZ_returns2OldestTgz)
     pFile = fopen(dest2, "wb");
 
     if (pFile) {
-        fwrite(result + 6 + 2 * GETLOG_INFO_SIZE, 1, 6, pFile); // TODO fix this to read until EOF, or add the size to the result buffer
+        fwrite(result + 6 + 2 * GETLOG_INFO_SIZE + GETLOG_ENDBYTES_SIZE, 1, 6, pFile); // TODO fix this to read until EOF, or add the size to the result buffer
         fclose(pFile);
     }
 

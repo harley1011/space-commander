@@ -101,7 +101,7 @@ void* GetLogCommand::Execute()
         bytes += GetLogCommand::ReadFile(buffer + bytes, filepath); 
 
         // add END byte
-        // TODO
+        bytes += GetLogCommand::GetEndBytes(buffer + bytes);
 
         // Track
         number_of_files_to_retreive--; 
@@ -405,6 +405,21 @@ char* GetLogCommand::GetInfoBytes(char *buffer, const char *filepath)
 
     strncpy(buffer, info_bytes, GETLOG_INFO_SIZE);
     return buffer;
+}
+
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*
+* NAME : GetEndBytes
+* 
+* PURPOSE : Used to separate files in the result buffer of the GetLogCommand
+*
+*-----------------------------------------------------------------------------*/
+int GetLogCommand::GetEndBytes(char *buffer)
+{
+    buffer[0] = EOF;
+    buffer[1] = EOF;
+   
+    return GETLOG_ENDBYTES_SIZE;
 }
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

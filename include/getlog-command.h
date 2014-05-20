@@ -53,6 +53,7 @@ using namespace std;
 #define OPT_ISDATE(x)   (((x) & OPT_DATE) == OPT_DATE)
 
 #define START 0
+#define GETLOG_ENDBYTES_SIZE 2
 #define GETLOG_INFO_SIZE 4  /* number of info bytes written before the actual data, 
                              * limit the size of this 
                              */
@@ -86,6 +87,7 @@ class GetLogCommand : public ICommand {
         char* FindOldestFile(const char* directory_path, const char* pattern);
 
         static char* GetInfoBytes(char *buffer, const char *filepath);
+        int GetEndBytes(char *buffer);
         static InfoBytes* BuildInfoBytesStruct(InfoBytes* pInfo, const char *buffer);
         static size_t ReadFile_FromStartToEnd(char *buffer, const char *filename, size_t start, 
                                                                                     size_t size);
