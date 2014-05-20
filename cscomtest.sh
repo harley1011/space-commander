@@ -10,7 +10,7 @@
 ALLTESTS="./bin/AllTests"
 ARGUMENTS=""
 GROUP=""
-TODEVNULL="1"
+TODEVNULL=1
 
 usage()
 {
@@ -26,19 +26,19 @@ argType=""
 for arg in "$@"; do
     case $argType in
         -g) GROUP=$arg ;;
-        -v) TODEVNULL="0" ;;
     esac
     
     argType=""    
 
     case $arg in
+        -g)
+            argType=$arg
+        ;;
         -u)
             usage
             exit 0;
         ;;
-        *)
-            argType=$arg
-        ;;
+        -v) TODEVNULL=0 ;;
     esac
 done 
 
