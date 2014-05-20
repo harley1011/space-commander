@@ -90,9 +90,20 @@ void* GetLogCommand::Execute()
 #ifdef DEBUG
         fprintf(stderr, "[DEBUG] %s() - file_to_retreive : %s\n", __func__, file_to_retreive);
 #endif
+
         GetLogCommand::BuildPath(filepath, CS1_TGZ, file_to_retreive);
+
+        // Prepares Info bytes 
+        GetLogCommand::GetInfoBytes(buffer, filepath);
+        bytes += GETLOG_INFO_SIZE; 
+
+        // Reads the file in 'buffer'
         bytes += GetLogCommand::ReadFile(buffer + bytes, filepath); 
 
+        // add END byte
+        // TODO
+
+        // Track
         number_of_files_to_retreive--; 
         this->MarkAsProcessed(filepath); /* 'filepath' is considered as processed for this instance of the GetLogCommand
                                          *  if you send a new GetLogCommand with the same parameters, 'filepath' will not
@@ -104,13 +115,9 @@ void* GetLogCommand::Execute()
     // allocate the result buffer
     result = (char*)malloc(sizeof(char) * bytes);
 
-    // 1. get the GETLOG result info header
-
-    // 2. saves the tgz data in th result buffer
+    // Saves the tgz data in th result buffer
     memcpy(result, buffer, bytes);
 
-    // 3. add END byte
-    
     return (void*)result;
 }
 
@@ -268,7 +275,7 @@ void GetLogCommand::MarkAsProcessed(const char *filepath)
     stat(filepath, &attr);
 
 #ifdef DEBUG
-    fprintf(stderr, "[DEBUG] %s() - inode %d\n", __func__, attr.st_ino);
+    fprintf(stderr, "[DEBUG] %s() - inode %d\n", __func__, (unsigned int)attr.st_ino);
 #endif
     this->processed_files[this->number_of_processed_files] = attr.st_ino;
     this->number_of_processed_files++;
@@ -286,7 +293,7 @@ bool GetLogCommand::isFileProcessed(unsigned long inode)
     for (size_t i = 0; i < this->number_of_processed_files; i++) {
         if (inode == this->processed_files[i]) {
 #ifdef DEBUG
-            fprintf(stderr, "[DEBUG] %s() - inode %d\n", __func__, inode);
+            fprintf(stderr, "[DEBUG] %s() - inode %d\n", __func__, (unsigned int)inode);
 #endif
             return true;
         }
@@ -393,11 +400,26 @@ char* GetLogCommand::GetInfoBytes(char *buffer, const char *filepath)
 {
     char info_bytes[GETLOG_INFO_SIZE] = {'\0'};
 
-    ino_t inode = GetLogCommand::GetInoT(filepath); // get the inode of the file
+    ino_t inode = GetLogCommand::GetInoT(filepath); // gets the inode of the file
     SpaceString::get4Char(info_bytes, inode);       // saves it in the buffer
 
-    strncpy(buffer, info_bytes, 4);
+    strncpy(buffer, info_bytes, GETLOG_INFO_SIZE);
     return buffer;
+}
+
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*
+* NAME : BuildInfoBytesStruct
+* 
+* PURPOSE : Receives a buffer containing GETLOG_INFO_SIZE bytes and populates
+*           the InfoBytes struct at *pInfo with those data.
+*
+*-----------------------------------------------------------------------------*/
+InfoBytes* BuildInfoBytesStruct(InfoBytes* pInfo, const char *buffer)
+{
+   pInfo->inode = SpaceString::getUInt(buffer); 
+
+   return pInfo;
 }
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

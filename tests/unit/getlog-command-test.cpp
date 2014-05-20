@@ -82,6 +82,18 @@ TEST(GetLogTestGroup, GetInfoBytes_returnsCorrectInfoBytes)
 * NAME : Execute_OPT_NOOPT_get2TGZ_returns2OldestTgz 
 * 
 *-----------------------------------------------------------------------------*/
+TEST(GetLogTestGroup, Execute_OPT_NOOPT_)
+{
+
+}
+
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*
+* GROUP : GetLogTestGroup
+*
+* NAME : Execute_OPT_NOOPT_get2TGZ_returns2OldestTgz 
+* 
+*-----------------------------------------------------------------------------*/
 TEST(GetLogTestGroup, Execute_OPT_NOOPT_get2TGZ_returns2OldestTgz)
 {
     const char* path = CS1_TGZ"/Watch-Puppy20140101.txt";  
@@ -105,14 +117,14 @@ TEST(GetLogTestGroup, Execute_OPT_NOOPT_get2TGZ_returns2OldestTgz)
     FILE *pFile = fopen(dest, "wb");
 
     if (pFile) {
-        fwrite(result, 1, 6, pFile);        // TODO fix this to read until EOF, or add the size to the result buffer
+        fwrite(result + GETLOG_INFO_SIZE, 1, 6, pFile);        // TODO fix this to read until EOF, or add the size to the result buffer
         fclose(pFile);
     }
 
     pFile = fopen(dest2, "wb");
 
     if (pFile) {
-        fwrite(result + 6, 1, 6, pFile);        // TODO fix this to read until EOF, or add the size to the result buffer
+        fwrite(result + 6 + 2 * GETLOG_INFO_SIZE, 1, 6, pFile); // TODO fix this to read until EOF, or add the size to the result buffer
         fclose(pFile);
     }
 
@@ -159,7 +171,7 @@ TEST(GetLogTestGroup, Execute_OPT_NOOPT_returnsOldestTgz)
     FILE *pFile = fopen(dest, "wb");
 
     if (pFile) {
-        fwrite(result, 1, 6, pFile);        // TODO fix this to read until EOF, or add the size to the result buffer
+        fwrite(result + GETLOG_INFO_SIZE, 1, 6, pFile);        // TODO fix this to read until EOF, or add the size to the result buffer
         fclose(pFile);
     }
 

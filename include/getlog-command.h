@@ -56,6 +56,10 @@ using namespace std;
 #define GETLOG_INFO_SIZE 4  /* number of info bytes written before the actual data, 
                              * limit the size of this 
                              */
+struct InfoBytes
+{
+    ino_t inode;
+};
 
 class GetLogCommand : public ICommand {
     private :
@@ -82,6 +86,7 @@ class GetLogCommand : public ICommand {
         char* FindOldestFile(const char* directory_path, const char* pattern);
 
         static char* GetInfoBytes(char *buffer, const char *filepath);
+        static InfoBytes* BuildInfoBytesStruct(InfoBytes* pInfo, const char *buffer);
         static size_t ReadFile_FromStartToEnd(char *buffer, const char *filename, size_t start, 
                                                                                     size_t size);
         static time_t GetFileLastModifTimeT(const char *path);

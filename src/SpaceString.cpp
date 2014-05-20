@@ -1,7 +1,7 @@
 
 #include "SpaceString.h"
 
-size_t SpaceString::getUInt(char cstr[4])
+size_t SpaceString::getUInt(const char cstr[4])
 {
 
     Converter_uint_4char converter = {0};
