@@ -203,7 +203,13 @@ char* GetLogCommand::GetNextFile(void)
     else if (OPT_ISSUB(this->opt_byte) && OPT_ISDATE(this->opt_byte)) 
     {
         // Assuming there is only one file with this SUB and this DATE <- NOT TRUE!
+        fprintf(stderr, "[DEBUG] %s():%d OPT_SUB | OPT_DATE\n", __func__, __LINE__);
+        char pattern[CS1_NAME_MAX];
+        strcpy(pattern, s_cs1_subsystems[(size_t)this->subsystem]);
+        strcat(pattern, this->date.GetString());
+        fprintf(stderr, "[DEBUG] %s():%d OPT_DATE | OPT_DATE : pattern is %s\n", __func__, __LINE__, pattern);
 
+        buf = GetLogCommand::FindOldestFile(CS1_TGZ, pattern);
     }
     
     if (buf) { 
@@ -212,6 +218,8 @@ char* GetLogCommand::GetNextFile(void)
 
         free (buf);
         buf = 0;
+    } else {
+        memset(filename, '\0', CS1_NAME_MAX); // if but is null, clear the static char buffer!
     }
 
     return filename;

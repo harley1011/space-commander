@@ -26,12 +26,13 @@ argType=""
 for arg in "$@"; do
     case $argType in
         -g) GROUP=$arg ;;
+        -n) SINGLE_TEST="-n $arg";;
     esac
     
     argType=""    
 
     case $arg in
-        -g)
+        '-g'|'-n')
             argType=$arg
         ;;
         -u)
@@ -52,10 +53,21 @@ if [ "$GROUP" != "" ]; then
     esac
 fi
 
+ARGUMENTS="$ARGUMENTS $SINGLE_TEST" 
 
 #
 # Execute
 #
+echo "=== Build tests ==="
+make test
+
+if [ $? -ne 0 ]; then
+    echo "[ERROR] build failed"
+    exit -1
+fi
+
+echo "=== Run tests ==="
+
 if [ $TODEVNULL -ne 0 ]; then
     echo $ALLTESTS $ARGUMENTS 2>/dev/null
     $ALLTESTS $ARGUMENTS  2>/dev/null

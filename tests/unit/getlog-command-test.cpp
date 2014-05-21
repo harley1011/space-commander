@@ -31,6 +31,8 @@ static char command_buf[GETLOG_CMD_SIZE] = {'\0'};
 
 static void create_file(const char* path, const char* msg);
 
+#define UTEST_SIZE_OF_TEST_FILES 6
+const char* data_6_bytes = "123456";
 
 TEST_GROUP(GetLogTestGroup)
 {
@@ -82,9 +84,46 @@ TEST(GetLogTestGroup, GetInfoBytes_returnsCorrectInfoBytes)
 * NAME : Execute_OPT_NOOPT_get2TGZ_returns2OldestTgz 
 * 
 *-----------------------------------------------------------------------------*/
-TEST(GetLogTestGroup, Execute_OPT_NOOPT_)
+TEST(GetLogTestGroup, Execute_OPT_DATE_OPT_SUB_getTgz_returnsCorrectFile)
 {
+    const char* path = CS1_TGZ"/Updater20140102.txt";  
 
+    create_file(CS1_TGZ"/Watch-Puppy20140101.txt", "file a");
+    usleep(1000000);
+    create_file(CS1_TGZ"/Updater20140102.txt", "file b");
+    usleep(1000000);
+    create_file(CS1_TGZ"/Updater20140103.txt", "file c");
+    usleep(5000);
+
+    char* result = 0;
+    const char* dest = CS1_TGZ"/Watch-Puppy20140102.txt-copy";
+
+    Date date(2014, 1, 2); 
+    GetLogCommand::Build_GetLogCommand(command_buf, OPT_DATE|OPT_SUB, UPDATER, 0, date.GetTimeT());
+    ICommand *command = CommandFactory::CreateCommand(command_buf);
+    result = (char*)command->Execute();
+
+    FILE *pFile = fopen(dest, "wb");
+
+    if (pFile) {
+        fwrite(result + GETLOG_INFO_SIZE, 1, UTEST_SIZE_OF_TEST_FILES, pFile);       
+        fclose(pFile);
+    }
+
+    CHECK(*(result + GETLOG_INFO_SIZE + UTEST_SIZE_OF_TEST_FILES) == EOF);
+    CHECK(*(result + GETLOG_INFO_SIZE + UTEST_SIZE_OF_TEST_FILES + 1) == EOF);
+    CHECK(diff(dest, path));     
+
+    // Cleanup
+    if (command){
+        delete command;
+        command = NULL;
+    }
+
+    if (result) {
+        free(result);
+        result = 0;
+    }
 }
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -128,6 +167,8 @@ TEST(GetLogTestGroup, Execute_OPT_NOOPT_get2TGZ_returns2OldestTgz)
         fclose(pFile);
     }
 
+    CHECK(*(result + GETLOG_INFO_SIZE + 6) == EOF);
+    CHECK(*(result + GETLOG_INFO_SIZE + 7) == EOF);
     CHECK(diff(dest, path));     
     CHECK(diff(dest2, path2));     
 
