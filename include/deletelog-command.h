@@ -12,23 +12,28 @@
 #ifndef DELETELOG_COMMAND_H
 #define DELETELOG_COMMAND_H
 
+#include <sys/types.h>
 #include "icommand.h"
 
 #define LOG 0x0
 #define TGZ 0x1
 
-class DeleteLogCommand : public ICommand {
+class DeleteLogCommand : public ICommand 
+{
     private :
+
         char* filename;
         char type;
-
 
     public :
 
         DeleteLogCommand(const char* filename);
+        DeleteLogCommand(ino_t inode);
         virtual void* Execute();
         virtual ~DeleteLogCommand();
         char FindType();
+        void SaveFilename(ino_t inode);
+        char* ExtractFilenameFromFile();
 };
 
 #endif

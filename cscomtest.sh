@@ -48,8 +48,8 @@ done
 #
 if [ "$GROUP" != "" ]; then
     case $GROUP in 
-        'getlog') ARGUMENTS="-g GetLogTestGroup" ;;
-        'deletelog') echo "TODO";;
+        'getlog')       ARGUMENTS="-g GetLogTestGroup" ;;
+        'deletelog')    ARGUMENTS="-g DeleteLogTestGroup" ;;
     esac
 fi
 
@@ -58,6 +58,7 @@ ARGUMENTS="$ARGUMENTS $SINGLE_TEST"
 #
 # Execute
 #
+echo ""
 echo "=== Build tests ==="
 make test
 
@@ -66,6 +67,7 @@ if [ $? -ne 0 ]; then
     exit -1
 fi
 
+echo ""
 echo "=== Run tests ==="
 
 if [ $TODEVNULL -ne 0 ]; then

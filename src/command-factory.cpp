@@ -46,8 +46,20 @@ ICommand* CommandFactory::CreateCommand(char * data) {
     return NULL;
 }
 
-ICommand* CommandFactory::CreateDeleteLog(char* data) {
-    DeleteLogCommand* result = new DeleteLogCommand(&data[1]);
+ICommand* CommandFactory::CreateDeleteLog(char* data) 
+{
+    DeleteLogCommand* result = 0;
+    char opt_byte = data[1];
+
+    if (opt_byte == 'I') { 
+        // 0xFF means that we exepect 4 bytes representing an ino_t (unsigned long)
+        unsigned int inode = SpaceString::getUInt(data + 2);
+        result = new DeleteLogCommand(inode); 
+    } else {        
+        // we expect a null terminated string (filename)
+        result = new DeleteLogCommand(&data[2]); 
+    }
+
     return result;
 }
 

@@ -4,7 +4,7 @@
 *
 * TITLE : getlog-command-test.cpp 
 *
-* DESCRIPTION : Tests the GetLogCommand
+* DESCRIPTION : Tests the GetLogCommand class
 *
 *----------------------------------------------------------------------------*/
 #include <time.h>
@@ -32,7 +32,7 @@ static char command_buf[GETLOG_CMD_SIZE] = {'\0'};
 static void create_file(const char* path, const char* msg);
 
 #define UTEST_SIZE_OF_TEST_FILES 6
-const char* data_6_bytes = "123456";
+static const char* data_6_bytes = "123456";
 
 TEST_GROUP(GetLogTestGroup)
 {
