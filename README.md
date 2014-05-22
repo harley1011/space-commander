@@ -6,6 +6,13 @@ The commander is a process that receives commands from the ground station and se
 
 make buildBin
 
+## Unit tests
+
+make test
+
+./cscomtest.sh  [-g Group][-n testName][-v]
+
+
 ### Command Step 1
 
 echo -n -e \\x01 > Inet-w-com-r 
