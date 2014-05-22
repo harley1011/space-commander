@@ -2,8 +2,17 @@
 #**********************************************************************************************************************
 #
 # AUTHORS : Space Concordia 2014, Joseph
+#
+# FILE : cscomtest.sh
 # 
 # PURPOSE : Conveniently runs the tests.
+#           -g      Group
+#           -n      TestName
+#           -v      verbose (to get all DEBUG output)
+# 
+#       ex. ./cscomtest.sh                  =>   run ALL the tests
+#           ./cscomtest.sh -g deletelog     =>   run ALL deletelog tests
+#           ./cscomtest.sh -n nameOfTheTest
 #
 #**********************************************************************************************************************
 
