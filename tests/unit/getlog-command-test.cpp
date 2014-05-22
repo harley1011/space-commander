@@ -66,7 +66,7 @@ TEST(GetLogTestGroup, GetInfoBytes_returnsCorrectInfoBytes)
     const char *filepath = CS1_TGZ"/Watch-Puppy20140101.tgz";
     char buffer[GETLOG_INFO_SIZE];
 
-    create_file(filepath, "file a");
+    create_file(filepath, data_6_bytes);
 
     struct stat attr;
     stat(filepath, &attr);

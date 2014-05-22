@@ -11,7 +11,7 @@ typedef enum {
 
 class Net2Com{
     private :
-        const static int NULL_CHAR_LENGTH = 1;
+        static const int NULL_CHAR_LENGTH = 1;
         static const int NUMBER_OF_PIPES = 4;
         static const char* pipe_str[];
          

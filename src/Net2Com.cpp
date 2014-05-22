@@ -20,6 +20,15 @@ Net2Com::Net2Com(pipe_num_t dataw, pipe_num_t datar, pipe_num_t infow, pipe_num_
     dataPipe_r = pipe[datar];
     infoPipe_w = pipe[infow];
     infoPipe_r = pipe[infor];
+
+    /* A process can open a FIFO in non-blocking mode.
+    * In this case, opening for read only will succeed EVEN if no-one has 
+    * opened on the write side yet, opening for write only will FAIL with 
+    * ENXIO (no such device or address) unless the other end has already been opened.
+    */
+    dataPipe_r->Open('r');  //  Hence, we open read end of pipes! WARNING : 
+                            // Both processes (Netman and Commander) need to have there Net2Com created before starting using it.
+    infoPipe_r->Open('r');
 }
 //----------------------------------------------
 //  Destructor
@@ -53,38 +62,17 @@ bool Net2Com::CreatePipes(){
 }
 
 //----------------------------------------------
-//  OpenReadPipesPersistently
-//----------------------------------------------
-void Net2Com::OpenReadPipesPersistently(){
-    if (!dataPipe_r->Exist()) dataPipe_r->CreatePipe();  
-    if (!infoPipe_r->Exist()) infoPipe_r->CreatePipe();  
-    infoPipe_r->ensure_open('r');
-    dataPipe_r->ensure_open('r');
-}
-//----------------------------------------------
-//  OpenWritePipesPersistently
-//----------------------------------------------
-void Net2Com::OpenWritePipesPersistently(){
-    if (!dataPipe_w->Exist()) dataPipe_w->CreatePipe();  
-    if (!infoPipe_w->Exist()) infoPipe_w->CreatePipe();  
-    infoPipe_w->ensure_open('w');
-    dataPipe_w->ensure_open('w');
-}
-//----------------------------------------------
 // WriteToDataPipe
 //----------------------------------------------
 int Net2Com::WriteToDataPipe(const char* str){
-    OpenWritePipesPersistently();
     int result = dataPipe_w->WriteToPipe(str, strlen(str) + NULL_CHAR_LENGTH);
     return result;
 }
 int Net2Com::WriteToDataPipe(const void* data, int size){
-    OpenWritePipesPersistently();
     int result = dataPipe_w->WriteToPipe(data, size);
     return result;
 }
 int Net2Com::WriteToDataPipe(unsigned char number){
-    OpenWritePipesPersistently();
     unsigned char byte = number;
     return dataPipe_w->WriteToPipe(&byte, sizeof(unsigned char));
 }
@@ -92,31 +80,30 @@ int Net2Com::WriteToDataPipe(unsigned char number){
 // ReadFromDataPipe
 //----------------------------------------------
 int Net2Com::ReadFromDataPipe(char* buffer, int buf_size){
-    OpenReadPipesPersistently();
     return dataPipe_r->ReadFromPipe(buffer, buf_size);
 }
 //----------------------------------------------
 // WriteToInfoPipe
 //----------------------------------------------
 int Net2Com::WriteToInfoPipe(const char* str){
-    OpenWritePipesPersistently();
     int result = infoPipe_w->WriteToPipe(str, strlen(str) + NULL_CHAR_LENGTH);
     return result;
 }
+
 int Net2Com::WriteToInfoPipe(const void* data, int size){
-    OpenWritePipesPersistently();
     int result = infoPipe_w->WriteToPipe(data, size);
     return result;
 }
+
 int Net2Com::WriteToInfoPipe(unsigned char number){
-    OpenWritePipesPersistently();
     unsigned char byte = number;
     return infoPipe_w->WriteToPipe(&byte, sizeof(unsigned char));
 }
+
 //----------------------------------------------
 //  ReadFromInfoPipe
 //----------------------------------------------
-int Net2Com::ReadFromInfoPipe(char* buffer, int buf_size){
-    OpenReadPipesPersistently();
+int Net2Com::ReadFromInfoPipe(char* buffer, int buf_size)
+{
     return infoPipe_r->ReadFromPipe(buffer, buf_size);
 }
