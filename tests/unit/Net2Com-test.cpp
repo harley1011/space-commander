@@ -47,7 +47,7 @@ TEST(Net2ComTestGroup, WriteToDataPipe_ReturnsCorrectNumberOfBytesWritten){
     if (pid == 0){                                          // Child
         result = netman->WriteToDataPipe(data);
         #ifdef DEBUG
-        printf("strlen(data) : %d, result : %d\n", strlen(data) + NULL_CHAR_LENGTH, result);
+        fprintf(stderr, "strlen(data) : %d, result : %d\n", strlen(data) + NULL_CHAR_LENGTH, result);
         #endif
         CHECK_EQUAL(strlen(data) + NULL_CHAR_LENGTH, result);
 
