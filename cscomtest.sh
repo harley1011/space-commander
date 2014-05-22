@@ -59,6 +59,7 @@ if [ "$GROUP" != "" ]; then
     case $GROUP in 
         'getlog')       ARGUMENTS="-g GetLogTestGroup" ;;
         'deletelog')    ARGUMENTS="-g DeleteLogTestGroup" ;;
+        'net2com')      ARGUMENTS="-g Net2ComTestGroup" ;;
     esac
 fi
 
