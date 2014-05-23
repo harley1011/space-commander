@@ -12,6 +12,10 @@ make test
 
 ./cscomtest.sh  [-g Group][-n testName][-v]
 
+## Net2Com
+
+Both the Netman AND the Commander have to have there instance of the Net2Com BEFORE using the pipes!
+
 
 ### Command Step 1
 

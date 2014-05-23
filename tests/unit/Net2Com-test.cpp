@@ -10,9 +10,12 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <sys/stat.h>
 
 #include "CppUTest/TestHarness.h"
 
+#include "SpaceDecl.h"
+#include "fileIO.h"
 #include "Net2Com.h"
 
 
@@ -30,6 +33,7 @@ TEST_GROUP(Net2ComTestGroup)
 
     void setup()
     {
+        mkdir(CS1_PIPES, S_IRWXU);
         netman = new Net2Com(Dnet_w_com_r, Dcom_w_net_r,  Inet_w_com_r, Icom_w_net_r);
         commander = new Net2Com(Dcom_w_net_r, Dnet_w_com_r, Icom_w_net_r, Inet_w_com_r);
     }
@@ -45,6 +49,9 @@ TEST_GROUP(Net2ComTestGroup)
             delete commander;
             commander = NULL;
         }
+
+        DeleteDirectoryContent(CS1_PIPES);
+        rmdir(CS1_PIPES);
     }
 };
 

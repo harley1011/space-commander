@@ -86,6 +86,14 @@ bool NamedPipe::Open(char mode)
          if(fifo == -1) {
             fprintf(stderr, "Couldn't open(\"%s\", O_NONBLOCK | O_WRONLY) : %s\n",
                                                                 fifo_path, strerror(errno));
+            switch(errno) {
+                case ENXIO : // If this happens : make sure both the Commander and the Netman has created there instance
+                             // of Net2Com BEFORE attempting to write to the pipes.
+                        fprintf(stderr, "[ERROR] The pipe is not open for reading, hence you cannot write to it!\n");
+                    break;
+                 default : ;         
+            }
+
          }
 
     } else if (mode == 'r') {
