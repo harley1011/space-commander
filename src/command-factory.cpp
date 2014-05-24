@@ -1,10 +1,16 @@
-#include "command-factory.h"
 #include <cstddef>
 #include <stdlib.h>
 #include <cstring>
 
+#include "SpaceDecl.h"
+#include "SpaceString.h"
+#include "command-factory.h"
+
 ICommand* CommandFactory::CreateCommand(char * data) {
-    if (data == NULL) { return NULL; }
+    if (data == NULL) { 
+        fprintf(stderr, "NULL argument passed to CreateCommand() in %s\n", __FILE__);
+        return NULL; 
+    }
 
     switch(data[0]) {
         case '0': {
@@ -17,6 +23,13 @@ ICommand* CommandFactory::CreateCommand(char * data) {
             return CommandFactory::CreateUpdate(data);
         }
         case '3': {
+            /*
+            * data[0]   :   Command number
+            * data[1]   :   Option      - specifies if options are present or not
+            * ... [2]   :   Subsystem   - see subsystems.h 
+            *   [3-6]   :   Size        - 
+            *   [7-10]  :   Date        - time_t
+            */
             return CommandFactory::CreateGetLog(data);
         }
         case '4': {
@@ -25,6 +38,7 @@ ICommand* CommandFactory::CreateCommand(char * data) {
         case '6': {
             return CommandFactory::CreateDecode(data);
         }
+<<<<<<< HEAD
         
         
         
@@ -32,15 +46,41 @@ ICommand* CommandFactory::CreateCommand(char * data) {
             return CommandFactory::CreateSchedule(data);
         }
 
+=======
+        case '7': {
+            return CommandFactory::CreateDeleteLog(data);
+        }
+>>>>>>> master
     }
 
     return NULL;
 }
 
-ICommand* CommandFactory::CreateGetLog(char* data) {
-    int bytes = GetLength3(data, 2);
+ICommand* CommandFactory::CreateDeleteLog(char* data) 
+{
+    DeleteLogCommand* result = 0;
+    char opt_byte = data[1];
 
-    GetLogCommand* result = new GetLogCommand(data[1], (size_t)bytes);
+    if (opt_byte == 'I') { 
+        // 0xFF means that we exepect 4 bytes representing an ino_t (unsigned long)
+        unsigned int inode = SpaceString::getUInt(data + 2);
+        result = new DeleteLogCommand(inode); 
+    } else {        
+        // we expect a null terminated string (filename)
+        result = new DeleteLogCommand(&data[2]); 
+    }
+
+    return result;
+}
+
+ICommand* CommandFactory::CreateGetLog(char* data) {    // 0x33 or '3'
+    char opt_byte = data[1];
+    char subsystem = data[2];
+    size_t size = SpaceString::getUInt(data + 3);
+    time_t raw_time = SpaceString::getUInt(data + 7);
+
+    GetLogCommand* result = new GetLogCommand(opt_byte, subsystem, size, raw_time);
+
     return result;
 }
 

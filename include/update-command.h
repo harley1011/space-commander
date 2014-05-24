@@ -16,12 +16,16 @@ public:
     }
     
     ~UpdateCommand(){ 
-//Does file_data need to be set to null as well?
+        //Does file_data need to be set to null as well? yes!
+        if (file_data != NULL){
+            delete file_data;
+            file_data = NULL;
+        }
+        
         if (path != NULL) {
             delete path;
             path = NULL;
         }
-        
     }
 
     void* Execute();
