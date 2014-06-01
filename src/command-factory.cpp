@@ -52,7 +52,7 @@ ICommand* CommandFactory::CreateDeleteLog(char* data)
     char opt_byte = data[1];
 
     if (opt_byte == 'I') { 
-        // 0xFF means that we exepect 4 bytes representing an ino_t (unsigned long)
+        // 'I' means that we exepect 4 bytes representing an ino_t (unsigned long)
         unsigned int inode = SpaceString::getUInt(data + 2);
         result = new DeleteLogCommand(inode); 
     } else {        
