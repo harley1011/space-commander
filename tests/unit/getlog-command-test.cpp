@@ -64,7 +64,7 @@ void create_file(const char* path, const char* msg)
 TEST(GetLogTestGroup, GetInfoBytes_returnsCorrectInfoBytes)
 {
     const char *filepath = CS1_TGZ"/Watch-Puppy20140101.tgz";
-    char buffer[GETLOG_INFO_SIZE];
+    char buffer[GETLOG_INFO_SIZE] = {0};
 
     create_file(filepath, data_6_bytes);
 
@@ -74,7 +74,7 @@ TEST(GetLogTestGroup, GetInfoBytes_returnsCorrectInfoBytes)
     GetLogCommand::GetInfoBytes(buffer, filepath);
     ino_t inode = SpaceString::getUInt(buffer);     // for now, there is only the inode (4 bytes) to check
 
-    CHECK(inode == attr.st_ino);
+    CHECK_EQUAL((unsigned int)inode, (unsigned int)attr.st_ino);
 }
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

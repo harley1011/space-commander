@@ -411,7 +411,7 @@ char* GetLogCommand::GetInfoBytes(char *buffer, const char *filepath)
     ino_t inode = GetLogCommand::GetInoT(filepath); // gets the inode of the file
     SpaceString::get4Char(info_bytes, inode);       // saves it in the buffer
 
-    strncpy(buffer, info_bytes, GETLOG_INFO_SIZE);
+    memcpy(buffer, info_bytes, GETLOG_INFO_SIZE);
     return buffer;
 }
 
