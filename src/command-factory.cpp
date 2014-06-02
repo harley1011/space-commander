@@ -42,7 +42,7 @@ ICommand* CommandFactory::CreateCommand(char * data) {
             return CommandFactory::CreateDeleteLog(data);
         }
         case '8': {
-            return CommandFactory::CreateTimeTag(data);
+            return CommandFactory::CreateTimetag(data);
         }
     }
 
@@ -97,10 +97,13 @@ ICommand* CommandFactory::CreateUpdate(char* data) {
 }
 
 ICommand* CommandFactory::CreateTimetag(char* data) {
-
-    char * command = NULL;
+    // TODO FREE 
+    char * date_time = (char *) malloc(8);
+    char * command = (char*) malloc( (int) data[10] ); // data[10] holds the data length)
+    
+    memcpy (date_time, (char*)data+2,8);
+    memcpy (command, (char*)data+11,data[10]); 
     //char * command = GetCommand();
-    char * date_time = NULL;
     //char * date_time = GetDateTime();
 
     TimetagCommand* result = new TimetagCommand(command, date_time);
