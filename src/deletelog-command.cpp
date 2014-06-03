@@ -6,7 +6,9 @@
 #include "SpaceDecl.h"
 #include "deletelog-command.h"
 
-#define FILENAME_TMP "filename.tmp"
+#define FILENAME_TMP "filename.tmp" /* TODO  issue if you have two instances of space-commander running! (which should not happen)
+                                    *        add timestamp...?
+                                    */
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 *

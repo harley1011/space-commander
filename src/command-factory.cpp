@@ -38,19 +38,12 @@ ICommand* CommandFactory::CreateCommand(char * data) {
         case '6': {
             return CommandFactory::CreateDecode(data);
         }
-<<<<<<< HEAD
-        
-        
-        
-        case '8': {
-            return CommandFactory::CreateSchedule(data);
-        }
-
-=======
         case '7': {
             return CommandFactory::CreateDeleteLog(data);
         }
->>>>>>> master
+        case '8': {
+            return CommandFactory::CreateTimetag(data);
+        }
     }
 
     return NULL;
@@ -62,7 +55,7 @@ ICommand* CommandFactory::CreateDeleteLog(char* data)
     char opt_byte = data[1];
 
     if (opt_byte == 'I') { 
-        // 0xFF means that we exepect 4 bytes representing an ino_t (unsigned long)
+        // 'I' means that we exepect 4 bytes representing an ino_t (unsigned long)
         unsigned int inode = SpaceString::getUInt(data + 2);
         result = new DeleteLogCommand(inode); 
     } else {        
@@ -103,14 +96,17 @@ ICommand* CommandFactory::CreateUpdate(char* data) {
     return result;
 }
 
-ICommand* CommandFactory::CreateSchedule(char* data) {
-
-    char * command = NULL;
+ICommand* CommandFactory::CreateTimetag(char* data) {
+    // TODO FREE 
+    char * date_time = (char *) malloc(8);
+    char * command = (char*) malloc( (int) data[10] ); // data[10] holds the data length)
+    
+    memcpy (date_time, (char*)data+2,8);
+    memcpy (command, (char*)data+11,data[10]); 
     //char * command = GetCommand();
-    char * date_time = NULL;
     //char * date_time = GetDateTime();
 
-    ScheduleCommand* result = new ScheduleCommand(command, date_time);
+    TimetagCommand* result = new TimetagCommand(command, date_time);
     return result;
 }
 

@@ -1,4 +1,5 @@
 
+#include <stdio.h>
 #include "SpaceString.h"
 
 size_t SpaceString::getUInt(const char cstr[4])

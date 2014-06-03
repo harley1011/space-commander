@@ -8,8 +8,8 @@
 #include "gettime-command.h"
 #include "decode-command.h"
 #include "reboot-command.h"
-#include "schedule-command.h"
 #include "deletelog-command.h"
+#include "timetag-command.h"
 
 class CommandFactory {
 public:
@@ -22,11 +22,8 @@ private:
     static ICommand* CreateGetTime(char* data); 
     static ICommand* CreateReboot(char* data);
     static ICommand* CreateDecode(char* data); 
-<<<<<<< HEAD
-    static ICommand* CreateSchedule(char* data); 
-=======
     static ICommand* CreateDeleteLog(char* data); 
->>>>>>> master
+    static ICommand* CreateTimetag(char* data); 
         
     static int GetLength3(char* data, int offset);
     static int GetLength10(char* data, int offset);

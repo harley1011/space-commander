@@ -99,7 +99,7 @@ UNIT_TEST = tests/unit/Net2Com-test.cpp tests/unit/Utl-test.cpp tests/unit/delet
 #
 # ENV : either CS1_UTEST for test environment or empty for PROD, perform a 'make clean' when changing this parameter
 #
-ENV = -DCS1_UTEST -DDEBUG
+ENV = -DCS1_UTEST -DDEBUG ##-DPRESERVE
 
 all: bin/space-commander
 
