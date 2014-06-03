@@ -14,14 +14,14 @@
 
 using namespace std;
 
-class ScheduleCommand : public ICommand {
+class TimetagCommand : public ICommand {
 public: 
-    ScheduleCommand(char * command, char * date_time) {
+    TimetagCommand(char * command, char * date_time) {
         this->command = command;
         this->date_time = date_time;
     }
     
-    ~ScheduleCommand() {
+    ~TimetagCommand() {
         if (command != NULL) {
             delete command;
             command = NULL;
@@ -29,8 +29,13 @@ public:
     }
 
     void * Execute();
+    std::string SysExec(char* orig_cmd); 
+    int AddJob(char * date_time, char * executable);
+    int CancelJob(const int job_id);
+
     char * GetCommand() { return command; }
     char * GetDateTime() { return date_time; }
+
 private:
     char * command;
     char * date_time;
