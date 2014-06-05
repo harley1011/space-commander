@@ -9,7 +9,6 @@
 #define AT_RUNNER "/usr/bin/at-runner.sh"
 
 void* TimetagCommand::Execute(){
-    FILE* at_file = NULL;
     // schedule stuff
 
     return NULL;
@@ -42,22 +41,22 @@ int TimetagCommand::CancelJob(const int job_id) {
 
   // delete from at spool
   sprintf(cancel_job_command, "atrm %d", job_id);
-  std::string output = sysexec(cancel_job_command);
+  std::string output = SysExec(cancel_job_command);
   printf ( "Output: %s",output.c_str() );
  
   // TODO send to output pipe, store this detailed list remotely only, and reference vs local atq!
   sprintf(cancel_job_command, "sed -i '/^job %d.*/d' schedule.log", job_id);
-  output = sysexec(cancel_job_command);
+  output = SysExec(cancel_job_command);
   printf ( "Output: %s",output.c_str() );
 
   return 0;
 }
 
-int TimetagCommand::TimetagCommand(char * date_time, char * executable) {
+int TimetagCommand::AddJob(char * date_time, char * executable) {
   char add_job_command[CMD_BUFFER_LEN] = {0};
   sprintf(add_job_command, "sh %s %s %s", AT_RUNNER, date_time, executable);
   printf(add_job_command);
-  std::string output = sysexec(add_job_command);
+  std::string output = SysExec(add_job_command);
   printf ( "Output: %s",output.c_str() );
   int retval = atoi(output.c_str());
   if (retval <= 0) { retval = -1; }
