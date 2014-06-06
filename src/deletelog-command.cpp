@@ -179,5 +179,5 @@ char* DeleteLogCommand::ExtractFilenameFromFile()
 
     strncpy(this->filename, filestr, CS1_PATH_MAX);
 
-    return filestr;
+    return this->filename;
 }
