@@ -115,8 +115,11 @@ void* GetLogCommand::Execute()
     // allocate the result buffer
     result = (char*)malloc(sizeof(char) * bytes);
 
-    // Saves the tgz data in th result buffer
-    memcpy(result, buffer, bytes);
+    if (result) {
+        // Saves the tgz data in th result buffer
+        memcpy(result, buffer, bytes);
+    }
+
 
     return (void*)result;
 }
@@ -242,6 +245,11 @@ char* GetLogCommand::FindOldestFile(const char* directory_path, const char* patt
     time_t current_timeT = 0;
     char buffer[CS1_PATH_MAX] = {'\0'};
     char* oldest_filename = (char*)malloc(sizeof(char) * CS1_NAME_MAX);
+
+    if (!oldest_filename) {
+        return 0;
+    }
+
     memset(oldest_filename, '\0', CS1_NAME_MAX * sizeof(char));
     
     dir = opendir(directory_path);
