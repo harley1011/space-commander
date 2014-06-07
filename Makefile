@@ -93,16 +93,16 @@ OBJECTS = bin/Net2Com.o bin/NamedPipe.o bin/Date.o bin/command-factory.o bin/del
 #
 # CppUTest files, no wildcard, add files explicitly!
 #
-UNIT_TEST = tests/unit/Net2Com-test.cpp tests/unit/Utl-test.cpp tests/unit/deletelog-command-test.cpp  tests/unit/getlog-command-test.cpp
+UNIT_TEST = tests/unit/Net2Com-test.cpp tests/unit/Utl-test.cpp tests/unit/deletelog-command-test.cpp  tests/unit/getlog-command-test.cpp tests/unit/commander-test.cpp
 CS1_UTEST_DIR="cs1_utest" # as defined in SpaceDecl.h
 #
 # ENV : either CS1_UTEST for test environment or empty for PROD, perform a 'make clean' when changing this parameter
 #
-ENV = -DCS1_UTEST -DDEBUG #-DPRESERVE
+ENV = -DDEBUG -DCS1_UTEST  #-DPRESERVE
 
 buildBin: bin/space-commander
 
-test: bin/AllTests
+test: bin/AllTests bin/space-commander
 	mkdir -p $(CS1_UTEST_DIR)
 
 bin/%.o: src/%.cpp

@@ -16,11 +16,11 @@ const int MAX_COMMAND_SIZE     = 255;
 const char ERROR_CREATING_COMMAND  = '1';
 const char ERROR_EXECUTING_COMMAND = '2';
 
-const int SLEEP_TIME = 10;
+const int SLEEP_TIME = 1;
 
 pid_t get_watch_puppy_pid() {
     const int BUFFER_SIZE = 10;
-    string filename = "/home/pids/watch-puppy.pid";
+    string filename = CS1_WATCH_PUPPY_PID; 
     char buffer[BUFFER_SIZE] = {0};
     FILE* fp = fopen(filename.c_str(), "r");
 
@@ -36,19 +36,31 @@ pid_t get_watch_puppy_pid() {
 
 void signal_watch_puppy() {
     pid_t pid = get_watch_puppy_pid();
+
     if (pid > 0) {
         kill(pid, SIGUSR2);
     }
 }
 
-int main() {
+int main() 
+{
     char info_buffer[255];
     char* buffer = NULL;
     char* previous_command_buffer = NULL;
-    Net2Com* commander = new Net2Com(Dcom_w_net_r, Dnet_w_com_r, Icom_w_net_r, Inet_w_com_r);
+    Net2Com* commander = 0; 
     ICommand* command  = NULL;
     unsigned char read = 0;
     int read_total     = 0;
+
+    commander = new Net2Com(Dcom_w_net_r, Dnet_w_com_r, Icom_w_net_r, Inet_w_com_r);
+
+    if (!commander) {
+        fprintf(stderr, "[ERROR] %s:%s:%d Failed in Net2Com instanciation\n", 
+                                                __FILE__, __func__, __LINE__);
+        return EXIT_FAILURE; /* watch-puppy will take care of 
+                              * restarting space-commander
+                              */
+    }
 
     printf("Commander waiting commands from ground...\n");
 
