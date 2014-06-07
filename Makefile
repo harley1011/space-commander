@@ -98,7 +98,7 @@ CS1_UTEST_DIR="cs1_utest" # as defined in SpaceDecl.h
 #
 # ENV : either CS1_UTEST for test environment or empty for PROD, perform a 'make clean' when changing this parameter
 #
-ENV = -DCS1_UTEST -DDEBUG -DPRESERVE
+ENV = -DCS1_UTEST -DDEBUG #-DPRESERVE
 
 buildBin: bin/space-commander
 
