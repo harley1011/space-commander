@@ -23,7 +23,7 @@ DEBUGFLAGS=-ggdb -g -gdwarf-2 -g3 #gdwarf-2 + g3 provides macro info to gdb
 #
 # includes
 #
-INCPATH = -I./include/ -I$(SPACE_LIB)/shakespeare/inc -I$(SPACE_LIB)/include -I$(SPACE_UPTDATER)/include -I$(SPACE_SCRIPT)/tgz-wizard/include
+INCLUDES = -I./include/ -I$(SPACE_LIB)/shakespeare/inc -I$(SPACE_LIB)/include -I$(SPACE_UPTDATER)/include -I$(SPACE_SCRIPT)/tgz-wizard/include
 INCTESTPATH = -I./tests/unit/stubs/ -I./tests/helpers/include/
 
 #
@@ -37,15 +37,13 @@ LIBS=-lCppUTest -lCppUTestExt -lshakespeare
 #
 DEBUG_SRC_FILES =`find src/ ! -name 'space-commander-main.cpp' -name '*.cpp'`
 
-buildBin:
-	$(CC) $(CFLAGS) $(INCPATH) $(LIBPATH) $(DEBUGFLAGS) src/*.cpp -o bin/space-commander
 buildQ6:
-	$(MICROCC) $(MICROCFLAGS) $(INCPATH) src/*.cpp -o bin/space-commanderQ6
+	$(MICROCC) $(MICROCFLAGS) $(INCLUDES) src/*.cpp -o bin/space-commanderQ6
 buildBB:
-	$(BEAGLECC) $(INCPATH) $(DEBUGFLAGS) src/*.cpp -o bin/space-commanderBB
+	$(BEAGLECC) $(INCLUDES) $(DEBUGFLAGS) src/*.cpp -o bin/space-commanderBB
 
 %.o: %.cpp
-	$(CC) $(CFLAGS) $(INCPATH) $(LIBPATH) -c $^ -o $@
+	$(CC) $(CFLAGS) $(INCLUDES) $(LIBPATH) -c $^ -o $@
 
 %.a: %.o
 	ar -cvq $@ $^
@@ -56,10 +54,10 @@ staticlibs.tar: src/NamedPipe.a src/Net2Com.a
 	rm *.a
 
 src/NamedPipeQ6.o: src/NamedPipe.cpp
-	$(MICROCC) $(MICROCFLAGS) $(INCPATH) -c $^ -o $@
+	$(MICROCC) $(MICROCFLAGS) $(INCLUDES) -c $^ -o $@
 
 src/Net2ComQ6.o : src/Net2Com.cpp
-	$(MICROCC) $(MICROCFLAGS) $(INCPATH) -c $^ -o $@
+	$(MICROCC) $(MICROCFLAGS) $(INCLUDES) -c $^ -o $@
 
 src/NamedPipe-mbcc.a: src/NamedPipeQ6.o
 	ar -cvq $@ $^
@@ -68,10 +66,10 @@ src/Net2Com-mbcc.a: src/Net2ComQ6.o
 	ar -cvq $@ $^
 
 src/NamedPipeBB.o: src/NamedPipe.cpp
-	$(BEAGLECC) $(MICROFLAGS) $(INCPATH) -c $^ -o $@
+	$(BEAGLECC) $(MICROFLAGS) $(INCLUDES) -c $^ -o $@
 
 src/Net2ComBB.o: src/Net2Com.cpp
-	$(BEAGLECC) $(MICROFLAGS) $(INCPATH) -c $^ -o $@
+	$(BEAGLECC) $(MICROFLAGS) $(INCLUDES) -c $^ -o $@
 
 NamedPipe-BB.a: src/NamedPipeBB.o
 	ar -cvq $@ $^
@@ -96,33 +94,35 @@ OBJECTS = bin/Net2Com.o bin/NamedPipe.o bin/Date.o bin/command-factory.o bin/del
 # CppUTest files, no wildcard, add files explicitly!
 #
 UNIT_TEST = tests/unit/Net2Com-test.cpp tests/unit/Utl-test.cpp tests/unit/deletelog-command-test.cpp  tests/unit/getlog-command-test.cpp
+CS1_UTEST_DIR="cs1_utest" # as defined in SpaceDecl.h
 #
 # ENV : either CS1_UTEST for test environment or empty for PROD, perform a 'make clean' when changing this parameter
 #
-ENV = -DCS1_UTEST -DDEBUG ##-DPRESERVE
+ENV = -DCS1_UTEST -DDEBUG -DPRESERVE
 
-all: bin/space-commander
+buildBin: bin/space-commander
 
 test: bin/AllTests
+	mkdir -p $(CS1_UTEST_DIR)
 
 bin/%.o: src/%.cpp
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCPATH) -c $< -o $@ $(ENV)
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCLUDES) -c $< -o $@ $(ENV)
 	
 bin/fileIO.o: $(SPACE_UPTDATER)/src/fileIO.cpp $(SPACE_UPTDATER)/include/fileIO.h
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCPATH) -c $< -o $@ $(ENV)
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCLUDES) -c $< -o $@ $(ENV)
 
 bin/dirUtl.o: $(SPACE_SCRIPT)/tgz-wizard/src/dirUtl.cpp $(SPACE_SCRIPT)/tgz-wizard/include/dirUtl.h
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCPATH) -c $< -o $@ $(ENV)
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCLUDES) -c $< -o $@ $(ENV)
 
 bin/AllTests: tests/unit/AllTests.cpp  $(UNIT_TEST) $(OBJECTS) bin/fileIO.o	 bin/dirUtl.o
-	$(CC) $(CFLAGS) $(MEM_LEAK_MACRO) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCPATH) $(LIBPATH) -o $@ $^ $(LIBS) $(ENV)
+	$(CC) $(CFLAGS) $(MEM_LEAK_MACRO) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCLUDES) $(LIBPATH) -o $@ $^ $(LIBS) $(ENV)
 
 bin/space-commander: src/space-commander-main.cpp $(OBJECTS)
-	$(CC) $(CFLAGS) $(MEM_LEAK_MACRO) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCPATH) $(LIBPATH) -o $@ $^ $(LIBS) $(ENV)
+	$(CC) $(CFLAGS) $(MEM_LEAK_MACRO) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCLUDES) $(LIBPATH) -o $@ $^ $(LIBS) $(ENV)
 #
 #
 #++++++++++++++++++++
 # Cleanup
 #--------------------
 clean:
-	rm -f *.o *~ ./bin/* AllTests
+	rm -f *.o *~ ./bin/* AllTests  && rm -fr ./cs1_utest
