@@ -8,13 +8,15 @@
 *
 * CREATION DATE : 06-06-2014
 *
-* LAST MODIFIED : Sat 07 Jun 2014 07:10:30 PM EDT
+* LAST MODIFIED : Sun 08 Jun 2014 02:35:24 AM EDT
 *
 ******************************************************************************/
+#include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>  
+#include <sys/wait.h>
 
 #include "CppUTest/TestHarness.h"
 #include "CppUTest/MemoryLeakDetectorMallocMacros.h"
@@ -26,7 +28,9 @@
 #include "SpaceString.h"
 #include "Net2Com.h"
 
-static char command_buf[GETLOG_CMD_SIZE] = {'\0'};
+#define RESULT_BUF_SIZE 50
+#define CMD_BUF_SIZE 25
+static char command_buf[CMD_BUF_SIZE] = {'\0'};
 #define SPACE_COMMANDER_BIN  "bin/space-commander" // use local bin, not the one unser CS1_APPS
 
 TEST_GROUP(CommanderTestGroup)
@@ -38,12 +42,24 @@ TEST_GROUP(CommanderTestGroup)
     {
         mkdir(CS1_TGZ, S_IRWXU);
         mkdir(CS1_LOGS, S_IRWXU);
-        if(system("./"SPACE_COMMANDER_BIN" &") != 0){
-            fprintf(stderr, "[ERROR] %s:%s:%d ", __FILE__, __func__, __LINE__);
-            exit(EXIT_FAILURE);
+
+        pid_t pid = fork();
+        int status = 0;
+
+        if (pid == 0) {
+            if(execl("./"SPACE_COMMANDER_BIN, SPACE_COMMANDER_BIN, NULL) == -1){
+                fprintf(stderr, "[ERROR] %s:%s:%d ", __FILE__, __func__, __LINE__);
+                exit(EXIT_FAILURE);
+            }
+        }
+
+        // Make sure the commander is running
+        while (system("ps aux | grep bin/space-commander 1>/dev/null") != 0){
+           usleep(1000); 
         }
 
         netman = Net2Com::create_netman();
+        memset(command_buf, '\0', CMD_BUF_SIZE);
     }
     
     void teardown()
@@ -54,11 +70,14 @@ TEST_GROUP(CommanderTestGroup)
 
         DeleteDirectoryContent(CS1_LOGS);
         rmdir(CS1_LOGS);
+#endif
 
         if (system("pidof space-commander | xargs  kill -15") != 0) {
             fprintf(stderr, "[ERROR] pidof space-commander | xargs -15 kill");
         }
-#endif
+
+        DeleteDirectoryContent(CS1_PIPES);
+
         if (netman) {
             delete netman;
             netman = NULL;
@@ -68,8 +87,7 @@ TEST_GROUP(CommanderTestGroup)
 
 TEST(CommanderTestGroup, DeleteLog_Success) 
 {
-
-    char* result = 0;
+    char result[RESULT_BUF_SIZE] = {0};
     // Creates the file
     char inode_str[4] = {'\0'};
     const char* filetest_path = CS1_TGZ"/filetest.tgz";
@@ -94,14 +112,18 @@ TEST(CommanderTestGroup, DeleteLog_Success)
     #endif
 
     // use Netman Net2Com to send data to space-commander Net2Com
-        FAIL("TODO joseph write this command to the pipe!");
-//    netman->WriteToInfoPipe(sizeOfCmd);
- //   netman->WriteToDataPipe(cmd);
-//    netman->WriteToInfoPipe(0xFF);
-//  echo -n -e \\x01 > Inet-w-com-r
-//  echo -n -e \\x21 > Dnet-w-com-r
-//  echo -n -e \\xFF > Inet-w-com-r
+    netman->WriteToInfoPipe((unsigned char)CMD_BUF_SIZE);
+    netman->WriteToDataPipe(command_buf, CMD_BUF_SIZE);
+    netman->WriteToInfoPipe((unsigned char)0xFF);
+    netman->WriteToInfoPipe((unsigned char)0x01);
+    netman->WriteToDataPipe((unsigned char)0x21);
+    netman->WriteToInfoPipe((unsigned char)0xFF);
 
+
+    while (netman->ReadFromDataPipe(result, RESULT_BUF_SIZE) == 0) {
+        // Give enough time to the commander to proceed!
+        usleep(1000);
+    }
 
     // Checks that the file has been deleted.
     CHECK_EQUAL(-1, access(filetest_path, F_OK));

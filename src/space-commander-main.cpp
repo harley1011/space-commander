@@ -1,5 +1,3 @@
-#include "Net2Com.h"
-#include "command-factory.h"
 #include <cstdio>
 #include <cstdlib>
 #include <time.h>
@@ -7,6 +5,10 @@
 #include <signal.h>
 #include <unistd.h>
 #include <inttypes.h>
+
+#include "Net2Com.h"
+#include "command-factory.h"
+#include "SpaceDecl.h"
 
 const string LAST_COMMAND_FILENAME("last-command");
 const int COMMAND_RESEND_INDEX = 0;
@@ -16,7 +18,6 @@ const int MAX_COMMAND_SIZE     = 255;
 const char ERROR_CREATING_COMMAND  = '1';
 const char ERROR_EXECUTING_COMMAND = '2';
 
-const int SLEEP_TIME = 1;
 
 pid_t get_watch_puppy_pid() {
     const int BUFFER_SIZE = 10;
@@ -62,7 +63,7 @@ int main()
                               */
     }
 
-    printf("Commander waiting commands from ground...\n");
+    fprintf(stderr, "Commander waiting commands from ground...\n");
 
     while (true) {
         memset(info_buffer, 0, sizeof(char) * 255);
@@ -72,7 +73,7 @@ int main()
             for(int i = 0; i != bytes; i++) {
                 read = (unsigned char)info_buffer[i];
 
-                printf("Read from info pipe = %d bytes\n", read);
+                fprintf(stderr, "Read from info pipe = %d bytes\n", read);
                 fflush(stdout);
 
                 switch (read) {
@@ -86,17 +87,17 @@ int main()
                             data_bytes = commander->ReadFromDataPipe(buffer, read_total);
 
                             if (data_bytes > 0) {
-                                printf("Read %zu bytes from ground station: ", data_bytes);
+                                fprintf(stderr, "Read %zu bytes from ground station: ", data_bytes);
                                 fflush(stdout);
                                 for(uint8_t z = 0; z < data_bytes; ++z){
                                     uint8_t c = buffer[z];
-                                    printf("0x%02X ", c);
+                                    fprintf(stderr, "0x%02X ", c);
                                 }
-                                printf("\n");
+                                fprintf(stderr, "\n");
                                 fflush(stdout);
 
                                 if (data_bytes != read_total) {
-                                    printf("Something went wrong !!\n");
+                                    fprintf(stderr, "Something went wrong !!\n");
                                     fflush(stdout);
                                     read_total = 0;
                                     break;
@@ -117,12 +118,12 @@ int main()
                                         fclose(fp_last_command);
                                         command = CommandFactory::CreateCommand(previous_command_buffer);
                                         if (command != NULL) {
-                                            printf("%s\n", "Executing command");
+                                            fprintf(stderr, "%s\n", "Executing command");
                                             fflush(stdout);
 
                                             char* result  = (char* )command->Execute();
                                             if (result != NULL) {
-                                                printf("Command output = %s", result);
+                                                fprintf(stderr, "Command output = %s", result);
                                                 fflush(stdout);
 
                                                 commander->WriteToDataPipe(result);
@@ -159,7 +160,7 @@ int main()
                                 buffer = NULL;
                             }
 
-                            sleep(SLEEP_TIME);
+                            sleep(COMMANER_SLEEP_TIME);
                             signal_watch_puppy();
                         } //end while
 
@@ -177,10 +178,14 @@ int main()
         } // end if
 
 
-        sleep(SLEEP_TIME);
+        sleep(COMMANER_SLEEP_TIME);
         signal_watch_puppy();
     }
 
-    delete commander;
+    if (commander) {
+        delete commander;
+        commander = 0;
+    }
+
     return 0;
 }
