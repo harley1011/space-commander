@@ -19,7 +19,8 @@ const char ERROR_CREATING_COMMAND  = '1';
 const char ERROR_EXECUTING_COMMAND = '2';
 
 
-pid_t get_watch_puppy_pid() {
+pid_t get_watch_puppy_pid() 
+{
     const int BUFFER_SIZE = 10;
     string filename = CS1_WATCH_PUPPY_PID; 
     char buffer[BUFFER_SIZE] = {0};
@@ -29,13 +30,13 @@ pid_t get_watch_puppy_pid() {
         fread(buffer, BUFFER_SIZE, sizeof(char), fp);
         fclose(fp);
         return atoi(buffer);
-    }
-    else {
+    } else {
         return 0;
     }
 }
 
-void signal_watch_puppy() {
+void signal_watch_puppy() 
+{
     pid_t pid = get_watch_puppy_pid();
 
     if (pid > 0) {
@@ -45,9 +46,9 @@ void signal_watch_puppy() {
 
 int main() 
 {
-    char info_buffer[255];
+    char info_buffer[255] = {'\0'};
+    char previous_command_buffer[MAX_COMMAND_SIZE] = {'\0'};
     char* buffer = NULL;
-    char* previous_command_buffer = NULL;
     Net2Com* commander = 0; 
     ICommand* command  = NULL;
     unsigned char read = 0;
@@ -112,8 +113,7 @@ int main()
                                         retry -=1;
                                     }
 
-                                    if (fp_last_command != NULL){
-                                        previous_command_buffer = (char*) malloc(MAX_COMMAND_SIZE);
+                                    if (fp_last_command != NULL) {
                                         fread(previous_command_buffer, sizeof(char), MAX_COMMAND_SIZE, fp_last_command);
                                         fclose(fp_last_command);
                                         command = CommandFactory::CreateCommand(previous_command_buffer);
@@ -139,9 +139,7 @@ int main()
                                             commander->WriteToInfoPipe(ERROR_CREATING_COMMAND);
                                         }
 
-                                        free(previous_command_buffer);
-                                        previous_command_buffer = NULL;
-
+                                        memset(previous_command_buffer, '\0', MAX_COMMAND_SIZE);
                                     }
                                 } else {
 
