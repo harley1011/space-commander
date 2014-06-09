@@ -23,7 +23,9 @@ TODEVNULL=1
 
 usage()
 {
-    echo "usage : TODO"
+    echo "usage : cscomtest.sh  [-u] [-g testGroup] [-n testName] [-v]"
+    echo "          -v verbose : to get all DEBUG info (N.B. DEBUG info can be turned on/off in the makefile ... -DDEBUG"
+    echo "          -u usage"
 }
 
 
@@ -31,26 +33,18 @@ usage()
 # Parses command line arguments
 #
 argType=""
-
-for arg in "$@"; do
-    case $argType in
-        -g) GROUP=$arg ;;
-        -n) SINGLE_TEST="-n $arg";;
-    esac
-    
-    argType=""    
-
-    case $arg in
-        '-g'|'-n')
-            argType=$arg
-        ;;
-        -u)
+while getopts "g:n:uv" opt; do
+    case "$opt" in
+        g) GROUP=$arg ;;
+        n) SINGLE_TEST="-n $arg" ;;
+        u)
             usage
             exit 0;
         ;;
-        -v) TODEVNULL=0 ;;
+        v) TODEVNULL=0 ;;
+
     esac
-done 
+done
 
 #
 # GROUP
@@ -60,6 +54,7 @@ if [ "$GROUP" != "" ]; then
         'getlog')       ARGUMENTS="-g GetLogTestGroup" ;;
         'deletelog')    ARGUMENTS="-g DeleteLogTestGroup" ;;
         'net2com')      ARGUMENTS="-g Net2ComTestGroup" ;;
+        'commander')    ARGUMENTS="-g CommanderTestGroup";;
     esac
 fi
 

@@ -8,7 +8,7 @@
 *
 * CREATION DATE : 06-06-2014
 *
-* LAST MODIFIED : Sun 08 Jun 2014 02:35:24 AM EDT
+* LAST MODIFIED : Sun 08 Jun 2014 10:20:14 PM EDT
 *
 ******************************************************************************/
 #include <stdlib.h>
@@ -44,7 +44,6 @@ TEST_GROUP(CommanderTestGroup)
         mkdir(CS1_LOGS, S_IRWXU);
 
         pid_t pid = fork();
-        int status = 0;
 
         if (pid == 0) {
             if(execl("./"SPACE_COMMANDER_BIN, SPACE_COMMANDER_BIN, NULL) == -1){
