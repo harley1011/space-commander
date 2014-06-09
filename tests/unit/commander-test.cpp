@@ -8,7 +8,7 @@
 *
 * CREATION DATE : 06-06-2014
 *
-* LAST MODIFIED : Sun 08 Jun 2014 11:05:45 PM EDT
+* LAST MODIFIED : Sun 08 Jun 2014 11:46:44 PM EDT
 *
 ******************************************************************************/
 #include <stdlib.h>
@@ -107,7 +107,6 @@ TEST(CommanderTestGroup, DeleteLog_Success)
     #ifdef DEBUG
         fprintf(stderr, "[DEBUG] %s:%s:%d filetest_path is : %s\n", __FILE__, __func__, __LINE__, filetest_path);
         fprintf(stderr, "[DEBUG] %s:%s:%d inode is : %d\n", __FILE__, __func__, __LINE__, (unsigned int)inode);
-        fprintf(stderr, "[DEBUG] %s:%s:%d command_buf is : %s\n", __FILE__,  __func__, __LINE__, command_buf);
     #endif
 
     // use Netman Net2Com to send data to space-commander Net2Com

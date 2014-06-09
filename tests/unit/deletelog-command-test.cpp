@@ -12,7 +12,8 @@
 #include "fileIO.h"
 #include "SpaceString.h"
 
-static char command_buf[GETLOG_CMD_SIZE] = {'\0'};
+#define PADDING 10
+static char command_buf[GETLOG_CMD_SIZE + PADDING] = {'\0'};
 
 TEST_GROUP(DeleteLogTestGroup)
 {
@@ -20,6 +21,8 @@ TEST_GROUP(DeleteLogTestGroup)
     {
         mkdir(CS1_TGZ, S_IRWXU);
         mkdir(CS1_LOGS, S_IRWXU);
+
+        memset(command_buf, '\0', GETLOG_CMD_SIZE);
     }
     
     void teardown()
@@ -63,7 +66,6 @@ TEST(DeleteLogTestGroup, DeleteLog_UsingInode_fileIsDeleted)
     #ifdef DEBUG
         fprintf(stderr, "[DEBUG] %s:%s:%d filetest_path is : %s\n", __FILE__, __func__, __LINE__, filetest_path);
         fprintf(stderr, "[DEBUG] %s:%s:%d inode is : %d\n", __FILE__, __func__, __LINE__, (unsigned int)inode);
-        fprintf(stderr, "[DEBUG] %s:%s:%d command_buf is : %s\n", __FILE__,  __func__, __LINE__, command_buf);
     #endif
 
     ICommand* command = CommandFactory::CreateCommand(command_buf);
