@@ -105,6 +105,8 @@ while [ $counter -lt $MULTIPLE_RUN ]; do
         echo -e "\e[32m UTest Success!\e[0m"
     fi
 
+    sleep 1
+
     counter=$(($counter+1))
 done
 
