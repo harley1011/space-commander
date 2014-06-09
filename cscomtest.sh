@@ -20,12 +20,18 @@ ALLTESTS="./bin/AllTests"
 ARGUMENTS=""
 GROUP=""
 TODEVNULL=1
+GROUP_LIST=(getlog deletelog net2com commander)
 
 usage()
 {
     echo "usage : cscomtest.sh  [-u] [-g testGroup] [-n testName] [-v]"
-    echo "          -v verbose : to get all DEBUG info (N.B. DEBUG info can be turned on/off in the makefile ... -DDEBUG"
+    echo "          -v verbose : to get all DEBUG info (N.B. DEBUG info can be turned on/off in the makefile ... -DDEBUG)"
     echo "          -u usage"
+    printf "%s" "          -g group   : one of those -> " 
+    for gr in ${GROUP_LIST[@]}; do
+        printf "%s " $gr
+    done
+    echo
 }
 
 
@@ -35,8 +41,8 @@ usage()
 argType=""
 while getopts "g:n:uv" opt; do
     case "$opt" in
-        g) GROUP=$arg ;;
-        n) SINGLE_TEST="-n $arg" ;;
+        g) GROUP=$OPTARG ;;
+        n) SINGLE_TEST="-n $OPTARG" ;;
         u)
             usage
             exit 0;
