@@ -20,7 +20,7 @@ ALLTESTS="./bin/AllTests"
 ARGUMENTS=""
 GROUP=""
 TODEVNULL=1
-MULTIPLE_RUN=0
+MULTIPLE_RUN=1
 GROUP_LIST=(getlog deletelog net2com commander)
 
 usage()
