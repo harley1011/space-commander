@@ -78,8 +78,10 @@ echo "=== Build tests ==="
 make test
 
 if [ $? -ne 0 ]; then
-    echo "[ERROR] build failed"
+    echo -e "\e[31m Build failed\e[0m"
     exit -1
+else
+    echo -e "\e[32m Build success!\e[0m"
 fi
 
 echo ""
@@ -97,7 +99,10 @@ while [ $counter -lt $MULTIPLE_RUN ]; do
     fi
 
     if [ $? -ne 0 ]; then
+        echo -e "\e[31m UTest Failure!\e[0m"
         break;
+    else 
+        echo -e "\e[32m UTest Success!\e[0m"
     fi
 
     counter=$(($counter+1))
