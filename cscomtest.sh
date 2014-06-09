@@ -20,11 +20,13 @@ ALLTESTS="./bin/AllTests"
 ARGUMENTS=""
 GROUP=""
 TODEVNULL=1
+MULTIPLE_RUN=0
 GROUP_LIST=(getlog deletelog net2com commander)
 
 usage()
 {
-    echo "usage : cscomtest.sh  [-u] [-g testGroup] [-n testName] [-v]"
+    echo "usage : cscomtest.sh  [-u] [-g testGroup] [-n testName] [-m numberOfRuns][-v]"
+    echo "          -m numberOfRuns : run the specified tests 'numberOfRuns' times and stop if error" 
     echo "          -v verbose : to get all DEBUG info (N.B. DEBUG info can be turned on/off in the makefile ... -DDEBUG)"
     echo "          -u usage"
     printf "%s" "          -g group   : one of those -> " 
@@ -39,9 +41,10 @@ usage()
 # Parses command line arguments
 #
 argType=""
-while getopts "g:n:uv" opt; do
+while getopts "g:n:uvm:" opt; do
     case "$opt" in
-        g) GROUP=$OPTARG ;;
+        g) GROUP=$OPTARG;;
+        m) MULTIPLE_RUN=$OPTARG;;
         n) SINGLE_TEST="-n $OPTARG" ;;
         u)
             usage
@@ -66,6 +69,7 @@ fi
 
 ARGUMENTS="$ARGUMENTS $SINGLE_TEST" 
 
+
 #
 # Execute
 #
@@ -81,10 +85,21 @@ fi
 echo ""
 echo "=== Run tests ==="
 
-if [ $TODEVNULL -ne 0 ]; then
-    echo $ALLTESTS $ARGUMENTS 2>/dev/null
-    $ALLTESTS $ARGUMENTS  2>/dev/null
-else
-    echo $ALLTESTS $ARGUMENTS 
-    $ALLTESTS $ARGUMENTS  
-fi
+counter=0
+
+while [ $counter -lt $MULTIPLE_RUN ]; do
+    if [ $TODEVNULL -ne 0 ]; then
+        echo $ALLTESTS $ARGUMENTS 2>/dev/null
+        $ALLTESTS $ARGUMENTS  2>/dev/null
+    else
+        echo $ALLTESTS $ARGUMENTS 
+        $ALLTESTS $ARGUMENTS  
+    fi
+
+    if [ $? -ne 0 ]; then
+        break;
+    fi
+
+    counter=$(($counter+1))
+done
+
