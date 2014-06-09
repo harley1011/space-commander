@@ -30,6 +30,7 @@ public:
 
     void * Execute();
     std::string SysExec(char* orig_cmd); 
+    char * GetCustomTime(std::string format, int moreminutes);
     int AddJob(char * date_time, char * executable);
     int CancelJob(const int job_id);
 

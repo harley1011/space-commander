@@ -17,7 +17,7 @@ void* TimetagCommand::Execute(){
 /**
  * Function to execute a command and get output
  */
-// TODO use fork and kill zombies (if necessary?)!
+// TODO use fork and kill zombies (if necessary)
 std::string TimetagCommand::SysExec(char* orig_cmd) {
   char command[CMD_BUFFER_LEN] = {0};
   sprintf(command, orig_cmd, "2>&1"); // redirect stderr to stdout
@@ -34,6 +34,26 @@ std::string TimetagCommand::SysExec(char* orig_cmd) {
   pclose(exec_pipe);
   return result;
   // TODO perhaps this function should return exit status and write output to data pipe
+}
+
+// TODO -> mainly for testing purposes but consider replacing or adding to another library instead of here.
+// TODO -> thorough testing
+char * TimetagCommand::GetCustomTime(std::string format, int moreminutes) {
+    char *buffer = (char *) malloc(sizeof(char) * 80);
+    time_t rawtime;
+    struct tm * timeinfo;
+    time (&rawtime);
+    timeinfo = localtime(&rawtime);
+    timeinfo->tm_min = timeinfo->tm_min + moreminutes;
+    if ( (timeinfo->tm_min + moreminutes) > 59 ) {
+      timeinfo->tm_hour++;
+      timeinfo->tm_min = 0 + ( moreminutes - (60-timeinfo->tm_min));
+    }
+    else {
+      timeinfo->tm_min = timeinfo->tm_min + moreminutes;
+    }
+    strftime(buffer,80,format.c_str(),timeinfo);
+    return buffer;
 }
 
 int TimetagCommand::CancelJob(const int job_id) {
