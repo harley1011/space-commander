@@ -123,7 +123,7 @@ int main()
 
                                             char* result  = (char* )command->Execute();
                                             if (result != NULL) {
-                                                fprintf(stderr, "Command output = %s", result);
+                                                fprintf(stderr, "Command output = %s\n", result);
                                                 fflush(stdout);
 
                                                 commander->WriteToDataPipe(result);
