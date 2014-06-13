@@ -77,6 +77,11 @@ TEST(DeleteLogTestGroup, DeleteLog_UsingInode_fileIsDeleted)
     strncpy(status, result, 1);
     CHECK_EQUAL(0, atoi(status));
 
+    if (result) {
+        free(result);
+        result = 0;
+    }
+
     if (command != NULL){
         delete command;
         command = NULL;
