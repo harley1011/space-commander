@@ -7,7 +7,7 @@ BEAGLECC=arm-linux-gnueabi-g++
 #
 SPACE_LIB = ../space-lib
 SPACE_UPTDATER = ../space-updater
-CPPUTEST_HOME = ../space-commander
+CPPUTEST_HOME = /home/jamg85/CppUTest
 SPACE_SCRIPT = ../space-script
 
 #
@@ -29,7 +29,7 @@ INCTESTPATH = -I./tests/unit/stubs/ -I./tests/helpers/include/
 #
 # Libraries
 #
-LIBPATH=-L./lib/  -L$(SPACE_LIB)/shakespeare/lib
+LIBPATH=-L./lib/  -L$(SPACE_LIB)/shakespeare/lib -L$(CPPUTEST_HOME)/lib
 LIBS=-lCppUTest -lCppUTestExt -lshakespeare
 
 #
