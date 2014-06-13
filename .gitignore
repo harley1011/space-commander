@@ -10,3 +10,8 @@ AllTests
 tgz/
 cs1_utest
 last-command
+**/CppUTestExt/*
+**/Platforms/*
+**/CppUTest/*
+libCppUTest.a
+libCppUTestExt.a
