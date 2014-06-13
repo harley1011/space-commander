@@ -7,7 +7,7 @@ BEAGLECC=arm-linux-gnueabi-g++
 #
 SPACE_LIB = ../space-lib
 SPACE_UPTDATER = ../space-updater
-CPPUTEST_HOME = /home/jamg85/CppUTest
+CPPUTEST_HOME = ../CppUTest
 SPACE_SCRIPT = ../space-script
 
 #
