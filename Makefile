@@ -6,6 +6,7 @@ BEAGLECC=arm-linux-gnueabi-g++
 # Paths
 #
 SPACE_LIB = ../space-lib
+SPACE_UTLS = $(SPACE_LIB)/utls
 SPACE_UPTDATER = ../space-updater
 CPPUTEST_HOME = ../CppUTest
 SPACE_SCRIPT = ../space-script
@@ -23,19 +24,14 @@ DEBUGFLAGS=-ggdb -g -gdwarf-2 -g3 #gdwarf-2 + g3 provides macro info to gdb
 #
 # includes
 #
-INCLUDES = -I./include/ -I$(SPACE_LIB)/shakespeare/inc -I$(SPACE_LIB)/include -I$(SPACE_UPTDATER)/include -I$(SPACE_SCRIPT)/tgz-wizard/include
+INCLUDES = -I./include/ -I$(SPACE_LIB)/shakespeare/inc -I$(SPACE_LIB)/include -I$(SPACE_UPTDATER)/include -I$(SPACE_SCRIPT)/tgz-wizard/include -I$(SPACE_UTLS)/include
 INCTESTPATH = -I./tests/unit/stubs/ -I./tests/helpers/include/
 
 #
 # Libraries
 #
-LIBPATH=-L./lib/  -L$(SPACE_LIB)/shakespeare/lib -L$(CPPUTEST_HOME)/lib
-LIBS=-lCppUTest -lCppUTestExt -lshakespeare
-
-#
-# The test builds have their own main provided by CppUTest so we need to exclude commander.cpp
-#
-DEBUG_SRC_FILES =`find src/ ! -name 'space-commander-main.cpp' -name '*.cpp'`
+LIBPATH=-L./lib/  -L$(SPACE_LIB)/shakespeare/lib -L$(CPPUTEST_HOME)/lib -L$(SPACE_UTLS)/lib
+LIBS=-lCppUTest -lCppUTestExt -lshakespeare -lcs1_utls
 
 buildQ6:
 	$(MICROCC) $(MICROCFLAGS) $(INCLUDES) src/*.cpp -o bin/space-commanderQ6
@@ -89,11 +85,11 @@ staticlibsQ6.tar: src/NamedPipe-mbcc.a src/Net2Com-mbcc.a
 #
 # All Object files, do not use wildcard, add the ones you need explicitly!
 #
-OBJECTS = bin/Net2Com.o bin/NamedPipe.o bin/Date.o bin/command-factory.o bin/deletelog-command.o  bin/decode-command.o bin/getlog-command.o bin/gettime-command.o bin/reboot-command.o bin/settime-command.o bin/update-command.o bin/base64.o bin/subsystems.o bin/SpaceString.o
+OBJECTS = bin/Net2Com.o bin/NamedPipe.o bin/command-factory.o bin/deletelog-command.o  bin/decode-command.o bin/getlog-command.o bin/gettime-command.o bin/reboot-command.o bin/settime-command.o bin/update-command.o bin/base64.o bin/subsystems.o 
 #
 # CppUTest files, no wildcard, add files explicitly!
 #
-UNIT_TEST = tests/unit/Net2Com-test.cpp tests/unit/Utl-test.cpp tests/unit/deletelog-command-test.cpp  tests/unit/getlog-command-test.cpp tests/unit/commander-test.cpp
+UNIT_TEST = tests/unit/Net2Com-test.cpp  tests/unit/deletelog-command-test.cpp  tests/unit/getlog-command-test.cpp tests/unit/commander-test.cpp
 CS1_UTEST_DIR="cs1_utest" # as defined in SpaceDecl.h
 #
 # ENV : either CS1_UTEST for test environment or empty for PROD, perform a 'make clean' when changing this parameter
