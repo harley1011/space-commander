@@ -125,8 +125,9 @@ TEST(Net2ComTestGroup, ReadFromInfoPipe_persist_open_ReturnsCorrectByte)
 
 TEST(Net2ComTestGroup, ReadFromInfoPipe_TryOverFlowBuffer_ReadUntilBufferIsFull)
 {
+    const int BUF_SIZE = 10;
     const int TO_SMALL = 5;
-    char buffer[TO_SMALL];
+    char buffer[BUF_SIZE] = {'\0'};
     const char* data = "myCommand";
     int result;
 
