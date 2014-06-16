@@ -62,14 +62,6 @@ struct InfoBytes
     ino_t inode;
 };
 
-struct GetLogArgs
-{
-    char opt_byte;
-    char subsystem;
-    size_t size;
-    time_t time;
-};
-
 class GetLogCommand : public ICommand 
 {
     private :
