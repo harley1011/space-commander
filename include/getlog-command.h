@@ -60,6 +60,7 @@ using namespace std;
 struct InfoBytes
 {
     ino_t inode;
+    const char *next_file_in_result_buffer;
 };
 
 class GetLogCommand : public ICommand 
@@ -73,13 +74,13 @@ class GetLogCommand : public ICommand
         size_t number_of_processed_files;
         unsigned long processed_files[MAX_NUMBER_OF_FILES_PER_CMD];
 
-
     public :
         GetLogCommand();
         GetLogCommand(char opt_byte, char subsystem, size_t size, time_t time);
         ~GetLogCommand();
         void* Execute();
         char* GetCmdStr(char* cmd_buf);
+        void* ParseResult(const char *result);
 
         char* GetNextFile(void);
         size_t ReadFile(char *buffer, const char *filename);
@@ -87,12 +88,14 @@ class GetLogCommand : public ICommand
         bool isFileProcessed(const char *filepath);
         bool isFileProcessed(unsigned long inode);
         char* FindOldestFile(const char* directory_path, const char* pattern);
+        InfoBytes* BuildInfoBytesStruct(InfoBytes* pInfo, const char *buffer);
 
+
+        static const char* HasNextFile(const char* result);
         static char* Build_GetLogCommand(char command_buf[GETLOG_CMD_SIZE], char opt_byte, 
                                                         char subsystem, size_t size, time_t date);
         static char* GetInfoBytes(char *buffer, const char *filepath);
         static int GetEndBytes(char *buffer);
-        static InfoBytes* BuildInfoBytesStruct(InfoBytes* pInfo, const char *buffer);
         static size_t ReadFile_FromStartToEnd(char *buffer, const char *filename, size_t start, 
                                                                                     size_t size);
         static time_t GetFileLastModifTimeT(const char *path);

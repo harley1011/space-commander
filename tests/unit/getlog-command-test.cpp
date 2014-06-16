@@ -239,12 +239,12 @@ TEST(GetLogTestGroup, Execute_OPT_NOOPT_returnsOldestTgz)
 *-----------------------------------------------------------------------------*/
 TEST(GetLogTestGroup, ReadFile_FromStartToEnd_success)
 {
-    char buffer[CS1_TGZ_MAX + 50] = {0};
+    char buffer[CS1_MAX_FRAME_SIZE + 50] = {0};
     const char* path = CS1_TGZ"/Updater20140101.txt";
     const char* dest = CS1_TGZ"/Updater20140101.txt-copy";
     create_file(path, "data");
 
-    size_t bytes = GetLogCommand::ReadFile_FromStartToEnd(buffer, path, 0, CS1_TGZ_MAX);
+    size_t bytes = GetLogCommand::ReadFile_FromStartToEnd(buffer, path, 0, CS1_MAX_FRAME_SIZE);
 
     FILE *pFile = fopen(dest, "wb");
 
@@ -462,7 +462,14 @@ TEST(GetLogTestGroup, Build_GetLogCommand_returnsCorrectCmd)
     CHECK_EQUAL(memcmp(expected, command_buf, GETLOG_CMD_SIZE), 0);
 }
 
-TEST(GetLogTestGroup, Build_GetCmdStr_returnsCorrectCmd)
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*
+* GROUP : GetLogTestGroup
+*
+* NAME : GetCmdStr_returnsCorrectCmd 
+* 
+*-----------------------------------------------------------------------------*/
+TEST(GetLogTestGroup, GetCmdStr_returnsCorrectCmd)
 {
     char expected[GETLOG_CMD_SIZE] = {0};
     expected[0] = GETLOG_CMD;
@@ -488,4 +495,22 @@ TEST(GetLogTestGroup, Build_GetCmdStr_returnsCorrectCmd)
         delete cmd;
         cmd = 0;
     }
+}
+
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*
+* GROUP : GetLogTestGroup
+*
+* NAME : HasNextFile_returnsPointerToNextData 
+* 
+*-----------------------------------------------------------------------------*/
+TEST(GetLogTestGroup, HasNextFile_returnsPointerToNextData)
+{
+    const char result[] = { EOF, EOF, EOF, EOF, 'I',
+                            EOF, EOF, EOF, EOF, 'B' };
+    const char* next_data = GetLogCommand::HasNextFile(result);
+    CHECK_EQUAL('I', *next_data);
+
+    next_data = GetLogCommand::HasNextFile(next_data + 1);
+    CHECK_EQUAL('B', *next_data);
 }

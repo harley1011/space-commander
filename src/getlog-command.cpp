@@ -63,7 +63,7 @@ GetLogCommand::~GetLogCommand()
 * 
 * PURPOSE : Executes the GetLogCommand.
 *           - if no OPT_SIZE is not specified, retreives one tgz
-*           - if OPT_SIZE is specified, retreives floor(SIZE / CS1_TGZ_MAX) tgzs
+*           - if OPT_SIZE is specified, retreives floor(SIZE / CS1_MAX_FRAME_SIZE) tgzs
 *
 *-----------------------------------------------------------------------------*/
 void* GetLogCommand::Execute()
@@ -76,13 +76,13 @@ void* GetLogCommand::Execute()
     char *result = 0;
 
     char filepath[CS1_PATH_MAX] = {'\0'};
-    char buffer[CS1_TGZ_MAX] = {'\0'};
+    char buffer[CS1_MAX_FRAME_SIZE] = {'\0'};
     char *file_to_retreive = 0;
     size_t bytes = 0;
     size_t number_of_files_to_retreive = 1;         // defaults to 1
 
     if (OPT_ISSIZE(this->opt_byte)) { 
-        number_of_files_to_retreive = this->size / CS1_TGZ_MAX;
+        number_of_files_to_retreive = this->size / CS1_MAX_FRAME_SIZE;
     }
 
     while (number_of_files_to_retreive) { 
@@ -100,7 +100,7 @@ void* GetLogCommand::Execute()
         // Reads the file in 'buffer'
         bytes += GetLogCommand::ReadFile(buffer + bytes, filepath); 
 
-        // add END byte
+        // add END bytes 
         bytes += GetLogCommand::GetEndBytes(buffer + bytes);
 
         // Track
@@ -111,6 +111,9 @@ void* GetLogCommand::Execute()
                                          *  instance only
                                          */
     }
+
+    // add END bytes
+    bytes += GetLogCommand::GetEndBytes(buffer + bytes);
 
     // allocate the result buffer
     result = (char*)malloc(sizeof(char) * bytes);
@@ -129,12 +132,12 @@ void* GetLogCommand::Execute()
 * NAME : ReadFile
 * 
 * PURPOSE : Reads the specefied file into the specified buffer.
-*           N.B. max size is CS1_TGZ_MAX
+*           N.B. max size is CS1_MAX_FRAME_SIZE
 *
 *-----------------------------------------------------------------------------*/
 size_t GetLogCommand::ReadFile(char *buffer, const char *filename)
 {
-    return GetLogCommand::ReadFile_FromStartToEnd(buffer, filename, START, CS1_TGZ_MAX);
+    return GetLogCommand::ReadFile_FromStartToEnd(buffer, filename, START, CS1_MAX_FRAME_SIZE);
 }
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -165,6 +168,14 @@ size_t GetLogCommand::ReadFile_FromStartToEnd(char *buffer, const char *filename
 
     fseek(pFile, start, 0);
     bytes = fread(buffer, 1, size, pFile);
+
+    if (feof(pFile)) {
+        #ifdef DEBUG
+            fprintf(stderr, "%s EOF reached \n", __func__);
+        #endif
+    } else {
+        fprintf(stdout, "[ERROR], %s:%s:%d - EOF has not been reached, the file will be incomplete", __FILE__, __func__, __LINE__);
+    }
 
     // Cleanup
     if (pFile) {
@@ -446,9 +457,11 @@ int GetLogCommand::GetEndBytes(char *buffer)
 *           the InfoBytes struct at *pInfo with those data.
 *
 *-----------------------------------------------------------------------------*/
-InfoBytes* BuildInfoBytesStruct(InfoBytes* pInfo, const char *buffer)
+InfoBytes* GetLogCommand::BuildInfoBytesStruct(InfoBytes* pInfo, const char *buffer)
 {
-   pInfo->inode = SpaceString::getUInt(buffer); 
+    if (pInfo) {
+        pInfo->inode = SpaceString::getUInt(buffer); 
+    }
 
    return pInfo;
 }
@@ -484,4 +497,62 @@ char* GetLogCommand::GetCmdStr(char* cmd_buf)
                                        this->date.GetTimeT());
     
     return cmd_buf;
+}
+
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*
+* NAME : ParseResult                                                        TODO UnitTest me
+* 
+* PURPOSE : Parses the result buffer returned by the execute function.
+*   
+* RETURN : struct InfoBytes* to STATIC memory (Make a COPY!)
+*
+*-----------------------------------------------------------------------------*/
+void* GetLogCommand::ParseResult(const char *result)
+{
+    if (!result) {
+        return 0;
+    }
+
+    static struct InfoBytes info_bytes = {0};
+
+    // 1. Get InfoBytes
+    this->BuildInfoBytesStruct(&info_bytes, result);
+    result += GETLOG_INFO_SIZE; 
+
+    // 2. Save data as a file
+    // TODO
+
+    info_bytes.next_file_in_result_buffer = this->HasNextFile(result);
+
+
+    return (void*)&info_bytes; 
+}
+
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*
+* NAME : HasNextFile 
+* 
+* PURPOSE : Check if END bytes (2x) are there (i.e. EOF EOF EOF EOF) 
+*           This means that there is no more files in the result buffer.
+*   
+*-----------------------------------------------------------------------------*/
+const char* GetLogCommand::HasNextFile(const char* result)
+{
+    int eof_count = 0;
+    bool has_next_file = true;
+
+    while (has_next_file && eof_count < 4) { // 4 times OEF signals NO MORE FILES
+        if (result[eof_count] == EOF) {
+            eof_count++;    
+        } else {
+            has_next_file = false;
+        }
+    }
+
+    if (has_next_file) {
+        return result + 4;
+    }
+
+    return 0;
 }
