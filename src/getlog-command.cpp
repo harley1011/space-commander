@@ -22,7 +22,7 @@
 #include "commands.h"
 #include "getlog-command.h"
 
-extern const char* s_cs1_subsystems[];  // defined in sybsystems.cpp
+extern const char* s_cs1_subsystems[];  // defined in subsystems.cpp
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 *
@@ -466,4 +466,22 @@ ino_t GetLogCommand::GetInoT(const char *filepath)
     stat(filepath, &attr);
 
     return attr.st_ino;
+}
+
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*
+* NAME : GetCmdStr
+* 
+* PURPOSE : Builds a GetLogCommand and saves it into 'cmd_buf'
+*
+*-----------------------------------------------------------------------------*/
+char* GetLogCommand::GetCmdStr(char* cmd_buf)
+{
+    GetLogCommand::Build_GetLogCommand(cmd_buf,
+                                       this->opt_byte,
+                                       this->subsystem,
+                                       this->size,
+                                       this->date.GetTimeT());
+    
+    return cmd_buf;
 }

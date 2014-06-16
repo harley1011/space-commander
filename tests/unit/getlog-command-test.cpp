@@ -461,3 +461,31 @@ TEST(GetLogTestGroup, Build_GetLogCommand_returnsCorrectCmd)
 
     CHECK_EQUAL(memcmp(expected, command_buf, GETLOG_CMD_SIZE), 0);
 }
+
+TEST(GetLogTestGroup, Build_GetCmdStr_returnsCorrectCmd)
+{
+    char expected[GETLOG_CMD_SIZE] = {0};
+    expected[0] = GETLOG_CMD;
+    expected[1] = OPT_SUB | OPT_SIZE | OPT_DATE;
+    expected[2] = UPDATER; 
+    SpaceString::get4Char(expected + 3, 666);
+    SpaceString::get4Char(expected + 7, 666);
+    
+    ICommand *cmd = new GetLogCommand(OPT_SUB | OPT_SIZE | OPT_DATE, UPDATER, 666, 666);
+    cmd->GetCmdStr(command_buf);
+
+    #ifdef DEBUG
+        fprintf(stderr, "[INFO] command_buf : %x %x %x %d %d\n", command_buf[0], 
+                                                           command_buf[1], 
+                                                           command_buf[2],
+                                                           SpaceString::getUInt(&command_buf[3]),
+                                                           SpaceString::getUInt(&command_buf[7]));
+    #endif
+
+    CHECK_EQUAL(memcmp(expected, command_buf, GETLOG_CMD_SIZE), 0);
+
+    if (cmd) {
+        delete cmd;
+        cmd = 0;
+    }
+}

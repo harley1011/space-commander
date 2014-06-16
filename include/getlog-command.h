@@ -62,7 +62,16 @@ struct InfoBytes
     ino_t inode;
 };
 
-class GetLogCommand : public ICommand {
+struct GetLogArgs
+{
+    char opt_byte;
+    char subsystem;
+    size_t size;
+    time_t time;
+};
+
+class GetLogCommand : public ICommand 
+{
     private :
         char opt_byte;
         char subsystem;     // OPT_SUB 
@@ -78,6 +87,7 @@ class GetLogCommand : public ICommand {
         GetLogCommand(char opt_byte, char subsystem, size_t size, time_t time);
         ~GetLogCommand();
         void* Execute();
+        char* GetCmdStr(char* cmd_buf);
 
         char* GetNextFile(void);
         size_t ReadFile(char *buffer, const char *filename);
@@ -86,15 +96,15 @@ class GetLogCommand : public ICommand {
         bool isFileProcessed(unsigned long inode);
         char* FindOldestFile(const char* directory_path, const char* pattern);
 
+        static char* Build_GetLogCommand(char command_buf[GETLOG_CMD_SIZE], char opt_byte, 
+                                                        char subsystem, size_t size, time_t date);
         static char* GetInfoBytes(char *buffer, const char *filepath);
-        int GetEndBytes(char *buffer);
+        static int GetEndBytes(char *buffer);
         static InfoBytes* BuildInfoBytesStruct(InfoBytes* pInfo, const char *buffer);
         static size_t ReadFile_FromStartToEnd(char *buffer, const char *filename, size_t start, 
                                                                                     size_t size);
         static time_t GetFileLastModifTimeT(const char *path);
         static bool prefixMatches(const char* filename, const char* pattern);
-        static char* Build_GetLogCommand(char command_buf[GETLOG_CMD_SIZE], char opt_byte, 
-                                                        char subsystem, size_t size, time_t date);
         static char* BuildPath(char *path_buf, const char* dir, const char* file);
         static ino_t GetInoT(const char *filepath);
 

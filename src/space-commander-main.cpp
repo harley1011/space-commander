@@ -48,7 +48,7 @@ int main()
 {
     char info_buffer[255] = {'\0'};
     char previous_command_buffer[MAX_COMMAND_SIZE] = {'\0'};
-    char* buffer = NULL;
+    char* buffer = NULL;    // TODO  This buffer scared me ! 
     Net2Com* commander = 0; 
     ICommand* command  = NULL;
     unsigned char read = 0;
