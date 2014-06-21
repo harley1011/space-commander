@@ -128,7 +128,7 @@ char DeleteLogCommand::FindType()
 *-----------------------------------------------------------------------------*/
 void DeleteLogCommand::SaveFilename(ino_t inode)
 {
-    const char* command_prefix = "find "CS1_TGZ" -inum ";
+    const char* command_prefix = "find "CS1_TGZ"/ -inum ";
     const char* command_suffix = " > "CS1_TMP"/"FILENAME_TMP;
     char inode_str[15] = {'\0'};
     sprintf(inode_str, "%d", (unsigned int)inode);

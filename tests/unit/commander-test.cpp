@@ -8,7 +8,7 @@
 *
 * CREATION DATE : 06-06-2014
 *
-* LAST MODIFIED : Sun 08 Jun 2014 11:46:44 PM EDT
+* LAST MODIFIED : Sat 21 Jun 2014 06:34:08 PM EDT
 *
 ******************************************************************************/
 #include <stdlib.h>
@@ -91,6 +91,14 @@ TEST(CommanderTestGroup, DeleteLog_Success)
     char inode_str[4] = {'\0'};
     const char* filetest_path = CS1_TGZ"/filetest.tgz";
     FILE* filetest = fopen(filetest_path, "w+");
+    
+    if (!filetest) {
+        string msg("Can't create ");
+        msg.append(filetest_path);
+        msg.append(", make sure the directory exists on your system.");
+        FAIL(msg.c_str());
+    }
+
     fprintf(filetest, "some text to test");
     fclose(filetest);
 
