@@ -482,7 +482,7 @@ TEST(GetLogTestGroup, GetCmdStr_returnsCorrectCmd)
     cmd->GetCmdStr(command_buf);
 
     #ifdef DEBUG
-        fprintf(stderr, "[INFO] command_buf : %x %x %x %d %d\n", command_buf[0], 
+        fprintf(stderr, "[INFO] command_buf : %x %x %x %zd %zd\n", command_buf[0], 
                                                            command_buf[1], 
                                                            command_buf[2],
                                                            SpaceString::getUInt(&command_buf[3]),

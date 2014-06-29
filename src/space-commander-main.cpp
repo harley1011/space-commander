@@ -88,7 +88,7 @@ int main()
                             data_bytes = commander->ReadFromDataPipe(buffer, read_total);
 
                             if (data_bytes > 0) {
-                                fprintf(stderr, "Read %zu bytes from ground station: ", data_bytes);
+                                fprintf(stderr, "Read %d bytes from ground station: ", data_bytes);
                                 fflush(stdout);
                                 for(uint8_t z = 0; z < data_bytes; ++z){
                                     uint8_t c = buffer[z];
