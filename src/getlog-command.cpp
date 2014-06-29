@@ -92,7 +92,7 @@ void* GetLogCommand::Execute()
         fprintf(stderr, "[DEBUG] %s() - file_to_retreive : %s\n", __func__, file_to_retreive);
 #endif
 
-        GetLogCommand::BuildPath(filepath, CS1_TGZ, file_to_retreive);
+        SpaceString::BuildPath(filepath, CS1_TGZ, file_to_retreive);
 
         // Prepares Info bytes 
         GetLogCommand::GetInfoBytes(buffer, filepath);
@@ -271,7 +271,7 @@ char* GetLogCommand::FindOldestFile(const char* directory_path, const char* patt
                 && !this->isFileProcessed(dir_entry->d_ino) // is NOT processed
                     && GetLogCommand::prefixMatches(dir_entry->d_name, pattern)) 
         { 
-            GetLogCommand::BuildPath(buffer, directory_path, dir_entry->d_name);
+            SpaceString::BuildPath(buffer, directory_path, dir_entry->d_name);
 
             current_timeT = GetLogCommand::GetFileLastModifTimeT(buffer); 
 
@@ -395,25 +395,6 @@ char* GetLogCommand::Build_GetLogCommand(char command_buf[GETLOG_CMD_SIZE], char
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 *
-* NAME : BuildPath 
-* 
-* PURPOSE : Builds a path 'dir/file' and saves it into 'path_buf', the caller
-*           has to make sure path_buf is large enough.
-*
-*-----------------------------------------------------------------------------*/
-char* GetLogCommand::BuildPath(char *path_buf, const char *dir, const char *file)
-{
-    assert(strlen(dir) + strlen(file) + 1 < CS1_PATH_MAX);
-
-    strcpy(path_buf, dir);
-    strcat(path_buf, "/");
-    strcat(path_buf, file);
-
-    return path_buf;
-}
-
-/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-*
 * NAME : GetInfoBytes 
 * 
 * PURPOSE : Builds and saves the info bytes for the file 'filepath' at the 
@@ -486,7 +467,8 @@ ino_t GetLogCommand::GetInoT(const char *filepath)
 *
 * NAME : GetCmdStr
 * 
-* PURPOSE : Builds a GetLogCommand and saves it into 'cmd_buf'
+* PURPOSE : Builds a GetLogCommand and saves it into 'cmd_buf', meant to be
+*           use by the GroundCommander. 
 *
 *-----------------------------------------------------------------------------*/
 char* GetLogCommand::GetCmdStr(char* cmd_buf)

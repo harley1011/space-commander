@@ -80,6 +80,7 @@ class GetLogCommand : public ICommand
         GetLogCommand(char opt_byte, char subsystem, size_t size, time_t time);
         ~GetLogCommand();
         void* Execute();
+        
         char* GetCmdStr(char* cmd_buf);
         void* ParseResult(const char *result, const char *filename);
         //void* ParseResult(const char *result); TODO
@@ -94,16 +95,16 @@ class GetLogCommand : public ICommand
 
 
         static const char* HasNextFile(const char* result);
-        static char* Build_GetLogCommand(char command_buf[GETLOG_CMD_SIZE], char opt_byte, 
-                                                        char subsystem, size_t size, time_t date);
         static char* GetInfoBytes(char *buffer, const char *filepath);
         static int GetEndBytes(char *buffer);
         static size_t ReadFile_FromStartToEnd(char *buffer, const char *filename, size_t start, 
                                                                                     size_t size);
         static time_t GetFileLastModifTimeT(const char *path);
         static bool prefixMatches(const char* filename, const char* pattern);
-        static char* BuildPath(char *path_buf, const char* dir, const char* file);
         static ino_t GetInoT(const char *filepath);
 
+    private :
+        static char* Build_GetLogCommand(char command_buf[GETLOG_CMD_SIZE], char opt_byte, 
+                                                        char subsystem, size_t size, time_t date);
 };
 #endif

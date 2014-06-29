@@ -99,7 +99,12 @@ TEST(GetLogTestGroup, Execute_OPT_DATE_OPT_SUB_getTgz_returnsCorrectFile)
     const char* dest = CS1_TGZ"/Watch-Puppy20140102.txt-copy";
 
     Date date(2014, 1, 2); 
-    GetLogCommand::Build_GetLogCommand(command_buf, OPT_DATE|OPT_SUB, UPDATER, 0, date.GetTimeT());
+
+    // This is the Command to create on the ground.
+    GetLogCommand ground_cmd(OPT_DATE|OPT_SUB, UPDATER, 0, date.GetTimeT());
+    ground_cmd.GetCmdStr(command_buf);
+
+    // This is the Command that the space-commander will create
     ICommand *command = CommandFactory::CreateCommand(command_buf);
     result = (char*)command->Execute();
 
@@ -109,7 +114,7 @@ TEST(GetLogTestGroup, Execute_OPT_DATE_OPT_SUB_getTgz_returnsCorrectFile)
     std::cerr << "[DEBUG] " << __FILE__ << " indoe is "  << getlog_info.inode << endl;
     #endif
 
-    CHECK_EQUAL(NULL, getlog_info.next_file_in_result_buffer);
+    CHECK_EQUAL(0, getlog_info.next_file_in_result_buffer);
     CHECK(*(result + GETLOG_INFO_SIZE + UTEST_SIZE_OF_TEST_FILES) == EOF);
     CHECK(*(result + GETLOG_INFO_SIZE + UTEST_SIZE_OF_TEST_FILES + 1) == EOF);
     CHECK(diff(dest, path));     
@@ -149,7 +154,10 @@ TEST(GetLogTestGroup, Execute_OPT_NOOPT_get2TGZ_returns2OldestTgz)
     const char* dest = CS1_TGZ"/Watch-Puppy20140101.txt-copy";
     const char* dest2 = CS1_TGZ"/Updater20140102.txt-copy";
 
-    GetLogCommand::Build_GetLogCommand(command_buf, OPT_SIZE, 0, (size_t)CS1_MAX_FRAME_SIZE * 2, 0);
+    // This is the Command to create on the ground.
+    GetLogCommand ground_cmd(OPT_SIZE, 0, (size_t)CS1_MAX_FRAME_SIZE * 2, 0);
+    ground_cmd.GetCmdStr(command_buf);
+
     ICommand *command = CommandFactory::CreateCommand(command_buf);
     result = (char*)command->Execute();
 
@@ -205,7 +213,10 @@ TEST(GetLogTestGroup, Execute_OPT_NOOPT_returnsOldestTgz)
     char* result = 0;
     const char* dest = CS1_TGZ"/Watch-Puppy20140101.txt-copy";
 
-    GetLogCommand::Build_GetLogCommand(command_buf, OPT_NOOPT, 0, 0, 0);
+    // This is the Command to create on the ground.
+    GetLogCommand ground_cmd(OPT_SIZE, 0, (size_t)CS1_MAX_FRAME_SIZE * 2, 0);
+    ground_cmd.GetCmdStr(command_buf);
+
     ICommand *command = CommandFactory::CreateCommand(command_buf);
     result = (char*)command->Execute();
 
@@ -419,7 +430,7 @@ TEST(GetLogTestGroup, BuildPath_returnsCorrectPath)
 
     char buffer[CS1_PATH_MAX];
 
-    STRCMP_EQUAL(expected, GetLogCommand::BuildPath(buffer, dir, file));
+    STRCMP_EQUAL(expected, SpaceString::BuildPath(buffer, dir, file));
 }
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -441,26 +452,6 @@ TEST(GetLogTestGroup, prefixMatches_returnsTrue)
     CHECK(GetLogCommand::prefixMatches(haystack, needle3) == 0);
 }
 
-/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-*
-* GROUP : GetLogTestGroup
-*
-* NAME : Build_GetLogCommand 
-* 
-*-----------------------------------------------------------------------------*/
-TEST(GetLogTestGroup, Build_GetLogCommand_returnsCorrectCmd)
-{
-    char expected[GETLOG_CMD_SIZE] = {0};
-    expected[0] = GETLOG_CMD;
-    expected[1] = OPT_SUB | OPT_SIZE | OPT_DATE;
-    expected[2] = UPDATER; 
-    SpaceString::get4Char(expected + 3, 666);
-    SpaceString::get4Char(expected + 7, 666);
-    
-    GetLogCommand::Build_GetLogCommand(command_buf, OPT_SUB | OPT_SIZE | OPT_DATE, UPDATER, 666, 666);
-
-    CHECK_EQUAL(memcmp(expected, command_buf, GETLOG_CMD_SIZE), 0);
-}
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 *
