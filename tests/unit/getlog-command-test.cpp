@@ -81,7 +81,7 @@ TEST(GetLogTestGroup, GetInfoBytes_returnsCorrectInfoBytes)
 *
 * GROUP : GetLogTestGroup
 *
-* NAME : Execute_OPT_NOOPT_get2TGZ_returns2OldestTgz 
+* NAME : Execute_OPT_DATE_OPT_SUB_getTgz_returnsCorrectFile
 * 
 *-----------------------------------------------------------------------------*/
 TEST(GetLogTestGroup, Execute_OPT_DATE_OPT_SUB_getTgz_returnsCorrectFile)
@@ -103,13 +103,13 @@ TEST(GetLogTestGroup, Execute_OPT_DATE_OPT_SUB_getTgz_returnsCorrectFile)
     ICommand *command = CommandFactory::CreateCommand(command_buf);
     result = (char*)command->Execute();
 
-    FILE *pFile = fopen(dest, "wb");
+    InfoBytes getlog_info = *static_cast<InfoBytes*>(dynamic_cast<GetLogCommand*>(command)->ParseResult(result, dest));
 
-    if (pFile) {
-        fwrite(result + GETLOG_INFO_SIZE, 1, UTEST_SIZE_OF_TEST_FILES, pFile);       
-        fclose(pFile);
-    }
+    #ifdef DEBUG
+    std::cerr << "[DEBUG] " << __FILE__ << " indoe is "  << getlog_info.inode << endl;
+    #endif
 
+    CHECK_EQUAL(NULL, getlog_info.next_file_in_result_buffer);
     CHECK(*(result + GETLOG_INFO_SIZE + UTEST_SIZE_OF_TEST_FILES) == EOF);
     CHECK(*(result + GETLOG_INFO_SIZE + UTEST_SIZE_OF_TEST_FILES + 1) == EOF);
     CHECK(diff(dest, path));     
@@ -506,11 +506,21 @@ TEST(GetLogTestGroup, GetCmdStr_returnsCorrectCmd)
 *-----------------------------------------------------------------------------*/
 TEST(GetLogTestGroup, HasNextFile_returnsPointerToNextData)
 {
-    const char result[] = { EOF, EOF, EOF, EOF, 'I',
-                            EOF, EOF, EOF, EOF, 'B' };
+    const char result[] = { EOF, EOF, 'I',
+                            EOF, EOF, 'B' };
+
     const char* next_data = GetLogCommand::HasNextFile(result);
-    CHECK_EQUAL('I', *next_data);
+    if (next_data) {
+        CHECK_EQUAL('I', *next_data);
+    } else {
+        FAIL("null pointer");
+    }
 
     next_data = GetLogCommand::HasNextFile(next_data + 1);
-    CHECK_EQUAL('B', *next_data);
+
+    if (next_data) {
+        CHECK_EQUAL('B', *next_data);
+    } else {
+        FAIL("null pointer");
+    }
 }

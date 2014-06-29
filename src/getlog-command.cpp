@@ -11,6 +11,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <dirent.h>
+#include <iostream>
 #include <limits.h>
 #include <time.h>
 #include <string.h>
@@ -504,11 +505,17 @@ char* GetLogCommand::GetCmdStr(char* cmd_buf)
 * NAME : ParseResult                                                        TODO UnitTest me
 * 
 * PURPOSE : Parses the result buffer returned by the execute function.
+*
+* ARGUMENTS : result    : pointer to the result buffer
+*             filepath  : string of the form "path/file.log" (if the file exists,
+*                         it will be overwritten)
 *   
 * RETURN : struct InfoBytes* to STATIC memory (Make a COPY!)
 *
+* DESCRIPTION :
+*
 *-----------------------------------------------------------------------------*/
-void* GetLogCommand::ParseResult(const char *result)
+void* GetLogCommand::ParseResult(const char *result, const char *filename)
 {
     if (!result) {
         return 0;
@@ -521,10 +528,20 @@ void* GetLogCommand::ParseResult(const char *result)
     result += GETLOG_INFO_SIZE; 
 
     // 2. Save data as a file
-    // TODO
+    FILE *pFile = fopen(filename, "wb");
+
+    if (!pFile) {
+        fprintf(stderr, "[ERROR] %s:%s:%d cannot create the file %s\n", __FILE__, __func__, __LINE__, filename);
+    }
+
+    while (*result != EOF) {
+        fwrite(result, 1, 1, pFile);       
+        result++;
+    }
+
+    fclose(pFile);
 
     info_bytes.next_file_in_result_buffer = this->HasNextFile(result);
-
 
     return (void*)&info_bytes; 
 }
@@ -540,18 +557,19 @@ void* GetLogCommand::ParseResult(const char *result)
 const char* GetLogCommand::HasNextFile(const char* result)
 {
     int eof_count = 0;
-    bool has_next_file = true;
+    const char *current_char = result;
 
-    while (has_next_file && eof_count < 4) { // 4 times OEF signals NO MORE FILES
-        if (result[eof_count] == EOF) {
-            eof_count++;    
-        } else {
-            has_next_file = false;
-        }
+    while(*current_char == EOF) {
+        eof_count++;    
+        current_char++;
     }
 
-    if (has_next_file) {
-        return result + 4;
+    if (eof_count == 4) {
+        return 0;
+    }
+
+    if (eof_count == 2) {
+        return result + 2;
     }
 
     return 0;

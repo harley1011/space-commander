@@ -73,6 +73,7 @@ class GetLogCommand : public ICommand
 
         size_t number_of_processed_files;
         unsigned long processed_files[MAX_NUMBER_OF_FILES_PER_CMD];
+        string parse_result_filename;
 
     public :
         GetLogCommand();
@@ -80,7 +81,8 @@ class GetLogCommand : public ICommand
         ~GetLogCommand();
         void* Execute();
         char* GetCmdStr(char* cmd_buf);
-        void* ParseResult(const char *result);
+        void* ParseResult(const char *result, const char *filename);
+        //void* ParseResult(const char *result); TODO
 
         char* GetNextFile(void);
         size_t ReadFile(char *buffer, const char *filename);
