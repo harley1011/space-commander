@@ -73,7 +73,6 @@ class GetLogCommand : public ICommand
 
         size_t number_of_processed_files;
         unsigned long processed_files[MAX_NUMBER_OF_FILES_PER_CMD];
-        string parse_result_filename;
 
     public :
         GetLogCommand();
