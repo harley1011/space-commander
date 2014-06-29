@@ -21,6 +21,7 @@ ARGUMENTS=""
 GROUP=""
 TODEVNULL=1
 MULTIPLE_RUN=1
+CLEAN=0
 GROUP_LIST=(getlog deletelog net2com commander)
 
 usage()
@@ -28,6 +29,7 @@ usage()
     echo "usage : cscomtest.sh  [-u] [-g testGroup] [-n testName] [-m numberOfRuns][-v]"
     echo "          -m numberOfRuns : run the specified tests 'numberOfRuns' times and stop if error" 
     echo "          -v verbose : to get all DEBUG info (N.B. DEBUG info can be turned on/off in the makefile ... -DDEBUG)"
+    echo "          -c clean before build"
     echo "          -u usage"
     printf "%s" "          -g group   : one of those -> " 
     for gr in ${GROUP_LIST[@]}; do
@@ -41,8 +43,9 @@ usage()
 # Parses command line arguments
 #
 argType=""
-while getopts "g:n:uvm:" opt; do
+while getopts "cg:n:uvm:" opt; do
     case "$opt" in
+        c) CLEAN=1;; 
         g) GROUP=$OPTARG;;
         m) MULTIPLE_RUN=$OPTARG;;
         n) SINGLE_TEST="-n $OPTARG" ;;
@@ -73,6 +76,12 @@ ARGUMENTS="$ARGUMENTS $SINGLE_TEST"
 #
 # Execute
 #
+if [ $CLEAN -eq 1 ]; then
+    echo ""
+    echo "=== Clean ==="
+    make clean
+fi
+
 echo ""
 echo "=== Build tests ==="
 make test
