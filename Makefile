@@ -16,8 +16,7 @@ SPACE_SCRIPT = ../space-script
 #
 CFLAGS += -Wall
 CPPFLAGS += -Wall -I$(CPPUTEST_HOME)/include
-CXXFLAGS += -include $(CPPUTEST_HOME)/include/CppUTest/MemoryLeakDetectorNewMacros.h
-MEM_LEAK_MACRO = -include $(CPPUTEST_HOME)/include/CppUTest/MemoryLeakDetectorMallocMacros.h
+MEM_LEAK_MACRO = -include $(CPPUTEST_HOME)/include/CppUTest/MemoryLeakDetectorMallocMacros.h  -include $(CPPUTEST_HOME)/include/CppUTest/MemoryLeakDetectorNewMacros.h
 MICROCFLAGS=-mcpu=v8.40.b -mxl-barrel-shift -mxl-multiply-high -mxl-pattern-compare -mno-xl-soft-mul -mno-xl-soft-div -mxl-float-sqrt -mhard-float -mxl-float-convert -mlittle-endian -Wall
 DEBUGFLAGS=-ggdb -g -gdwarf-2 -g3 #gdwarf-2 + g3 provides macro info to gdb
 
@@ -31,7 +30,8 @@ INCTESTPATH = -I./tests/unit/stubs/ -I./tests/helpers/include/
 # Libraries
 #
 LIBPATH=-L./lib/  -L$(SPACE_LIB)/shakespeare/lib -L$(CPPUTEST_HOME)/lib -L$(SPACE_UTLS)/lib
-LIBS=-lCppUTest -lCppUTestExt -lshakespeare -lcs1_utls
+LIBS=-lshakespeare -lcs1_utls 
+CPPUTEST_LIBS=-lCppUTest -lCppUTestExt 
 
 buildQ6:
 	$(MICROCC) $(MICROCFLAGS) $(INCLUDES) src/*.cpp -o bin/space-commanderQ6
@@ -94,7 +94,8 @@ CS1_UTEST_DIR="cs1_utest" # as defined in SpaceDecl.h
 #
 # ENV : either CS1_UTEST for test environment or empty for PROD, perform a 'make clean' when changing this parameter
 #
-ENV = -DDEBUG -DCS1_UTEST  #-DPRESERVE
+UTEST_ENV=-DCS1_UTEST $(MEM_LEAK_MACRO) $(CPPUTEST_LIBS) 
+ENV = -DDEBUG  $(UTEST_ENV)  #-DPRESERVE
 
 buildBin: bin/space-commander
 
@@ -102,7 +103,7 @@ test: bin/AllTests bin/space-commander
 	mkdir -p $(CS1_UTEST_DIR)
 
 bin/%.o: src/%.cpp include/%.h
-	$(CC) $(CFLAGS) $(MEM_LEAK_MACRO)  $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCLUDES) -c $< -o $@ $(ENV) 
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCLUDES) -c $< -o $@ $(ENV) 
 	
 bin/fileIO.o: $(SPACE_UPTDATER)/src/fileIO.cpp $(SPACE_UPTDATER)/include/fileIO.h
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCLUDES) -c $< -o $@ $(ENV)
@@ -111,10 +112,10 @@ bin/dirUtl.o: $(SPACE_SCRIPT)/tgz-wizard/src/dirUtl.cpp $(SPACE_SCRIPT)/tgz-wiza
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCLUDES) -c $< -o $@ $(ENV)
 
 bin/AllTests: tests/unit/AllTests.cpp  $(UNIT_TEST) $(OBJECTS) bin/fileIO.o	 bin/dirUtl.o
-	$(CC) $(CFLAGS) $(MEM_LEAK_MACRO) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCLUDES) $(LIBPATH) -o $@ $^ $(LIBS) $(ENV)
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCLUDES) $(LIBPATH) -o $@ $^ $(LIBS) $(ENV)
 
 bin/space-commander: src/space-commander-main.cpp $(OBJECTS)
-	$(CC) $(CFLAGS) $(MEM_LEAK_MACRO) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCLUDES) $(LIBPATH) -o $@ $^ $(LIBS) $(ENV)
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCLUDES) $(LIBPATH) -o $@ $^ $(LIBS) $(ENV)
 #
 #
 #++++++++++++++++++++

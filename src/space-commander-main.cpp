@@ -18,6 +18,8 @@ const int MAX_COMMAND_SIZE     = 255;
 const char ERROR_CREATING_COMMAND  = '1';
 const char ERROR_EXECUTING_COMMAND = '2';
 
+// Declarations
+void out_of_memory_handler();
 
 pid_t get_watch_puppy_pid() 
 {
@@ -44,8 +46,17 @@ void signal_watch_puppy()
     }
 }
 
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ *
+ * NAME : main 
+ *
+ * DESCRIPTION : space-commander main 
+ *
+ *-----------------------------------------------------------------------------*/
 int main() 
 {
+    set_new_handler(&out_of_memory_handler);
+
     char info_buffer[255] = {'\0'};
     char previous_command_buffer[MAX_COMMAND_SIZE] = {'\0'};
     char* buffer = NULL;    // TODO  This buffer scared me ! 
@@ -127,7 +138,7 @@ int main()
                                                 fflush(stdout);
 
                                                 commander->WriteToDataPipe(result);
-                                                free(result);
+                                                free(result); // TODO allocate result buffer with new in all icommand subclasses and use delete
                                                 result = NULL;
                                             } else {
                                                 commander->WriteToInfoPipe(ERROR_EXECUTING_COMMAND);
@@ -167,7 +178,7 @@ int main()
                     }
                     default:
                         read_total += read;
-                        buffer = (char* )realloc(buffer, read_total * sizeof(char));
+                        buffer = (char* )realloc(buffer, read_total * sizeof(char)); // todo get rid of this realloc! use new instead
                         memset(buffer, 0, sizeof(char) * read_total);
                         break;
                 } // end switch
@@ -186,4 +197,17 @@ int main()
     }
 
     return 0;
+}
+
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ *
+ * NAME : out_of_memory_handler 
+ *
+ * DESCRIPTION : This function is called when memory allocation with new fails.
+ *
+ *-----------------------------------------------------------------------------*/
+void out_of_memory_handler()
+{
+    std::cerr << "[ERROR] new failed\n";
+    throw bad_alloc();
 }
