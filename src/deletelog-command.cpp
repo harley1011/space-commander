@@ -97,7 +97,7 @@ void* DeleteLogCommand::Execute()
         snprintf(result, size, "%s", buffer); 
     }
 
-    return result;
+    return (void*)result;
 }
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
