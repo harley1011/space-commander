@@ -214,7 +214,7 @@ TEST(GetLogTestGroup, Execute_OPT_NOOPT_returnsOldestTgz)
     const char* dest = CS1_TGZ"/Watch-Puppy20140101.txt-copy";
 
     // This is the Command to create on the ground.
-    GetLogCommand ground_cmd(OPT_SIZE, 0, (size_t)CS1_MAX_FRAME_SIZE * 2, 0);
+    GetLogCommand ground_cmd(OPT_NOOPT, 0, 0, 0);
     ground_cmd.GetCmdStr(command_buf);
 
     ICommand *command = CommandFactory::CreateCommand(command_buf);
