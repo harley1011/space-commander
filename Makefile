@@ -1,5 +1,5 @@
 CC=g++
-MICROCC=microblazeel-xilinx-linux-gnu-g++
+MBCC=microblazeel-xilinx-linux-gnu-g++
 BEAGLECC=arm-linux-gnueabi-g++
 
 #
@@ -30,16 +30,80 @@ INCTESTPATH = -I./tests/unit/stubs/ -I./tests/helpers/include/
 # Libraries
 #
 LIBPATH=-L./lib/  -L$(SPACE_LIB)/shakespeare/lib -L$(CPPUTEST_HOME)/lib -L$(SPACE_UTLS)/lib
-LIBS=-lshakespeare -lcs1_utls 
+
+#
+#++++++++++++++++++++
+# 	CppUTest / PC
+#--------------------
+LIBS=-lshakespeare -lcs1_utls  
 CPPUTEST_LIBS=-lCppUTest -lCppUTestExt 
 
-buildQ6:
-	$(MICROCC) $(MICROCFLAGS) $(INCLUDES) src/*.cpp -o bin/space-commanderQ6
+#
+# All Object files, do not use wildcard, add the ones you need explicitly!
+#
+OBJECTS = bin/Net2Com.o bin/NamedPipe.o bin/command-factory.o bin/deletelog-command.o  bin/decode-command.o bin/getlog-command.o bin/gettime-command.o bin/reboot-command.o bin/settime-command.o bin/update-command.o bin/base64.o bin/subsystems.o 
+#
+# CppUTest files, no wildcard, add files explicitly!
+#
+UNIT_TEST = tests/unit/Net2Com-test.cpp  tests/unit/deletelog-command-test.cpp  tests/unit/getlog-command-test.cpp tests/unit/commander-test.cpp
+CS1_UTEST_DIR="cs1_utest" # as defined in SpaceDecl.h
+#
+# ENV : either CS1_UTEST for test environment or empty for PROD, perform a 'make clean' when changing this parameter
+#
+UTEST_ENV=-DCS1_UTEST $(MEM_LEAK_MACRO) $(CPPUTEST_LIBS) 
+ENV = -DDEBUG  $(UTEST_ENV)  #-DPRESERVE
+
+buildBin: bin/space-commander
+
+bin/%.o: src/%.cpp include/%.h
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCLUDES) -c $< -o $@ $(ENV) 
+
+bin/space-commander: src/space-commander-main.cpp $(OBJECTS)
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCLUDES) $(LIBPATH) -o $@ $^ $(LIBS) $(ENV)
+
+test: bin/AllTests bin/space-commander
+	mkdir -p $(CS1_UTEST_DIR)
+
+bin/AllTests: tests/unit/AllTests.cpp  $(UNIT_TEST) $(OBJECTS) 
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCLUDES) $(LIBPATH) -o $@ $^ $(LIBS) $(ENV)
+
+
+#
+#++++++++++++++++++++
+#  MicroBlaze 
+#--------------------
+LIBS_Q6= -lshakespeare-mbcc -lcs1_utlsQ6
+
+OBJECTS_Q6 = bin/Net2ComQ6.o bin/NamedPipeQ6.o bin/command-factoryQ6.o bin/deletelog-commandQ6.o  bin/decode-commandQ6.o bin/getlog-commandQ6.o bin/gettime-commandQ6.o bin/reboot-commandQ6.o bin/settime-commandQ6.o bin/update-commandQ6.o bin/base64Q6.o bin/subsystemsQ6.o 
+
+buildQ6: bin/space-commanderQ6
+	
+bin/%Q6.o: src/%.cpp include/%.h
+	$(MBCC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCLUDES) -c $< -o $@
+
+bin/space-commanderQ6: src/space-commander-main.cpp $(OBJECTS_Q6)
+	$(MBCC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCLUDES) $(LIBPATH) -o $@ $^ $(LIBS_Q6)
+
+
+#
+#
+#++++++++++++++++++++
+# Cleanup
+#--------------------
+clean:
+	rm -f *.o *~ ./bin/* AllTests  && rm -fr ./cs1_utest
+
+
+#
+#
+#=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# TODO cleanup what is below
+#=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+#
+#
+
 buildBB:
 	$(BEAGLECC) $(INCLUDES) $(DEBUGFLAGS) src/*.cpp -o bin/space-commanderBB
-
-%.o: %.cpp
-	$(CC) $(CFLAGS) $(INCLUDES) $(LIBPATH) -c $^ -o $@
 
 %.a: %.o
 	ar -cvq $@ $^
@@ -48,12 +112,6 @@ staticlibs.tar: src/NamedPipe.a src/Net2Com.a
 	mv $^ ./
 	tar -cf $@ include/NamedPipe.h include/Net2Com.h NamedPipe.a Net2Com.a
 	rm *.a
-
-src/NamedPipeQ6.o: src/NamedPipe.cpp
-	$(MICROCC) $(MICROCFLAGS) $(INCLUDES) -c $^ -o $@
-
-src/Net2ComQ6.o : src/Net2Com.cpp
-	$(MICROCC) $(MICROCFLAGS) $(INCLUDES) -c $^ -o $@
 
 src/NamedPipe-mbcc.a: src/NamedPipeQ6.o
 	ar -cvq $@ $^
@@ -78,48 +136,4 @@ staticlibsQ6.tar: src/NamedPipe-mbcc.a src/Net2Com-mbcc.a
 	tar -cf $@ include/NamedPipe.h include/Net2Com.h NamedPipe-mbcc.a Net2Com-mbcc.a
 
 
-#
-#++++++++++++++++++++
-# 	CppUTest / PC
-#--------------------
-#
-# All Object files, do not use wildcard, add the ones you need explicitly!
-#
-OBJECTS = bin/Net2Com.o bin/NamedPipe.o bin/command-factory.o bin/deletelog-command.o  bin/decode-command.o bin/getlog-command.o bin/gettime-command.o bin/reboot-command.o bin/settime-command.o bin/update-command.o bin/base64.o bin/subsystems.o 
-#
-# CppUTest files, no wildcard, add files explicitly!
-#
-UNIT_TEST = tests/unit/Net2Com-test.cpp  tests/unit/deletelog-command-test.cpp  tests/unit/getlog-command-test.cpp tests/unit/commander-test.cpp
-CS1_UTEST_DIR="cs1_utest" # as defined in SpaceDecl.h
-#
-# ENV : either CS1_UTEST for test environment or empty for PROD, perform a 'make clean' when changing this parameter
-#
-UTEST_ENV=-DCS1_UTEST $(MEM_LEAK_MACRO) $(CPPUTEST_LIBS) 
-ENV = -DDEBUG  $(UTEST_ENV)  #-DPRESERVE
 
-buildBin: bin/space-commander
-
-test: bin/AllTests bin/space-commander
-	mkdir -p $(CS1_UTEST_DIR)
-
-bin/%.o: src/%.cpp include/%.h
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCLUDES) -c $< -o $@ $(ENV) 
-	
-bin/fileIO.o: $(SPACE_UPTDATER)/src/fileIO.cpp $(SPACE_UPTDATER)/include/fileIO.h
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCLUDES) -c $< -o $@ $(ENV)
-
-bin/dirUtl.o: $(SPACE_SCRIPT)/tgz-wizard/src/dirUtl.cpp $(SPACE_SCRIPT)/tgz-wizard/include/dirUtl.h
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCLUDES) -c $< -o $@ $(ENV)
-
-bin/AllTests: tests/unit/AllTests.cpp  $(UNIT_TEST) $(OBJECTS) bin/fileIO.o	 bin/dirUtl.o
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCLUDES) $(LIBPATH) -o $@ $^ $(LIBS) $(ENV)
-
-bin/space-commander: src/space-commander-main.cpp $(OBJECTS)
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCLUDES) $(LIBPATH) -o $@ $^ $(LIBS) $(ENV)
-#
-#
-#++++++++++++++++++++
-# Cleanup
-#--------------------
-clean:
-	rm -f *.o *~ ./bin/* AllTests  && rm -fr ./cs1_utest
