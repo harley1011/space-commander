@@ -8,11 +8,11 @@ void* SetTimeCommand::Execute(){
     struct timeval tv;
     
     tv.tv_sec = GetSeconds();   
-
+    tv.tv_usec = 0;
     if (settimeofday(&tv, 0) != 0){
         perror ("Error! settimeofday()\n");
-        exit(1);
+        return (void*)0;        
     }
 
-    return NULL;
+    return (void*)1;
 }

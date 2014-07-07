@@ -10,6 +10,9 @@ using namespace std;
 
 class SetTimeCommand : public ICommand {
 public:
+    SetTimeCommand(time_t time ) {
+        this->seconds = time;
+    }
     SetTimeCommand(char year, char month, char day, char hour, char minute, char second) {
         this->year    = year;
         this->month   = month;
