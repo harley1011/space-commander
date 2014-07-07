@@ -32,7 +32,7 @@ INCTESTPATH = -I./tests/unit/stubs/ -I./tests/helpers/include/
 LIBPATH=-L./lib/  -L$(SPACE_LIB)/shakespeare/lib -L$(CPPUTEST_HOME)/lib -L$(SPACE_UTLS)/lib
 
 make_dir:
-	mkdir -p bin
+	mkdir -p bin && mkdir -p lib
 
 #
 #++++++++++++++++++++
@@ -94,7 +94,7 @@ bin/space-commanderQ6: src/space-commander-main.cpp $(OBJECTS_Q6)
 # Cleanup
 #--------------------
 clean:
-	rm -fr ./bin && rm -fr ./cs1_utest
+	rm -fr ./bin ./lib ./cs1_utest
 
 
 #
