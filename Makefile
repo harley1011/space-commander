@@ -31,6 +31,9 @@ INCTESTPATH = -I./tests/unit/stubs/ -I./tests/helpers/include/
 #
 LIBPATH=-L./lib/  -L$(SPACE_LIB)/shakespeare/lib -L$(CPPUTEST_HOME)/lib -L$(SPACE_UTLS)/lib
 
+make_dir:
+	mkdir -p bin
+
 #
 #++++++++++++++++++++
 # 	CppUTest / PC
@@ -53,7 +56,7 @@ CS1_UTEST_DIR="cs1_utest" # as defined in SpaceDecl.h
 UTEST_ENV=-DCS1_UTEST $(MEM_LEAK_MACRO) $(CPPUTEST_LIBS) 
 ENV = -DDEBUG  $(UTEST_ENV)  #-DPRESERVE
 
-buildBin: bin/space-commander
+buildBin: make_dir bin/space-commander
 
 bin/%.o: src/%.cpp include/%.h
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCLUDES) -c $< -o $@ $(ENV) 
@@ -61,7 +64,7 @@ bin/%.o: src/%.cpp include/%.h
 bin/space-commander: src/space-commander-main.cpp $(OBJECTS)
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCLUDES) $(LIBPATH) -o $@ $^ $(LIBS) $(ENV)
 
-test: bin/AllTests bin/space-commander
+test: make_dir bin/AllTests bin/space-commander
 	mkdir -p $(CS1_UTEST_DIR)
 
 bin/AllTests: tests/unit/AllTests.cpp  $(UNIT_TEST) $(OBJECTS) 
@@ -76,7 +79,7 @@ LIBS_Q6= -lshakespeare-mbcc -lcs1_utlsQ6
 
 OBJECTS_Q6 = bin/Net2ComQ6.o bin/NamedPipeQ6.o bin/command-factoryQ6.o bin/deletelog-commandQ6.o  bin/decode-commandQ6.o bin/getlog-commandQ6.o bin/gettime-commandQ6.o bin/reboot-commandQ6.o bin/settime-commandQ6.o bin/update-commandQ6.o bin/base64Q6.o bin/subsystemsQ6.o 
 
-buildQ6: bin/space-commanderQ6
+buildQ6:  make_dir bin/space-commanderQ6
 	
 bin/%Q6.o: src/%.cpp include/%.h
 	$(MBCC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCLUDES) -c $< -o $@
@@ -91,7 +94,7 @@ bin/space-commanderQ6: src/space-commander-main.cpp $(OBJECTS_Q6)
 # Cleanup
 #--------------------
 clean:
-	rm -f *.o *~ ./bin/* AllTests  && rm -fr ./cs1_utest
+	rm -fr ./bin && rm -fr ./cs1_utest
 
 
 #

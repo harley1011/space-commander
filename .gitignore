@@ -6,12 +6,6 @@ bin/
 *.o
 staticlibs.tar
 staticlibsQ6.tar
-AllTests
 tgz/
 cs1_utest
 last-command
-**/CppUTestExt/*
-**/Platforms/*
-**/CppUTest/*
-libCppUTest.a
-libCppUTestExt.a
