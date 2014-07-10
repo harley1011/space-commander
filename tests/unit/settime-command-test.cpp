@@ -1,10 +1,10 @@
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 *
-* AUTHORS : Space Concordia 2014, Joseph
+* AUTHORS : Space Concordia 2014, Harley
 *
-* TITLE : getlog-command-test.cpp 
+* TITLE : settime-command-test.cpp 
 *
-* DESCRIPTION : Tests the GetLogCommand class
+* DESCRIPTION : Tests the SetTimeCommand class
 *
 *----------------------------------------------------------------------------*/
 #include <time.h>
@@ -75,8 +75,8 @@ TEST(SetTimeTestGroup, Check_Command)
     ICommand* command = CommandFactory::CreateCommand(command_buf);
     result = (int*)command->Execute();
     CHECK(result);    
-    std::cerr << "[DEBUG] " << __FILE__ << "Raw Seconds elapsed " << rawtime << endl;
- 
+    std::cerr << "[DEBUG] " << __FILE__ << "Seconds since epoch 1970 elapsed " << rawtime << endl;
+
    // CHECK(newtime == rawtime);
      if ( command != NULL)
     {
