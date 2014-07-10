@@ -27,7 +27,7 @@
 #include "subsystems.h"
 #include "dirUtl.h"
 
-static char command_buf[2] = {'\0'};
+static char command_buf[1] = {'\0'};
 
 
 
@@ -68,14 +68,17 @@ TEST(SetTimeTestGroup, Check_Command)
 {
     time_t rawtime;
     time(&rawtime);
-
+    rawtime += 3600;
     command_buf[0] = '0';
-    command_buf[1] = rawtime;
+    memcpy(command_buf+1,&rawtime,8);
     int* result = 0; 
     ICommand* command = CommandFactory::CreateCommand(command_buf);
     result = (int*)command->Execute();
     CHECK(result);    
-   if ( command != NULL)
+    std::cerr << "[DEBUG] " << __FILE__ << "Raw Seconds elapsed " << rawtime << endl;
+ 
+   // CHECK(newtime == rawtime);
+     if ( command != NULL)
     {
         delete command;
         command = NULL;
