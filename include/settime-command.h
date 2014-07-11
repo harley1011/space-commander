@@ -1,6 +1,6 @@
 #ifndef SETTIME_COMMAND_H
 #define SETTIME_COMMAND_H
-
+#define SETTIME_CMD_SIZE 9
 #include "icommand.h"
 #include <time.h>
 #include <iostream>
