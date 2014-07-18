@@ -94,7 +94,33 @@ bin/space-commanderQ6: src/space-commander-main.cpp $(OBJECTS_Q6)
 # Cleanup
 #--------------------
 clean:
-	rm -fr ./bin ./lib ./cs1_utest
+	rm -fr ./bin ./lib ./cs1_utest 
+
+
+
+
+#++++++++++++++++++++
+# buildLib 
+#--------------------
+staticlibs.tar: make_dir lib/NamedPipe.a lib/Net2Com.a
+	tar -cf $@ include/NamedPipe.h include/Net2Com.h lib/NamedPipe.a lib/Net2Com.a
+
+staticlibsQ6.tar: lib/NamedPipe-mbcc.a lib/Net2Com-mbcc.a
+	tar -cf $@ include/NamedPipe.h include/Net2Com.h lib/NamedPipe-mbcc.a lib/Net2Com-mbcc.a
+
+lib/NamedPipe.a: bin/NamedPipe.o
+	ar -cvq $@ $^
+
+lib/Net2Com.a: bin/Net2ComQ6.o
+	ar -cvq $@ $^
+
+lib/NamedPipe-mbcc.a: bin/NamedPipeQ6.o
+	ar -cvq $@ $^
+
+lib/Net2Com-mbcc.a: bin/Net2ComQ6.o
+	ar -cvq $@ $^
+
+
 
 
 #
@@ -111,32 +137,14 @@ buildBB:
 %.a: %.o
 	ar -cvq $@ $^
 
-staticlibs.tar: src/NamedPipe.a src/Net2Com.a
-	mv $^ ./
-	tar -cf $@ include/NamedPipe.h include/Net2Com.h NamedPipe.a Net2Com.a
-	rm *.a
-
-src/NamedPipe-mbcc.a: src/NamedPipeQ6.o
-	ar -cvq $@ $^
-
-src/Net2Com-mbcc.a: src/Net2ComQ6.o
-	ar -cvq $@ $^
-
-src/NamedPipeBB.o: src/NamedPipe.cpp
+bin/NamedPipeBB.o: src/NamedPipe.cpp
 	$(BEAGLECC) $(MICROFLAGS) $(INCLUDES) -c $^ -o $@
 
-src/Net2ComBB.o: src/Net2Com.cpp
+bin/Net2ComBB.o: src/Net2Com.cpp
 	$(BEAGLECC) $(MICROFLAGS) $(INCLUDES) -c $^ -o $@
 
-NamedPipe-BB.a: src/NamedPipeBB.o
+NamedPipe-BB.a: bin/NamedPipeBB.o
 	ar -cvq $@ $^
 
 Net2Com-BB.a: src/Net2ComBB.o
 	ar -cvq $@ $^
-
-staticlibsQ6.tar: src/NamedPipe-mbcc.a src/Net2Com-mbcc.a
-	mv $^ ./
-	tar -cf $@ include/NamedPipe.h include/Net2Com.h NamedPipe-mbcc.a Net2Com-mbcc.a
-
-
-
