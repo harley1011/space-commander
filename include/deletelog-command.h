@@ -22,7 +22,7 @@ class DeleteLogCommand : public ICommand
 {
     private :
 
-        char* filename;
+        char filename[CS1_PATH_MAX];
         char type;
 
     public :

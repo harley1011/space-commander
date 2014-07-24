@@ -81,7 +81,7 @@ TEST(GetLogTestGroup, GetInfoBytes_returnsCorrectInfoBytes)
 *
 * GROUP : GetLogTestGroup
 *
-* NAME : Execute_OPT_NOOPT_get2TGZ_returns2OldestTgz 
+* NAME : Execute_OPT_DATE_OPT_SUB_getTgz_returnsCorrectFile
 * 
 *-----------------------------------------------------------------------------*/
 TEST(GetLogTestGroup, Execute_OPT_DATE_OPT_SUB_getTgz_returnsCorrectFile)
@@ -99,17 +99,22 @@ TEST(GetLogTestGroup, Execute_OPT_DATE_OPT_SUB_getTgz_returnsCorrectFile)
     const char* dest = CS1_TGZ"/Watch-Puppy20140102.txt-copy";
 
     Date date(2014, 1, 2); 
-    GetLogCommand::Build_GetLogCommand(command_buf, OPT_DATE|OPT_SUB, UPDATER, 0, date.GetTimeT());
+
+    // This is the Command to create on the ground.
+    GetLogCommand ground_cmd(OPT_DATE|OPT_SUB, UPDATER, 0, date.GetTimeT());
+    ground_cmd.GetCmdStr(command_buf);
+
+    // This is the Command that the space-commander will create
     ICommand *command = CommandFactory::CreateCommand(command_buf);
     result = (char*)command->Execute();
 
-    FILE *pFile = fopen(dest, "wb");
+    InfoBytes getlog_info = *static_cast<InfoBytes*>(dynamic_cast<GetLogCommand*>(command)->ParseResult(result, dest));
 
-    if (pFile) {
-        fwrite(result + GETLOG_INFO_SIZE, 1, UTEST_SIZE_OF_TEST_FILES, pFile);       
-        fclose(pFile);
-    }
+    #ifdef DEBUG
+    std::cerr << "[DEBUG] " << __FILE__ << " indoe is "  << getlog_info.inode << endl;
+    #endif
 
+    CHECK_EQUAL(0, getlog_info.next_file_in_result_buffer);
     CHECK(*(result + GETLOG_INFO_SIZE + UTEST_SIZE_OF_TEST_FILES) == EOF);
     CHECK(*(result + GETLOG_INFO_SIZE + UTEST_SIZE_OF_TEST_FILES + 1) == EOF);
     CHECK(diff(dest, path));     
@@ -149,7 +154,10 @@ TEST(GetLogTestGroup, Execute_OPT_NOOPT_get2TGZ_returns2OldestTgz)
     const char* dest = CS1_TGZ"/Watch-Puppy20140101.txt-copy";
     const char* dest2 = CS1_TGZ"/Updater20140102.txt-copy";
 
-    GetLogCommand::Build_GetLogCommand(command_buf, OPT_SIZE, 0, (size_t)CS1_MAX_FRAME_SIZE * 2, 0);
+    // This is the Command to create on the ground.
+    GetLogCommand ground_cmd(OPT_SIZE, 0, (size_t)CS1_MAX_FRAME_SIZE * 2, 0);
+    ground_cmd.GetCmdStr(command_buf);
+
     ICommand *command = CommandFactory::CreateCommand(command_buf);
     result = (char*)command->Execute();
 
@@ -205,7 +213,10 @@ TEST(GetLogTestGroup, Execute_OPT_NOOPT_returnsOldestTgz)
     char* result = 0;
     const char* dest = CS1_TGZ"/Watch-Puppy20140101.txt-copy";
 
-    GetLogCommand::Build_GetLogCommand(command_buf, OPT_NOOPT, 0, 0, 0);
+    // This is the Command to create on the ground.
+    GetLogCommand ground_cmd(OPT_NOOPT, 0, 0, 0);
+    ground_cmd.GetCmdStr(command_buf);
+
     ICommand *command = CommandFactory::CreateCommand(command_buf);
     result = (char*)command->Execute();
 
@@ -239,12 +250,12 @@ TEST(GetLogTestGroup, Execute_OPT_NOOPT_returnsOldestTgz)
 *-----------------------------------------------------------------------------*/
 TEST(GetLogTestGroup, ReadFile_FromStartToEnd_success)
 {
-    char buffer[CS1_TGZ_MAX + 50] = {0};
+    char buffer[CS1_MAX_FRAME_SIZE + 50] = {0};
     const char* path = CS1_TGZ"/Updater20140101.txt";
     const char* dest = CS1_TGZ"/Updater20140101.txt-copy";
     create_file(path, "data");
 
-    size_t bytes = GetLogCommand::ReadFile_FromStartToEnd(buffer, path, 0, CS1_TGZ_MAX);
+    size_t bytes = GetLogCommand::ReadFile_FromStartToEnd(buffer, path, 0, CS1_MAX_FRAME_SIZE);
 
     FILE *pFile = fopen(dest, "wb");
 
@@ -419,7 +430,7 @@ TEST(GetLogTestGroup, BuildPath_returnsCorrectPath)
 
     char buffer[CS1_PATH_MAX];
 
-    STRCMP_EQUAL(expected, GetLogCommand::BuildPath(buffer, dir, file));
+    STRCMP_EQUAL(expected, SpaceString::BuildPath(buffer, dir, file));
 }
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -441,14 +452,15 @@ TEST(GetLogTestGroup, prefixMatches_returnsTrue)
     CHECK(GetLogCommand::prefixMatches(haystack, needle3) == 0);
 }
 
+
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 *
 * GROUP : GetLogTestGroup
 *
-* NAME : Build_GetLogCommand 
+* NAME : GetCmdStr_returnsCorrectCmd 
 * 
 *-----------------------------------------------------------------------------*/
-TEST(GetLogTestGroup, Build_GetLogCommand_returnsCorrectCmd)
+TEST(GetLogTestGroup, GetCmdStr_returnsCorrectCmd)
 {
     char expected[GETLOG_CMD_SIZE] = {0};
     expected[0] = GETLOG_CMD;
@@ -457,7 +469,49 @@ TEST(GetLogTestGroup, Build_GetLogCommand_returnsCorrectCmd)
     SpaceString::get4Char(expected + 3, 666);
     SpaceString::get4Char(expected + 7, 666);
     
-    GetLogCommand::Build_GetLogCommand(command_buf, OPT_SUB | OPT_SIZE | OPT_DATE, UPDATER, 666, 666);
+    ICommand *cmd = new GetLogCommand(OPT_SUB | OPT_SIZE | OPT_DATE, UPDATER, 666, 666);
+    cmd->GetCmdStr(command_buf);
+
+    #ifdef DEBUG
+        fprintf(stderr, "[INFO] command_buf : %x %x %x %zd %zd\n", command_buf[0], 
+                                                           command_buf[1], 
+                                                           command_buf[2],
+                                                           SpaceString::getUInt(&command_buf[3]),
+                                                           SpaceString::getUInt(&command_buf[7]));
+    #endif
 
     CHECK_EQUAL(memcmp(expected, command_buf, GETLOG_CMD_SIZE), 0);
+
+    if (cmd) {
+        delete cmd;
+        cmd = 0;
+    }
+}
+
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*
+* GROUP : GetLogTestGroup
+*
+* NAME : HasNextFile_returnsPointerToNextData 
+* 
+*-----------------------------------------------------------------------------*/
+TEST(GetLogTestGroup, HasNextFile_returnsPointerToNextData)
+{
+    const char result[] = { EOF, EOF, 'I',
+                            EOF, EOF, 'B' };
+
+    const char* next_data = GetLogCommand::HasNextFile(result);
+    if (next_data) {
+        CHECK_EQUAL('I', *next_data);
+    } else {
+        FAIL("null pointer");
+    }
+
+    next_data = GetLogCommand::HasNextFile(next_data + 1);
+
+    if (next_data) {
+        CHECK_EQUAL('B', *next_data);
+    } else {
+        FAIL("null pointer");
+    }
 }

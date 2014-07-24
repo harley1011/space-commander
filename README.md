@@ -8,9 +8,7 @@ make buildBin
 
 ## Unit tests
 
-make test
-
-./cscomtest.sh  [-g Group][-n testName][-v]
+./cscomtest.sh  [-g Group][-n testName][-v][-u]
 
 ## Net2Com
 

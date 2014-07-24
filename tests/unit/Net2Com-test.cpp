@@ -59,7 +59,7 @@ TEST(Net2ComTestGroup, WriteToDataPipe_ReturnsCorrectNumberOfBytesWritten)
 {
     char buffer[BUFFER_SIZE];
     const char* data = "SomeUsefullData";
-    int result;
+    size_t result;
 
     result = netman->WriteToDataPipe(data);
     commander->ReadFromDataPipe(buffer, BUFFER_SIZE);
@@ -72,7 +72,7 @@ TEST(Net2ComTestGroup, ReadFromDataPipe_ReturnsCorrectString)
 {
     char buffer[BUFFER_SIZE];
     const char* data = "myCommand";
-    int result;
+    size_t result;
 
     result = commander->WriteToDataPipe(data);
     netman->ReadFromDataPipe(buffer, BUFFER_SIZE);
@@ -125,10 +125,11 @@ TEST(Net2ComTestGroup, ReadFromInfoPipe_persist_open_ReturnsCorrectByte)
 
 TEST(Net2ComTestGroup, ReadFromInfoPipe_TryOverFlowBuffer_ReadUntilBufferIsFull)
 {
+    const int BUF_SIZE = 10;
     const int TO_SMALL = 5;
-    char buffer[TO_SMALL];
+    char buffer[BUF_SIZE] = {'\0'};
     const char* data = "myCommand";
-    int result;
+    size_t result;
 
     result = commander->WriteToDataPipe(data);
     CHECK_EQUAL(strlen(data) + NULL_CHAR_LENGTH, result);
