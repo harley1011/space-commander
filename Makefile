@@ -111,7 +111,7 @@ staticlibsQ6.tar: lib/NamedPipe-mbcc.a lib/Net2Com-mbcc.a
 lib/NamedPipe.a: bin/NamedPipe.o
 	ar -cvq $@ $^
 
-lib/Net2Com.a: bin/Net2ComQ6.o
+lib/Net2Com.a: bin/Net2Com.o
 	ar -cvq $@ $^
 
 lib/NamedPipe-mbcc.a: bin/NamedPipeQ6.o
