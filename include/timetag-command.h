@@ -12,6 +12,8 @@
 #include "icommand.h"
 #include <cstdlib>
 
+#define TIMETAG_CMD_SIZE 255
+
 using namespace std;
 
 class TimetagCommand : public ICommand {
@@ -33,6 +35,7 @@ public:
     char * GetCustomTime(std::string format, int moreminutes);
     int AddJob(char * date_time, char * executable);
     int CancelJob(const int job_id);
+    void * ParseResult(const char * result);
 
     char * GetCommand() { return command; }
     char * GetDateTime() { return date_time; }
