@@ -110,7 +110,7 @@ TEST(GetLogTestGroup, Execute_OPT_DATE_OPT_SUB_getTgz_returnsCorrectFile)
 
     InfoBytes getlog_info = *static_cast<InfoBytes*>(dynamic_cast<GetLogCommand*>(command)->ParseResult(result, dest));
 
-    #ifdef DEBUG
+    #ifdef CS1_DEBUG
     std::cerr << "[DEBUG] " << __FILE__ << " indoe is "  << getlog_info.inode << endl;
     #endif
 
@@ -214,7 +214,7 @@ TEST(GetLogTestGroup, Execute_OPT_NOOPT_returnsOldestTgz)
     const char* dest = CS1_TGZ"/Watch-Puppy20140101.txt-copy";
 
     // This is the Command to create on the ground.
-    GetLogCommand ground_cmd(OPT_SIZE, 0, (size_t)CS1_MAX_FRAME_SIZE * 2, 0);
+    GetLogCommand ground_cmd(OPT_NOOPT, 0, 0, 0);
     ground_cmd.GetCmdStr(command_buf);
 
     ICommand *command = CommandFactory::CreateCommand(command_buf);
@@ -472,7 +472,7 @@ TEST(GetLogTestGroup, GetCmdStr_returnsCorrectCmd)
     ICommand *cmd = new GetLogCommand(OPT_SUB | OPT_SIZE | OPT_DATE, UPDATER, 666, 666);
     cmd->GetCmdStr(command_buf);
 
-    #ifdef DEBUG
+    #ifdef CS1_DEBUG
         fprintf(stderr, "[INFO] command_buf : %x %x %x %zd %zd\n", command_buf[0], 
                                                            command_buf[1], 
                                                            command_buf[2],

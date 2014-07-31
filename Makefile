@@ -1,5 +1,5 @@
 CC=g++
-MICROCC=microblazeel-xilinx-linux-gnu-g++
+MBCC=microblazeel-xilinx-linux-gnu-g++
 BEAGLECC=arm-linux-gnueabi-g++
 
 #
@@ -30,58 +30,17 @@ INCTESTPATH = -I./tests/unit/stubs/ -I./tests/helpers/include/
 # Libraries
 #
 LIBPATH=-L./lib/  -L$(SPACE_LIB)/shakespeare/lib -L$(CPPUTEST_HOME)/lib -L$(SPACE_UTLS)/lib
-LIBS=-lshakespeare -lcs1_utls 
-CPPUTEST_LIBS=-lCppUTest -lCppUTestExt 
 
-buildQ6:
-	$(MICROCC) $(MICROCFLAGS) $(INCLUDES) src/*.cpp -o bin/space-commanderQ6
-buildBB:
-	$(BEAGLECC) $(INCLUDES) $(DEBUGFLAGS) src/*.cpp -o bin/space-commanderBB
-
-%.o: %.cpp
-	$(CC) $(CFLAGS) $(INCLUDES) $(LIBPATH) -c $^ -o $@
-
-%.a: %.o
-	ar -cvq $@ $^
-
-staticlibs.tar: src/NamedPipe.a src/Net2Com.a
-	mv $^ ./
-	tar -cf $@ include/NamedPipe.h include/Net2Com.h NamedPipe.a Net2Com.a
-	rm *.a
-
-src/NamedPipeQ6.o: src/NamedPipe.cpp
-	$(MICROCC) $(MICROCFLAGS) $(INCLUDES) -c $^ -o $@
-
-src/Net2ComQ6.o : src/Net2Com.cpp
-	$(MICROCC) $(MICROCFLAGS) $(INCLUDES) -c $^ -o $@
-
-src/NamedPipe-mbcc.a: src/NamedPipeQ6.o
-	ar -cvq $@ $^
-
-src/Net2Com-mbcc.a: src/Net2ComQ6.o
-	ar -cvq $@ $^
-
-src/NamedPipeBB.o: src/NamedPipe.cpp
-	$(BEAGLECC) $(MICROFLAGS) $(INCLUDES) -c $^ -o $@
-
-src/Net2ComBB.o: src/Net2Com.cpp
-	$(BEAGLECC) $(MICROFLAGS) $(INCLUDES) -c $^ -o $@
-
-NamedPipe-BB.a: src/NamedPipeBB.o
-	ar -cvq $@ $^
-
-Net2Com-BB.a: src/Net2ComBB.o
-	ar -cvq $@ $^
-
-staticlibsQ6.tar: src/NamedPipe-mbcc.a src/Net2Com-mbcc.a
-	mv $^ ./
-	tar -cf $@ include/NamedPipe.h include/Net2Com.h NamedPipe-mbcc.a Net2Com-mbcc.a
-
+make_dir:
+	mkdir -p bin && mkdir -p lib
 
 #
 #++++++++++++++++++++
 # 	CppUTest / PC
 #--------------------
+LIBS=-lshakespeare -lcs1_utls  
+CPPUTEST_LIBS=-lCppUTest -lCppUTestExt 
+
 #
 # All Object files, do not use wildcard, add the ones you need explicitly!
 #
@@ -97,29 +56,95 @@ CS1_UTEST_DIR="cs1_utest" # as defined in SpaceDecl.h
 UTEST_ENV=-DCS1_UTEST $(MEM_LEAK_MACRO) $(CPPUTEST_LIBS) 
 ENV = -DDEBUG  $(UTEST_ENV)  #-DPRESERVE
 
-buildBin: bin/space-commander
-
-test: bin/AllTests bin/space-commander
-	mkdir -p $(CS1_UTEST_DIR)
+buildBin: make_dir bin/space-commander
 
 bin/%.o: src/%.cpp include/%.h
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCLUDES) -c $< -o $@ $(ENV) 
-	
-bin/fileIO.o: $(SPACE_UPTDATER)/src/fileIO.cpp $(SPACE_UPTDATER)/include/fileIO.h
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCLUDES) -c $< -o $@ $(ENV)
-
-bin/dirUtl.o: $(SPACE_SCRIPT)/tgz-wizard/src/dirUtl.cpp $(SPACE_SCRIPT)/tgz-wizard/include/dirUtl.h
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCLUDES) -c $< -o $@ $(ENV)
-
-bin/AllTests: tests/unit/AllTests.cpp  $(UNIT_TEST) $(OBJECTS) bin/fileIO.o	 bin/dirUtl.o
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCLUDES) $(LIBPATH) -o $@ $^ $(LIBS) $(ENV)
 
 bin/space-commander: src/space-commander-main.cpp $(OBJECTS)
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCLUDES) $(LIBPATH) -o $@ $^ $(LIBS) $(ENV)
+
+test: make_dir bin/AllTests bin/space-commander
+	mkdir -p $(CS1_UTEST_DIR)
+
+bin/AllTests: tests/unit/AllTests.cpp  $(UNIT_TEST) $(OBJECTS) 
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCLUDES) $(LIBPATH) -o $@ $^ $(LIBS) $(ENV)
+
+
+#
+#++++++++++++++++++++
+#  MicroBlaze 
+#--------------------
+LIBS_Q6= -lshakespeare-mbcc -lcs1_utlsQ6
+
+OBJECTS_Q6 = bin/Net2ComQ6.o bin/NamedPipeQ6.o bin/command-factoryQ6.o bin/deletelog-commandQ6.o  bin/decode-commandQ6.o bin/getlog-commandQ6.o bin/gettime-commandQ6.o bin/reboot-commandQ6.o bin/settime-commandQ6.o bin/update-commandQ6.o bin/base64Q6.o bin/subsystemsQ6.o 
+
+buildQ6:  make_dir bin/space-commanderQ6
+	
+bin/%Q6.o: src/%.cpp include/%.h
+	$(MBCC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCLUDES) -c $< -o $@
+
+bin/space-commanderQ6: src/space-commander-main.cpp $(OBJECTS_Q6)
+	$(MBCC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCLUDES) $(LIBPATH) -o $@ $^ $(LIBS_Q6)
+
+
 #
 #
 #++++++++++++++++++++
 # Cleanup
 #--------------------
 clean:
-	rm -f *.o *~ ./bin/* AllTests  && rm -fr ./cs1_utest
+	rm -fr ./bin ./lib ./cs1_utest 
+
+
+
+
+#++++++++++++++++++++
+# buildLib 
+#--------------------
+staticlibs.tar: make_dir lib/NamedPipe.a lib/Net2Com.a
+	tar -cf $@ include/NamedPipe.h include/Net2Com.h lib/NamedPipe.a lib/Net2Com.a
+
+staticlibsQ6.tar: lib/NamedPipe-mbcc.a lib/Net2Com-mbcc.a
+	tar -cf $@ include/NamedPipe.h include/Net2Com.h lib/NamedPipe-mbcc.a lib/Net2Com-mbcc.a
+
+lib/NamedPipe.a: bin/NamedPipe.o
+	ar -cvq $@ $^
+
+lib/Net2Com.a: bin/Net2Com.o
+	ar -cvq $@ $^
+
+lib/NamedPipe-mbcc.a: bin/NamedPipeQ6.o
+	ar -cvq $@ $^
+
+lib/Net2Com-mbcc.a: bin/Net2ComQ6.o
+	ar -cvq $@ $^
+
+
+
+
+#
+#
+#=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# TODO cleanup what is below
+#=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+#
+#
+
+buildBB:
+	$(BEAGLECC) $(INCLUDES) $(DEBUGFLAGS) src/*.cpp -o bin/space-commanderBB
+
+%.a: %.o
+	ar -cvq $@ $^
+
+bin/NamedPipeBB.o: src/NamedPipe.cpp
+	$(BEAGLECC) $(MICROFLAGS) $(INCLUDES) -c $^ -o $@
+
+bin/Net2ComBB.o: src/Net2Com.cpp
+	$(BEAGLECC) $(MICROFLAGS) $(INCLUDES) -c $^ -o $@
+
+NamedPipe-BB.a: bin/NamedPipeBB.o
+	ar -cvq $@ $^
+
+Net2Com-BB.a: src/Net2ComBB.o
+	ar -cvq $@ $^

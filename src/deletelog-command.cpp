@@ -78,7 +78,7 @@ void* DeleteLogCommand::Execute()
 
     snprintf(buffer, CS1_PATH_MAX, "%s/%s", folder, this->filename);
 
-    #ifdef DEBUG
+    #ifdef CS1_DEBUG
         fprintf(stderr, "[DEBUG] %s():%d - %s/%s\n", __func__, __LINE__, folder, this->filename);
     #endif
 
@@ -139,7 +139,7 @@ void DeleteLogCommand::SaveFilename(ino_t inode)
     if (command_buf) {
         sprintf(command_buf, "%s%d%s", command_prefix, (unsigned int)inode, command_suffix);
 
-        #ifdef DEBUG
+        #ifdef CS1_DEBUG
             fprintf(stderr, "[DEBUG] %s:%d executing \'%s\'\n", __func__, __LINE__, command_buf);
         #endif
 

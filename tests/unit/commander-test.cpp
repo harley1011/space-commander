@@ -1,14 +1,14 @@
 /******************************************************************************
 *
-* AUTHOR :
+* AUTHOR : Joseph
 *
 * FILE : commander-test.cpp
 *
-* PURPOSE :
+* PURPOSE : Test the space-commander using the Net2Com interface.
 *
 * CREATION DATE : 06-06-2014
 *
-* LAST MODIFIED : Sat 21 Jun 2014 06:34:08 PM EDT
+* LAST MODIFIED : Sat 05 Jul 2014 09:05:27 PM EDT
 *
 ******************************************************************************/
 #include <stdlib.h>
@@ -27,15 +27,19 @@
 #include "fileIO.h"
 #include "SpaceString.h"
 #include "Net2Com.h"
+#include "dirUtl.h"
+#include "UTestUtls.h"
 
 #define RESULT_BUF_SIZE 50
 #define CMD_BUF_SIZE 25
 static char command_buf[CMD_BUF_SIZE] = {'\0'};
 #define SPACE_COMMANDER_BIN  "bin/space-commander" // use local bin, not the one unser CS1_APPS
 
+#define UTEST_SIZE_OF_TEST_FILES 6
+
+
 TEST_GROUP(CommanderTestGroup)
 {
-
     Net2Com* netman;
 
     void setup()
@@ -84,6 +88,65 @@ TEST_GROUP(CommanderTestGroup)
     }
 };
 
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ *
+ * GROUP : CommanderTestGroup
+ *
+ * NAME : GetLog_Oldest_Success 
+ *
+ *-----------------------------------------------------------------------------*/
+TEST(CommanderTestGroup, GetLog_Oldest_Success) 
+{
+    const char* path = CS1_TGZ"/Watch-Puppy20140101.txt";  
+    UTestUtls::CreateFile(CS1_TGZ"/Watch-Puppy20140101.txt", "file a");
+    usleep(1000000);
+    UTestUtls::CreateFile(CS1_TGZ"/Updater20140102.txt", "file b");
+    usleep(1000000);
+    UTestUtls::CreateFile(CS1_TGZ"/Updater20140103.txt", "file c");
+    usleep(5000);
+
+    char* result = 0;
+    const char* dest = CS1_TGZ"/Watch-Puppy20140101.txt-copy";
+
+
+    // This is the Command to create on the ground.
+    GetLogCommand ground_cmd(OPT_NOOPT, 0, 0, 0);
+    ground_cmd.GetCmdStr(command_buf);
+
+    ICommand *command = CommandFactory::CreateCommand(command_buf);
+    result = (char*)command->Execute();
+
+    InfoBytes getlog_info = *static_cast<InfoBytes*>(dynamic_cast<GetLogCommand*>(command)->ParseResult(result, dest));
+
+    #ifdef CS1_DEBUG
+    std::cerr << "[DEBUG] " << __FILE__ << " indoe is "  << getlog_info.inode << endl;
+    #endif
+
+    CHECK_EQUAL(0, getlog_info.next_file_in_result_buffer);
+    CHECK(*(result + GETLOG_INFO_SIZE + UTEST_SIZE_OF_TEST_FILES) == EOF);
+    CHECK(*(result + GETLOG_INFO_SIZE + UTEST_SIZE_OF_TEST_FILES + 1) == EOF);
+    CHECK(diff(dest, path));     
+
+    // Cleanup
+    if (command){
+        delete command;
+        command = NULL;
+    }
+
+    if (result) {
+        free(result);
+        result = 0;
+    }
+
+}
+
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ *
+ * GROUP : CommanderTestGroup
+ *
+ * NAME : DeleteLog_Success 
+ *
+ *-----------------------------------------------------------------------------*/
 TEST(CommanderTestGroup, DeleteLog_Success) 
 {
     char result[RESULT_BUF_SIZE] = {0};
@@ -112,7 +175,7 @@ TEST(CommanderTestGroup, DeleteLog_Success)
     snprintf(command_buf, 3, "7I");  // 7 is the command number, I means inode
     memcpy(command_buf + 2, inode_str, 4);
 
-    #ifdef DEBUG
+    #ifdef CS1_DEBUG
         fprintf(stderr, "[DEBUG] %s:%s:%d filetest_path is : %s\n", __FILE__, __func__, __LINE__, filetest_path);
         fprintf(stderr, "[DEBUG] %s:%s:%d inode is : %d\n", __FILE__, __func__, __LINE__, (unsigned int)inode);
     #endif
@@ -138,3 +201,5 @@ TEST(CommanderTestGroup, DeleteLog_Success)
     strncpy(status, result, 1);
     CHECK_EQUAL(0, atoi(status));
 }
+
+

@@ -79,7 +79,7 @@ ARGUMENTS="$ARGUMENTS $SINGLE_TEST"
 if [ $CLEAN -eq 1 ]; then
     echo ""
     echo "=== Clean ==="
-    make clean
+    make clean || exit 1
 fi
 
 echo ""
@@ -109,7 +109,7 @@ while [ $counter -lt $MULTIPLE_RUN ]; do
 
     if [ $? -ne 0 ]; then
         echo -e "\e[31m UTest Failure!\e[0m"
-        break;
+        exit 1
     else 
         echo -e "\e[32m UTest Success!\e[0m"
     fi
