@@ -1,10 +1,10 @@
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 *
-* AUTHORS : Space Concordia 2014, Joseph
+* AUTHORS : Space Concordia 2014, Harley
 *
-* TITLE : getlog-command-test.cpp 
+* TITLE : settime-command-test.cpp 
 *
-* DESCRIPTION : Tests the GetLogCommand class
+* DESCRIPTION : Tests the SetTimeCommand class
 *
 *----------------------------------------------------------------------------*/
 #include <time.h>
@@ -15,7 +15,7 @@
 
 #include "CppUTest/TestHarness.h"
 #include "CppUTest/MemoryLeakDetectorMallocMacros.h"
-
+#include "shakespeare.h"
 #include "SpaceDecl.h"
 #include "SpaceString.h"
 #include "command-factory.h"
@@ -50,46 +50,35 @@ TEST_GROUP(SetTimeTestGroup)
 *
 * GROUP : SetTimeTestGroup
 *
-* NAME : GetInfoBytes_returnsCorrectInfoBytes
+* NAME : Check_Settime
 * 
 *-----------------------------------------------------------------------------*/
-TEST(SetTimeTestGroup, Check_Time)
-{
-
-    time_t rawtime;
-    time(&rawtime);
-    SetTimeCommand* command = new SetTimeCommand(rawtime);
-    std::cerr << "[DEBUG] " << __FILE__ << "Seconds elapsed " << command->GetSeconds() << endl; 
-    if ( command != NULL)
-    {
-        delete command;
-        command = NULL;
-    }
-}
-TEST(SetTimeTestGroup, Check_Command)
+TEST(SetTimeTestGroup, Check_Settime)
 {
     time_t rawtime;
     time(&rawtime);
 
     command_buf[0] = '0';
-    memcpy(command_buf+1,&rawtime,8);
+    memcpy(command_buf+1,&rawtime,sizeof(rawtime));
     int* result = 0; 
     ICommand* command = CommandFactory::CreateCommand(command_buf);
     result = (int*)command->Execute();
-    CHECK(result);    
-    std::cerr << "[DEBUG] " << __FILE__ << "Raw Seconds elapsed " << rawtime << endl;
-/*    FILE* logfile;
+    CHECK(result);
+    time_t newtime;
+    time(&newtime);
+    CHECK(newtime-rawtime < 1);        
+    std::cerr << "[DEBUG] " << __FILE__ << "Raw Seconds elapsed " << rawtime << " time is currently " << newtime << " difference is " << newtime - rawtime << endl;
+    FILE* logfile;
     logfile=Shakespeare::open_log("/var/log/job-template",PROCESS);
      // write to log via shakespeare
      if(logfile!=NULL) {
         Shakespeare::log(logfile, Shakespeare::NOTICE, PROCESS, sprintf("Raw seconds elapsed since epoch is %d", rawtime ));
-        } */
+        } 
     if ( command != NULL)
     {
         delete command;
         command = NULL;
     }
-   // STRCMP_EQUAL(15, day);
 }
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 *
@@ -100,6 +89,12 @@ TEST(SetTimeTestGroup, Check_Command)
 *-----------------------------------------------------------------------------*/
 TEST(SetTimeTestGroup, Check_Bytes_Of_Timet_On_System)
 {
-    time_t test;
-    CHECK(sizeof(test) == SETTIME_CMD_SIZE - 1 );
+    CHECK(sizeof(time_t) ==  SIZEOF_TIMET );
 }
+TEST(SetTimeTestGroup, Endian_Checker)
+{ 
+    short x=0x0100;
+    char  temp = (*(char *)&x);
+    CHECK(temp == LE);
+}
+
