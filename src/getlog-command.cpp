@@ -88,7 +88,7 @@ void* GetLogCommand::Execute()
 
     while (number_of_files_to_retreive) { 
         file_to_retreive = this->GetNextFile();
-#ifdef DEBUG
+#ifdef CS1_DEBUG
         fprintf(stderr, "[DEBUG] %s() - file_to_retreive : %s\n", __func__, file_to_retreive);
 #endif
 
@@ -171,7 +171,7 @@ size_t GetLogCommand::ReadFile_FromStartToEnd(char *buffer, const char *filename
     bytes = fread(buffer, 1, size, pFile);
 
     if (feof(pFile)) {
-        #ifdef DEBUG
+        #ifdef CS1_DEBUG
             fprintf(stderr, "%s EOF reached \n", __func__);
         #endif
     } else {
@@ -302,7 +302,7 @@ void GetLogCommand::MarkAsProcessed(const char *filepath)
     struct stat attr;
     stat(filepath, &attr);
 
-#ifdef DEBUG
+#ifdef CS1_DEBUG
     fprintf(stderr, "[DEBUG] %s() - inode %d\n", __func__, (unsigned int)attr.st_ino);
 #endif
     this->processed_files[this->number_of_processed_files] = attr.st_ino;
@@ -320,7 +320,7 @@ bool GetLogCommand::isFileProcessed(unsigned long inode)
 {
     for (size_t i = 0; i < this->number_of_processed_files; i++) {
         if (inode == this->processed_files[i]) {
-#ifdef DEBUG
+#ifdef CS1_DEBUG
             fprintf(stderr, "[DEBUG] %s() - inode %d\n", __func__, (unsigned int)inode);
 #endif
             return true;

@@ -118,7 +118,7 @@ TEST(CommanderTestGroup, GetLog_Oldest_Success)
 
     InfoBytes getlog_info = *static_cast<InfoBytes*>(dynamic_cast<GetLogCommand*>(command)->ParseResult(result, dest));
 
-    #ifdef DEBUG
+    #ifdef CS1_DEBUG
     std::cerr << "[DEBUG] " << __FILE__ << " indoe is "  << getlog_info.inode << endl;
     #endif
 
@@ -175,7 +175,7 @@ TEST(CommanderTestGroup, DeleteLog_Success)
     snprintf(command_buf, 3, "7I");  // 7 is the command number, I means inode
     memcpy(command_buf + 2, inode_str, 4);
 
-    #ifdef DEBUG
+    #ifdef CS1_DEBUG
         fprintf(stderr, "[DEBUG] %s:%s:%d filetest_path is : %s\n", __FILE__, __func__, __LINE__, filetest_path);
         fprintf(stderr, "[DEBUG] %s:%s:%d inode is : %d\n", __FILE__, __func__, __LINE__, (unsigned int)inode);
     #endif
