@@ -11,6 +11,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <dirent.h>
+#include <iostream>
 #include <limits.h>
 #include <time.h>
 #include <string.h>
@@ -22,7 +23,7 @@
 #include "commands.h"
 #include "getlog-command.h"
 
-extern const char* s_cs1_subsystems[];  // defined in sybsystems.cpp
+extern const char* s_cs1_subsystems[];  // defined in subsystems.cpp
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 *
@@ -63,7 +64,7 @@ GetLogCommand::~GetLogCommand()
 * 
 * PURPOSE : Executes the GetLogCommand.
 *           - if no OPT_SIZE is not specified, retreives one tgz
-*           - if OPT_SIZE is specified, retreives floor(SIZE / CS1_TGZ_MAX) tgzs
+*           - if OPT_SIZE is specified, retreives floor(SIZE / CS1_MAX_FRAME_SIZE) tgzs
 *
 *-----------------------------------------------------------------------------*/
 void* GetLogCommand::Execute()
@@ -76,22 +77,22 @@ void* GetLogCommand::Execute()
     char *result = 0;
 
     char filepath[CS1_PATH_MAX] = {'\0'};
-    char buffer[CS1_TGZ_MAX] = {'\0'};
+    char buffer[CS1_MAX_FRAME_SIZE] = {'\0'};
     char *file_to_retreive = 0;
     size_t bytes = 0;
     size_t number_of_files_to_retreive = 1;         // defaults to 1
 
     if (OPT_ISSIZE(this->opt_byte)) { 
-        number_of_files_to_retreive = this->size / CS1_TGZ_MAX;
+        number_of_files_to_retreive = this->size / CS1_MAX_FRAME_SIZE;
     }
 
     while (number_of_files_to_retreive) { 
         file_to_retreive = this->GetNextFile();
-#ifdef DEBUG
+#ifdef CS1_DEBUG
         fprintf(stderr, "[DEBUG] %s() - file_to_retreive : %s\n", __func__, file_to_retreive);
 #endif
 
-        GetLogCommand::BuildPath(filepath, CS1_TGZ, file_to_retreive);
+        SpaceString::BuildPath(filepath, CS1_TGZ, file_to_retreive);
 
         // Prepares Info bytes 
         GetLogCommand::GetInfoBytes(buffer, filepath);
@@ -100,7 +101,7 @@ void* GetLogCommand::Execute()
         // Reads the file in 'buffer'
         bytes += GetLogCommand::ReadFile(buffer + bytes, filepath); 
 
-        // add END byte
+        // add END bytes 
         bytes += GetLogCommand::GetEndBytes(buffer + bytes);
 
         // Track
@@ -112,11 +113,17 @@ void* GetLogCommand::Execute()
                                          */
     }
 
+    // add END bytes
+    bytes += GetLogCommand::GetEndBytes(buffer + bytes);
+
     // allocate the result buffer
     result = (char*)malloc(sizeof(char) * bytes);
 
-    // Saves the tgz data in th result buffer
-    memcpy(result, buffer, bytes);
+    if (result) {
+        // Saves the tgz data in th result buffer
+        memcpy(result, buffer, bytes);
+    }
+
 
     return (void*)result;
 }
@@ -126,12 +133,12 @@ void* GetLogCommand::Execute()
 * NAME : ReadFile
 * 
 * PURPOSE : Reads the specefied file into the specified buffer.
-*           N.B. max size is CS1_TGZ_MAX
+*           N.B. max size is CS1_MAX_FRAME_SIZE
 *
 *-----------------------------------------------------------------------------*/
 size_t GetLogCommand::ReadFile(char *buffer, const char *filename)
 {
-    return GetLogCommand::ReadFile_FromStartToEnd(buffer, filename, START, CS1_TGZ_MAX);
+    return GetLogCommand::ReadFile_FromStartToEnd(buffer, filename, START, CS1_MAX_FRAME_SIZE);
 }
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -162,6 +169,14 @@ size_t GetLogCommand::ReadFile_FromStartToEnd(char *buffer, const char *filename
 
     fseek(pFile, start, 0);
     bytes = fread(buffer, 1, size, pFile);
+
+    if (feof(pFile)) {
+        #ifdef CS1_DEBUG
+            fprintf(stderr, "%s EOF reached \n", __func__);
+        #endif
+    } else {
+        fprintf(stdout, "[ERROR], %s:%s:%d - EOF has not been reached, the file will be incomplete", __FILE__, __func__, __LINE__);
+    }
 
     // Cleanup
     if (pFile) {
@@ -242,6 +257,11 @@ char* GetLogCommand::FindOldestFile(const char* directory_path, const char* patt
     time_t current_timeT = 0;
     char buffer[CS1_PATH_MAX] = {'\0'};
     char* oldest_filename = (char*)malloc(sizeof(char) * CS1_NAME_MAX);
+
+    if (!oldest_filename) {
+        return 0;
+    }
+
     memset(oldest_filename, '\0', CS1_NAME_MAX * sizeof(char));
     
     dir = opendir(directory_path);
@@ -251,7 +271,7 @@ char* GetLogCommand::FindOldestFile(const char* directory_path, const char* patt
                 && !this->isFileProcessed(dir_entry->d_ino) // is NOT processed
                     && GetLogCommand::prefixMatches(dir_entry->d_name, pattern)) 
         { 
-            GetLogCommand::BuildPath(buffer, directory_path, dir_entry->d_name);
+            SpaceString::BuildPath(buffer, directory_path, dir_entry->d_name);
 
             current_timeT = GetLogCommand::GetFileLastModifTimeT(buffer); 
 
@@ -282,7 +302,7 @@ void GetLogCommand::MarkAsProcessed(const char *filepath)
     struct stat attr;
     stat(filepath, &attr);
 
-#ifdef DEBUG
+#ifdef CS1_DEBUG
     fprintf(stderr, "[DEBUG] %s() - inode %d\n", __func__, (unsigned int)attr.st_ino);
 #endif
     this->processed_files[this->number_of_processed_files] = attr.st_ino;
@@ -300,7 +320,7 @@ bool GetLogCommand::isFileProcessed(unsigned long inode)
 {
     for (size_t i = 0; i < this->number_of_processed_files; i++) {
         if (inode == this->processed_files[i]) {
-#ifdef DEBUG
+#ifdef CS1_DEBUG
             fprintf(stderr, "[DEBUG] %s() - inode %d\n", __func__, (unsigned int)inode);
 #endif
             return true;
@@ -375,25 +395,6 @@ char* GetLogCommand::Build_GetLogCommand(char command_buf[GETLOG_CMD_SIZE], char
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 *
-* NAME : BuildPath 
-* 
-* PURPOSE : Builds a path 'dir/file' and saves it into 'path_buf', the caller
-*           has to make sure path_buf is large enough.
-*
-*-----------------------------------------------------------------------------*/
-char* GetLogCommand::BuildPath(char *path_buf, const char *dir, const char *file)
-{
-    assert(strlen(dir) + strlen(file) + 1 < CS1_PATH_MAX);
-
-    strcpy(path_buf, dir);
-    strcat(path_buf, "/");
-    strcat(path_buf, file);
-
-    return path_buf;
-}
-
-/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-*
 * NAME : GetInfoBytes 
 * 
 * PURPOSE : Builds and saves the info bytes for the file 'filepath' at the 
@@ -438,9 +439,11 @@ int GetLogCommand::GetEndBytes(char *buffer)
 *           the InfoBytes struct at *pInfo with those data.
 *
 *-----------------------------------------------------------------------------*/
-InfoBytes* BuildInfoBytesStruct(InfoBytes* pInfo, const char *buffer)
+InfoBytes* GetLogCommand::BuildInfoBytesStruct(InfoBytes* pInfo, const char *buffer)
 {
-   pInfo->inode = SpaceString::getUInt(buffer); 
+    if (pInfo) {
+        pInfo->inode = SpaceString::getUInt(buffer); 
+    }
 
    return pInfo;
 }
@@ -458,4 +461,98 @@ ino_t GetLogCommand::GetInoT(const char *filepath)
     stat(filepath, &attr);
 
     return attr.st_ino;
+}
+
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*
+* NAME : GetCmdStr
+* 
+* PURPOSE : Builds a GetLogCommand and saves it into 'cmd_buf', meant to be
+*           use by the GroundCommander. 
+*
+*-----------------------------------------------------------------------------*/
+char* GetLogCommand::GetCmdStr(char* cmd_buf)
+{
+    GetLogCommand::Build_GetLogCommand(cmd_buf,
+                                       this->opt_byte,
+                                       this->subsystem,
+                                       this->size,
+                                       this->date.GetTimeT());
+    
+    return cmd_buf;
+}
+
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*
+* NAME : ParseResult                                                        TODO UnitTest me
+* 
+* PURPOSE : Parses the result buffer returned by the execute function.
+*
+* ARGUMENTS : result    : pointer to the result buffer
+*             filepath  : string of the form "path/file.log" (if the file exists,
+*                         it will be overwritten)
+*   
+* RETURN : struct InfoBytes* to STATIC memory (Make a COPY!)
+*
+* DESCRIPTION :
+*
+*-----------------------------------------------------------------------------*/
+void* GetLogCommand::ParseResult(const char *result, const char *filename)
+{
+    if (!result) {
+        return 0;
+    }
+
+    static struct InfoBytes info_bytes = {0};
+
+    // 1. Get InfoBytes
+    this->BuildInfoBytesStruct(&info_bytes, result);
+    result += GETLOG_INFO_SIZE; 
+
+    // 2. Save data as a file
+    FILE *pFile = fopen(filename, "wb");
+
+    if (!pFile) {
+        fprintf(stderr, "[ERROR] %s:%s:%d cannot create the file %s\n", __FILE__, __func__, __LINE__, filename);
+    }
+
+    while (*result != EOF) {
+        fwrite(result, 1, 1, pFile);       
+        result++;
+    }
+
+    fclose(pFile);
+
+    info_bytes.next_file_in_result_buffer = this->HasNextFile(result);
+
+    return (void*)&info_bytes; 
+}
+
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*
+* NAME : HasNextFile 
+* 
+* PURPOSE : Check if END bytes (2x) are there (i.e. EOF EOF EOF EOF) 
+*           This means that there is no more files in the result buffer.
+*   
+*-----------------------------------------------------------------------------*/
+const char* GetLogCommand::HasNextFile(const char* result)
+{
+    int eof_count = 0;
+    const char *current_char = result;
+
+    while(*current_char == EOF) {
+        eof_count++;    
+        current_char++;
+    }
+
+    if (eof_count == 4) {
+        return 0;
+    }
+
+    if (eof_count == 2) {
+        return result + 2;
+    }
+
+    return 0;
 }

@@ -1,8 +1,0 @@
-alias 1='make buildUnitTests && ./bin/AllUnitTests'
-alias 2='make buildIntegrationTests && ./bin/AllIntegrationTests'
-alias 3='gdb bin/AllUnitTests -tui'
-alias 4='gdb bin/AllIntegrationTests'
-alias 5='vim src/parser.cpp'
-alias 6='vim tests/unit/command-factory-test.cpp'
-alias 7='make buildBin'
-alias 8='vim Makefile'

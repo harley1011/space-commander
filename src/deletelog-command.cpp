@@ -19,15 +19,12 @@
 *-----------------------------------------------------------------------------*/
 DeleteLogCommand::DeleteLogCommand(const char* filename) 
 {
-    int filename_len = strlen(filename) + 1;
-    
-    this->filename = (char*)malloc(sizeof(char) * filename_len);
+    memset(this->filename, '\0', CS1_PATH_MAX);
 
-    if (this->filename != NULL) {
-        snprintf(this->filename, filename_len, "%s", filename); // Make a copy!
+    if (filename) {
+        snprintf(this->filename, strlen(filename) + 1, "%s", filename); // Make a copy!
+        this->FindType();
     }
-
-    this->FindType();
 }
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -40,15 +37,7 @@ DeleteLogCommand::DeleteLogCommand(const char* filename)
 DeleteLogCommand::DeleteLogCommand(ino_t inode)
 {
     this->SaveFilename(inode);
-
-    char* s_str = this->ExtractFilenameFromFile();
-
-    this->filename = (char*)malloc(sizeof(char) * (strlen(s_str) + 1));
-
-    if (this->filename) {
-        strcpy(this->filename, s_str);
-    }
-
+    this->ExtractFilenameFromFile();
     this->FindType();
 }
 
@@ -59,10 +48,7 @@ DeleteLogCommand::DeleteLogCommand(ino_t inode)
 *-----------------------------------------------------------------------------*/
 DeleteLogCommand::~DeleteLogCommand() 
 {
-    if (filename != NULL) {
-        free(filename);
-        filename = NULL;
-    }
+    //    
 }
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -92,7 +78,7 @@ void* DeleteLogCommand::Execute()
 
     snprintf(buffer, CS1_PATH_MAX, "%s/%s", folder, this->filename);
 
-    #ifdef DEBUG
+    #ifdef CS1_DEBUG
         fprintf(stderr, "[DEBUG] %s():%d - %s/%s\n", __func__, __LINE__, folder, this->filename);
     #endif
 
@@ -106,8 +92,12 @@ void* DeleteLogCommand::Execute()
     
     strncat(buffer, this->filename, CS1_PATH_MAX);
     char* result = (char*)malloc(sizeof(char) * size);
-    snprintf(result, size, "%s", buffer); 
-    return result;
+    
+    if (result) {
+        snprintf(result, size, "%s", buffer); 
+    }
+
+    return (void*)result;
 }
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -120,10 +110,10 @@ void* DeleteLogCommand::Execute()
 *-----------------------------------------------------------------------------*/
 char DeleteLogCommand::FindType()
 {
-    this->type = LOG;
+    this->type = TGZ;
 
-    if (strstr(this->filename, ".tgz")) {
-        this->type = TGZ;
+    if (strstr(this->filename, "log")) {
+        this->type = LOG;
     }
 
     return this->type;
@@ -138,22 +128,23 @@ char DeleteLogCommand::FindType()
 *-----------------------------------------------------------------------------*/
 void DeleteLogCommand::SaveFilename(ino_t inode)
 {
-    const char* command_prefix = "find "CS1_TGZ" -inum ";
+    const char* command_prefix = "find "CS1_TGZ"/ -inum ";
     const char* command_suffix = " > "CS1_TMP"/"FILENAME_TMP;
     char inode_str[15] = {'\0'};
     sprintf(inode_str, "%d", (unsigned int)inode);
     const size_t COMMAND_BUF_SIZE = strlen(command_prefix) + strlen(command_suffix) + strlen(inode_str) + 1;
+
     char* command_buf = (char*)malloc(sizeof(char) * COMMAND_BUF_SIZE);
 
-    sprintf(command_buf, "%s%d%s", command_prefix, (unsigned int)inode, command_suffix);
-
-    #ifdef DEBUG
-        fprintf(stderr, "[DEBUG] %s:%d executing \'%s\'\n", __func__, __LINE__, command_buf);
-    #endif
-
-    system(command_buf);
-
     if (command_buf) {
+        sprintf(command_buf, "%s%d%s", command_prefix, (unsigned int)inode, command_suffix);
+
+        #ifdef CS1_DEBUG
+            fprintf(stderr, "[DEBUG] %s:%d executing \'%s\'\n", __func__, __LINE__, command_buf);
+        #endif
+
+        system(command_buf);
+
         free(command_buf);
         command_buf = 0;
     }
@@ -172,19 +163,21 @@ char* DeleteLogCommand::ExtractFilenameFromFile()
 {
     const char* tmp = CS1_TMP"/"FILENAME_TMP;
     FILE* file = fopen(tmp, "r");
-    static char filename[CS1_PATH_MAX] = {'\0'};
+    char filestr[CS1_NAME_MAX] = {'\0'};
 
     if (file) {
-        fscanf(file, "%s", filename);
+        fscanf(file, "%s", filestr);
         fclose(file);
         file = 0;
     }
 
-    while(strchr(filename, '/')) {                                 // We keep what is after the last '/'
-        strcpy(filename, strchr(filename,'/') + 1);                // +1 to get rid of the '/'
+    if (strrchr(filestr, '/')) {                                 // We keep what is after the last '/'
+        strcpy(filestr, strrchr(filestr,'/') + 1);                // +1 to get rid of the '/'
     }
 
     remove(tmp);
 
-    return filename;
+    strncpy(this->filename, filestr, CS1_PATH_MAX);
+
+    return this->filename;
 }

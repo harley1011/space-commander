@@ -1,5 +1,3 @@
-#include "Net2Com.h"
-#include "command-factory.h"
 #include <cstdio>
 #include <cstdlib>
 #include <time.h>
@@ -7,6 +5,10 @@
 #include <signal.h>
 #include <unistd.h>
 #include <inttypes.h>
+
+#include "Net2Com.h"
+#include "command-factory.h"
+#include "SpaceDecl.h"
 
 const string LAST_COMMAND_FILENAME("last-command");
 const int COMMAND_RESEND_INDEX = 0;
@@ -16,11 +18,13 @@ const int MAX_COMMAND_SIZE     = 255;
 const char ERROR_CREATING_COMMAND  = '1';
 const char ERROR_EXECUTING_COMMAND = '2';
 
-const int SLEEP_TIME = 10;
+// Declarations
+void out_of_memory_handler();
 
-pid_t get_watch_puppy_pid() {
+pid_t get_watch_puppy_pid() 
+{
     const int BUFFER_SIZE = 10;
-    string filename = "/home/pids/watch-puppy.pid";
+    string filename = CS1_WATCH_PUPPY_PID; 
     char buffer[BUFFER_SIZE] = {0};
     FILE* fp = fopen(filename.c_str(), "r");
 
@@ -28,29 +32,50 @@ pid_t get_watch_puppy_pid() {
         fread(buffer, BUFFER_SIZE, sizeof(char), fp);
         fclose(fp);
         return atoi(buffer);
-    }
-    else {
+    } else {
         return 0;
     }
 }
 
-void signal_watch_puppy() {
+void signal_watch_puppy() 
+{
     pid_t pid = get_watch_puppy_pid();
+
     if (pid > 0) {
         kill(pid, SIGUSR2);
     }
 }
 
-int main() {
-    char info_buffer[255];
-    char* buffer = NULL;
-    char* previous_command_buffer = NULL;
-    Net2Com* commander = new Net2Com(Dcom_w_net_r, Dnet_w_com_r, Icom_w_net_r, Inet_w_com_r);
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ *
+ * NAME : main 
+ *
+ * DESCRIPTION : space-commander main 
+ *
+ *-----------------------------------------------------------------------------*/
+int main() 
+{
+    set_new_handler(&out_of_memory_handler);
+
+    char info_buffer[255] = {'\0'};
+    char previous_command_buffer[MAX_COMMAND_SIZE] = {'\0'};
+    char* buffer = NULL;    // TODO  This buffer scared me ! 
+    Net2Com* commander = 0; 
     ICommand* command  = NULL;
     unsigned char read = 0;
     int read_total     = 0;
 
-    printf("Commander waiting commands from ground...\n");
+    commander = new Net2Com(Dcom_w_net_r, Dnet_w_com_r, Icom_w_net_r, Inet_w_com_r);
+
+    if (!commander) {
+        fprintf(stderr, "[ERROR] %s:%s:%d Failed in Net2Com instanciation\n", 
+                                                __FILE__, __func__, __LINE__);
+        return EXIT_FAILURE; /* watch-puppy will take care of 
+                              * restarting space-commander
+                              */
+    }
+
+    fprintf(stderr, "Commander waiting commands from ground...\n");
 
     while (true) {
         memset(info_buffer, 0, sizeof(char) * 255);
@@ -60,7 +85,7 @@ int main() {
             for(int i = 0; i != bytes; i++) {
                 read = (unsigned char)info_buffer[i];
 
-                printf("Read from info pipe = %d bytes\n", read);
+                fprintf(stderr, "Read from info pipe = %d bytes\n", read);
                 fflush(stdout);
 
                 switch (read) {
@@ -74,17 +99,17 @@ int main() {
                             data_bytes = commander->ReadFromDataPipe(buffer, read_total);
 
                             if (data_bytes > 0) {
-                                printf("Read %zu bytes from ground station: ", data_bytes);
+                                fprintf(stderr, "Read %d bytes from ground station: ", data_bytes);
                                 fflush(stdout);
                                 for(uint8_t z = 0; z < data_bytes; ++z){
                                     uint8_t c = buffer[z];
-                                    printf("0x%02X ", c);
+                                    fprintf(stderr, "0x%02X ", c);
                                 }
-                                printf("\n");
+                                fprintf(stderr, "\n");
                                 fflush(stdout);
 
                                 if (data_bytes != read_total) {
-                                    printf("Something went wrong !!\n");
+                                    fprintf(stderr, "Something went wrong !!\n");
                                     fflush(stdout);
                                     read_total = 0;
                                     break;
@@ -99,22 +124,21 @@ int main() {
                                         retry -=1;
                                     }
 
-                                    if (fp_last_command != NULL){
-                                        previous_command_buffer = (char*) malloc(MAX_COMMAND_SIZE);
+                                    if (fp_last_command != NULL) {
                                         fread(previous_command_buffer, sizeof(char), MAX_COMMAND_SIZE, fp_last_command);
                                         fclose(fp_last_command);
                                         command = CommandFactory::CreateCommand(previous_command_buffer);
                                         if (command != NULL) {
-                                            printf("%s\n", "Executing command");
+                                            fprintf(stderr, "%s\n", "Executing command");
                                             fflush(stdout);
 
                                             char* result  = (char* )command->Execute();
                                             if (result != NULL) {
-                                                printf("Command output = %s", result);
+                                                fprintf(stderr, "Command output = %s\n", result);
                                                 fflush(stdout);
 
                                                 commander->WriteToDataPipe(result);
-                                                free(result);
+                                                free(result); // TODO allocate result buffer with new in all icommand subclasses and use delete
                                                 result = NULL;
                                             } else {
                                                 commander->WriteToInfoPipe(ERROR_EXECUTING_COMMAND);
@@ -126,9 +150,7 @@ int main() {
                                             commander->WriteToInfoPipe(ERROR_CREATING_COMMAND);
                                         }
 
-                                        free(previous_command_buffer);
-                                        previous_command_buffer = NULL;
-
+                                        memset(previous_command_buffer, '\0', MAX_COMMAND_SIZE);
                                     }
                                 } else {
 
@@ -147,7 +169,7 @@ int main() {
                                 buffer = NULL;
                             }
 
-                            sleep(SLEEP_TIME);
+                            sleep(COMMANER_SLEEP_TIME);
                             signal_watch_puppy();
                         } //end while
 
@@ -156,7 +178,7 @@ int main() {
                     }
                     default:
                         read_total += read;
-                        buffer = (char* )realloc(buffer, read_total * sizeof(char));
+                        buffer = (char* )realloc(buffer, read_total * sizeof(char)); // todo get rid of this realloc! use new instead
                         memset(buffer, 0, sizeof(char) * read_total);
                         break;
                 } // end switch
@@ -165,10 +187,27 @@ int main() {
         } // end if
 
 
-        sleep(SLEEP_TIME);
+        sleep(COMMANER_SLEEP_TIME);
         signal_watch_puppy();
     }
 
-    delete commander;
+    if (commander) {
+        delete commander;
+        commander = 0;
+    }
+
     return 0;
+}
+
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ *
+ * NAME : out_of_memory_handler 
+ *
+ * DESCRIPTION : This function is called when memory allocation with new fails.
+ *
+ *-----------------------------------------------------------------------------*/
+void out_of_memory_handler()
+{
+    std::cerr << "[ERROR] new failed\n";
+    throw bad_alloc();
 }

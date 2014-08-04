@@ -34,6 +34,26 @@ Net2Com::Net2Com(pipe_num_t dataw, pipe_num_t datar, pipe_num_t infow, pipe_num_
     infoPipe_r->Open('r');
 }
 
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*
+* NAME : create_commander
+*
+*-----------------------------------------------------------------------------*/
+Net2Com* Net2Com::create_netman()
+{
+    return new Net2Com(Dnet_w_com_r, Dcom_w_net_r,  Inet_w_com_r, Icom_w_net_r);
+}
+
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*
+* NAME : create_commander
+*
+*-----------------------------------------------------------------------------*/
+Net2Com* Net2Com::create_commander()
+{
+    return new Net2Com(Dcom_w_net_r, Dnet_w_com_r, Icom_w_net_r, Inet_w_com_r);
+}
+
 //----------------------------------------------
 //  Destructor
 //----------------------------------------------
