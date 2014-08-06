@@ -12,34 +12,25 @@
 #include "icommand.h"
 #include <cstdlib>
 
+#define TIMETAG_CMD_SIZE 255
+
 using namespace std;
 
 class TimetagCommand : public ICommand {
+private :
+    char * command;
+    time_t timestamp;
+
 public: 
-    TimetagCommand(char * command, char * date_time) {
-        this->command = command;
-        this->date_time = date_time;
-    }
-    
-    ~TimetagCommand() {
-        if (command != NULL) {
-            delete command;
-            command = NULL;
-        }
-    }
+    TimetagCommand(char * command, time_t timestamp);
+    ~TimetagCommand();
 
     void * Execute();
     std::string SysExec(char* orig_cmd); 
     char * GetCustomTime(std::string format, int moreminutes);
-    int AddJob(char * date_time, char * executable);
+    int AddJob(time_t timestamp, char * executable);
     int CancelJob(const int job_id);
 
-    char * GetCommand() { return command; }
-    char * GetDateTime() { return date_time; }
-
-private:
-    char * command;
-    char * date_time;
-};
-
+    char * GetCommand();
+    char * GetDateTime();
 #endif 

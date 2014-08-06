@@ -12,12 +12,8 @@
 #include <dirent.h>     // DIR
 #include <sys/types.h>
 #include <sys/stat.h>
-
 #include "CppUTest/TestHarness.h"
 #include "CppUTest/MemoryLeakDetectorMallocMacros.h"
-
-#include "SpaceDecl.h"
-
 #include "SpaceString.h"
 #include "command-factory.h"
 #include "timetag-command.h"
@@ -27,19 +23,19 @@
 #include "subsystems.h"
 #include "dirUtl.h"
 
-static char command_buf[GETLOG_CMD_SIZE] = {'\0'};
+#include "SpaceDecl.h"
 
-static void create_file(const char* path, const char* msg);
-
-#define UTEST_SIZE_OF_TEST_FILES 6
-static const char* data_6_bytes = "123456";
+static char command_buf[TIMETAG_CMD_SIZE] = {'\0'};
 
 TEST_GROUP(TimetagTestGroup)
 {
-    void setup(){
-        memset(command_buf, 0, GETLOG_CMD_SIZE);
+    void setup()
+    {
+        memset(command_buf, 0, TIMETAG_CMD_SIZE);
     }
-    void teardown(){
+    void teardown()
+    {
+    
     }
 };
 

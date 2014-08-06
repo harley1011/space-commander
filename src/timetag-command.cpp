@@ -1,3 +1,10 @@
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*
+* AUTHORS : Space Concordia 2014, Shawn 
+*
+* TITLE : timetag-command.cpp
+*
+*----------------------------------------------------------------------------*/
 #include "timetag-command.h"
 #include <cerrno>
 #include <sys/time.h>
@@ -8,10 +15,23 @@
 #define CMD_BUFFER_LEN 190
 #define AT_RUNNER "/usr/bin/at-runner.sh"
 
-void* TimetagCommand::Execute(){
-    // schedule stuff
+TimetagCommand::TimetagCommand(char * command, char * date_time)
+{
+    this->command = command;
+    this->date_time = date_time;
+}
 
-    return NULL;
+TimetagCommand::~TimetagCommand()
+{
+    if (command != NULL) {
+        delete command;
+        command = NULL;
+    }
+}
+
+void* TimetagCommand::Execute()
+{
+    return TimetagCommand::AddJob(this->date_time,this->command);
 }
 
 /**
