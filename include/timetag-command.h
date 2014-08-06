@@ -30,6 +30,7 @@ public:
     char * GetCustomTime(std::string format, int moreminutes);
     int AddJob(time_t timestamp, char * executable);
     int CancelJob(const int job_id);
+    void * ParseResult(const char * result);
 
     char * GetCommand();
     char * GetDateTime();

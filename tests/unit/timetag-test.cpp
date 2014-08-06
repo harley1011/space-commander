@@ -24,6 +24,7 @@
 #include "dirUtl.h"
 
 #include "SpaceDecl.h"
+#define DATETIMEFORMAT "%Y%m%d%H%M"
 
 static char command_buf[TIMETAG_CMD_SIZE] = {'\0'};
 
@@ -48,6 +49,8 @@ void create_file(const char* path, const char* msg)
 
 TEST(TimetagTestGroup, AddJob)
 {  
+   
+  ICommand* command = CommandFactory::CreateTimetag(command_buf);
   char * date_time = TimetagCommand::GetCustomTime(DATETIMEFORMAT,5);
   char task[72] = "echo \"$(grep \"^${USER}:\" /etc/passwd | cut -d: -f5)\" \\>\\> /tmp/test.log";
   int result = TimetagCommand::AddJob(date_time,task);
