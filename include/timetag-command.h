@@ -5,8 +5,8 @@
  * Distributed under terms of the MIT license.
  */
 
-#ifndef SCHEDULE_COMMAND_H
-#define SCHEDULE_COMMAND_H
+#ifndef TIMETAG_COMMAND_H
+#define TIMETAG_COMMAND_H
 
 #include <string>
 #include "icommand.h"
@@ -16,22 +16,27 @@
 
 using namespace std;
 
-class TimetagCommand : public ICommand {
-private :
-    char * command;
-    time_t timestamp;
+class TimetagCommand : public ICommand 
+{
+    private :
+        char * command;
+        time_t timestamp;
 
-public: 
-    TimetagCommand(char * command, time_t timestamp);
-    ~TimetagCommand();
+    public: 
+        TimetagCommand();
 
-    void * Execute();
-    std::string SysExec(char* orig_cmd); 
-    char * GetCustomTime(std::string format, int moreminutes);
-    int AddJob(time_t timestamp, char * executable);
-    int CancelJob(const int job_id);
-    void * ParseResult(const char * result);
+        TimetagCommand(char * command, time_t timestamp);
+        ~TimetagCommand();
+        
+        void * Execute();
+        std::string SysExec(char* orig_cmd); 
+        char * GetCustomTime(std::string format, int moreminutes);
+        int AddJob(time_t timestamp, char * executable);
+        int CancelJob(const int job_id);
+        //void * ParseResult(const char * result);
 
-    char * GetCommand();
-    char * GetDateTime();
+        char * GetCommand();
+        char * GetDateTime();
+};
+
 #endif 

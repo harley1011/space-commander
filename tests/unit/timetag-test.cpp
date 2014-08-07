@@ -9,7 +9,6 @@
 *----------------------------------------------------------------------------*/
 #include <time.h>
 #include <unistd.h>
-#include <dirent.h>     // DIR
 #include <sys/types.h>
 #include <sys/stat.h>
 #include "CppUTest/TestHarness.h"
@@ -22,6 +21,8 @@
 #include "commands.h"
 #include "subsystems.h"
 #include "dirUtl.h"
+
+#include "Date.h"
 
 #include "SpaceDecl.h"
 #define DATETIMEFORMAT "%Y%m%d%H%M"
@@ -40,30 +41,29 @@ TEST_GROUP(TimetagTestGroup)
     }
 };
 
-void create_file(const char* path, const char* msg)
-{
-    FILE* file = fopen(path, "w+");
-    fprintf(file, "%s", msg);
-    fclose(file);
-}
-
 TEST(TimetagTestGroup, AddJob)
 {  
-   
-  ICommand* command = CommandFactory::CreateTimetag(command_buf);
-  char * date_time = TimetagCommand::GetCustomTime(DATETIMEFORMAT,5);
   char task[72] = "echo \"$(grep \"^${USER}:\" /etc/passwd | cut -d: -f5)\" \\>\\> /tmp/test.log";
-  int result = TimetagCommand::AddJob(date_time,task);
+  command_buf[0] = TIMETAG_CMD; 
+  memcpy(command_buf+1,task,72); 
+  TimetagCommand *command = (TimetagCommand*)CommandFactory::CreateCommand(command_buf);
+  Date date(2014, 9, 15, 10, 10, 10);
+  time_t rawtime = date.GetTimeT();
+  int result = command->AddJob(rawtime,task);
 
   CHECK_EQUAL(0, result);
 }
 
 TEST(TimetagTestGroup, CancelJob)
 {
-  char * date_time = TimetagCommand::GetCustomTime(DATETIMEFORMAT,5);
   char task[48] = "grep -HinT --color=auto something /tmp/test.log";
-  int result = Timetagcommand::AddJob(date_time,task);
-  result = TimetagCommand::CancelJob(result); 
+  command_buf[0] = TIMETAG_CMD; 
+  memcpy(command_buf+1,task,48); 
+  TimetagCommand *command = (TimetagCommand*)CommandFactory::CreateCommand(command_buf);
+  Date date(2014, 9, 15, 10, 10, 10);
+  time_t rawtime = date.GetTimeT();
+  int result = command->AddJob(rawtime,task);
+  result = command->CancelJob(result); 
   CHECK_EQUAL(0, result);
 }
 

@@ -7,7 +7,7 @@
 #include "command-factory.h"
 
 ICommand* CommandFactory::CreateCommand(char * data) {
-    if (data == NULL) { 
+    if (data == NULL) {
         fprintf(stderr, "NULL argument passed to CreateCommand() in %s\n", __FILE__);
         return NULL; 
     }
@@ -97,16 +97,13 @@ ICommand* CommandFactory::CreateUpdate(char* data) {
 }
 
 ICommand* CommandFactory::CreateTimetag(char* data) {
-    // TODO FREE 
-    char * date_time = (char *) malloc(8);
-    char * command = (char*) malloc( (int) data[10] ); // data[10] holds the data length)
-    
-    memcpy (date_time, (char*)data+2,8);
+    time_t timestamp = SpaceString::getUInt(data+2);
+    char command[245]; // data[10] holds the data length)
     memcpy (command, (char*)data+11,data[10]); 
     //char * command = GetCommand();
     //char * date_time = GetDateTime();
 
-    TimetagCommand* result = new TimetagCommand(command, date_time);
+    TimetagCommand* result = new TimetagCommand(command, timestamp);
     return result;
 }
 

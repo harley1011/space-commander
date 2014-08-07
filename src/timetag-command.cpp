@@ -15,10 +15,17 @@
 #define CMD_BUFFER_LEN 190
 #define AT_RUNNER "/usr/bin/at-runner.sh"
 
-TimetagCommand::TimetagCommand(char * command, char * date_time)
+TimetagCommand::TimetagCommand()
+{
+    this->command = 0x0;
+    this->timestamp = 0x0;
+}
+
+
+TimetagCommand::TimetagCommand(char * command, time_t timestamp)
 {
     this->command = command;
-    this->date_time = date_time;
+    this->timestamp = timestamp;
 }
 
 TimetagCommand::~TimetagCommand()
@@ -31,7 +38,14 @@ TimetagCommand::~TimetagCommand()
 
 void* TimetagCommand::Execute()
 {
-    return TimetagCommand::AddJob(this->date_time,this->command);
+    int result = TimetagCommand::AddJob(this->timestamp,this->command);
+
+    // TODO return should be standardized. e.g. [command][exit_status]
+    if (result == 0) {
+        return (void*)0x00;
+    } else {
+        return (void*)0x01;
+    }
 }
 
 /**
@@ -92,15 +106,12 @@ int TimetagCommand::CancelJob(const int job_id) {
   return 0;
 }
 
-int TimetagCommand::AddJob(char * date_time, char * executable) {
+int TimetagCommand::AddJob(time_t timestamp, char * executable) {
   char add_job_command[CMD_BUFFER_LEN] = {0};
-  sprintf(add_job_command, "sh %s %s %s", AT_RUNNER, date_time, executable);
-  printf(add_job_command);
+  sprintf(add_job_command, "sh %s %ld %s", AT_RUNNER, timestamp, executable);
   std::string output = SysExec(add_job_command);
   printf ( "Output: %s",output.c_str() );
   int retval = atoi(output.c_str());
   if (retval <= 0) { retval = -1; }
-  free (date_time);
-  free (executable);
   return retval;
 }
