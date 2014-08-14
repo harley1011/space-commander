@@ -38,13 +38,13 @@ make_dir:
 #++++++++++++++++++++
 # 	CppUTest / PC
 #--------------------
-LIBS=-lshakespeare -lcs1_utls  
+LIBS=-lshakespeare -lcs1_utls -lfileIO
 CPPUTEST_LIBS=-lCppUTest -lCppUTestExt 
 
 #
 # All Object files, do not use wildcard, add the ones you need explicitly!
 #
-OBJECTS = bin/Net2Com.o bin/NamedPipe.o bin/command-factory.o bin/deletelog-command.o  bin/decode-command.o bin/getlog-command.o bin/gettime-command.o bin/reboot-command.o bin/settime-command.o bin/update-command.o bin/base64.o bin/subsystems.o bin/timetag-command.o
+OBJECTS = bin/Net2Com.o bin/NamedPipe.o bin/command-factory.o bin/deletelog-command.o  bin/decode-command.o bin/getlog-command.o bin/gettime-command.o bin/reboot-command.o bin/settime-command.o bin/update-command.o bin/base64.o bin/subsystems.o bin/fileIO.o lib/libfileIO.a bin/timetag-command.o
 #
 # CppUTest files, no wildcard, add files explicitly!
 #
@@ -67,6 +67,12 @@ bin/space-commander: src/space-commander-main.cpp $(OBJECTS)
 test: make_dir bin/AllTests bin/space-commander
 	mkdir -p $(CS1_UTEST_DIR)
 
+bin/fileIO.o: $(SPACE_UPTDATER)/src/fileIO.cpp $(SPACE_UPTDATER)/include/fileIO.h
+	$(CC) $(INCLUDES) -c $< -o $@
+
+lib/libfileIO.a: 
+	ar rcs lib/libfileIO.a bin/fileIO.o
+
 bin/AllTests: tests/unit/AllTests.cpp  $(UNIT_TEST) $(OBJECTS) 
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCLUDES) $(LIBPATH) -o $@ $^ $(LIBS) $(ENV)
 
@@ -75,9 +81,9 @@ bin/AllTests: tests/unit/AllTests.cpp  $(UNIT_TEST) $(OBJECTS)
 #++++++++++++++++++++
 #  MicroBlaze 
 #--------------------
-LIBS_Q6= -lshakespeare-mbcc -lcs1_utlsQ6
+LIBS_Q6= -lshakespeare-mbcc -lcs1_utlsQ6 -lfileIO-Q6
 
-OBJECTS_Q6 = bin/Net2ComQ6.o bin/NamedPipeQ6.o bin/command-factoryQ6.o bin/deletelog-commandQ6.o  bin/decode-commandQ6.o bin/getlog-commandQ6.o bin/gettime-commandQ6.o bin/reboot-commandQ6.o bin/settime-commandQ6.o bin/update-commandQ6.o bin/base64Q6.o bin/subsystemsQ6.o 
+OBJECTS_Q6 = bin/Net2ComQ6.o bin/NamedPipeQ6.o bin/command-factoryQ6.o bin/deletelog-commandQ6.o bin/decode-commandQ6.o bin/getlog-commandQ6.o bin/gettime-commandQ6.o bin/reboot-commandQ6.o bin/settime-commandQ6.o bin/update-commandQ6.o bin/base64Q6.o bin/subsystemsQ6.o 
 
 buildQ6:  make_dir bin/space-commanderQ6
 	

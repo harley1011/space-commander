@@ -21,20 +21,16 @@ class TimetagCommand : public ICommand
     private :
         char * command;
         time_t timestamp;
-
     public: 
         TimetagCommand();
-
         TimetagCommand(char * command, time_t timestamp);
         ~TimetagCommand();
-        
         void * Execute();
         std::string SysExec(char* orig_cmd); 
-        char * GetCustomTime(std::string format, int moreminutes);
+        char * GetCustomTime(std::string format, time_t, int moreminutes);
         int AddJob(time_t timestamp, char * executable);
         int CancelJob(const int job_id);
         //void * ParseResult(const char * result);
-
         char * GetCommand();
         char * GetDateTime();
 };
