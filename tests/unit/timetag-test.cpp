@@ -43,28 +43,45 @@ TEST_GROUP(TimetagTestGroup)
 
 TEST(TimetagTestGroup, AddJob)
 {  
+  int test_result=-1;
+
   char task[72] = "echo \"$(grep \"^${USER}:\" /etc/passwd | cut -d: -f5)\" \\>\\> /tmp/test.log";
   command_buf[0] = TIMETAG_CMD; 
   memcpy(command_buf+1,task,72); 
-  TimetagCommand *command = (TimetagCommand*)CommandFactory::CreateCommand(command_buf);
-  Date date(2014, 9, 15, 10, 10, 10);
-  time_t rawtime = date.GetTimeT();
-  int result = command->AddJob(rawtime,task);
 
-  CHECK_EQUAL(0, result);
+  TimetagCommand *command = (TimetagCommand*)CommandFactory::CreateCommand(command_buf);
+
+  Date date(2014, 9, 16, 3, 4, 4);
+  time_t rawtime = date.GetTimeT();
+
+  int result = command->AddJob(rawtime,task);
+  if (result > 0) {
+     test_result=0; 
+  }
+  CHECK_EQUAL(0, test_result);
 }
 
 TEST(TimetagTestGroup, CancelJob)
 {
+  int add_result=-1;
+
   char task[48] = "grep -HinT --color=auto something /tmp/test.log";
   command_buf[0] = TIMETAG_CMD; 
   memcpy(command_buf+1,task,48); 
+
   TimetagCommand *command = (TimetagCommand*)CommandFactory::CreateCommand(command_buf);
+
   Date date(2014, 9, 15, 10, 10, 10);
   time_t rawtime = date.GetTimeT();
+
   int result = command->AddJob(rawtime,task);
-  result = command->CancelJob(result); 
-  CHECK_EQUAL(0, result);
+  if (result > 0) {
+     add_result=0; 
+  }
+  CHECK_EQUAL(0, add_result);
+
+  int cancel_result = command->CancelJob(result); 
+  CHECK_EQUAL(0, cancel_result);
 }
 
 /* 

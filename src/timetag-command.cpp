@@ -18,12 +18,12 @@
 #define AT_RUNNER "/usr/bin/at-runner.sh"
 #define AT_EXEC "/usr/bin/at"
 #define AT_FORMAT "%Y%m%d%H%M"
+
 TimetagCommand::TimetagCommand()
 {
     this->command = 0x0;
     this->timestamp = 0x0;
 }
-
 
 TimetagCommand::TimetagCommand(char * command, time_t timestamp)
 {
@@ -41,14 +41,15 @@ TimetagCommand::~TimetagCommand()
 
 void* TimetagCommand::Execute()
 {
-    int result = TimetagCommand::AddJob(this->timestamp,this->command);
+    struct TimetagBytes result_struct;
+    int job_id = TimetagCommand::AddJob(this->timestamp,this->command);
 
     // TODO return should be standardized. e.g. [command][exit_status]
-    if (result == 0) {
-        return (void*)0x00;
-    } else {
-        return (void*)0x01;
-    }
+    result_struct.job_id = job_id;
+    result_struct.job_timestamp = this->timestamp;
+    result_struct.job_command = this->command;
+
+    return (void*) &result_struct;
 }
 
 /**
@@ -76,20 +77,10 @@ std::string TimetagCommand::SysExec(char* orig_cmd) {
 // TODO -> mainly for testing purposes but consider replacing or adding to another library instead of here.
 // TODO -> thorough testing
 // http://linux.die.net/man/3/strftime
-char * TimetagCommand::GetCustomTime(std::string format, time_t rawtime, int moreminutes) {
-    char *buffer = (char *) malloc(sizeof(char) * 80);
+int TimetagCommand::GetCustomTime(std::string format, char * output_date, int output_length, time_t rawtime) {
     struct tm * timeinfo;
-    time (&rawtime);
-    timeinfo->tm_min = timeinfo->tm_min + moreminutes;
-    if ( (timeinfo->tm_min + moreminutes) > 59 ) {
-      timeinfo->tm_hour++;
-      timeinfo->tm_min = 0 + ( moreminutes - (60-timeinfo->tm_min));
-    } else {
-      timeinfo->tm_min = timeinfo->tm_min + moreminutes;
-    }
-    strftime(buffer,80,format.c_str(),timeinfo);
-    printf("Formatted date: %s\r\n",buffer);
-    return buffer;
+    timeinfo = localtime(&rawtime);
+    return strftime(output_date,output_length,format.c_str(),timeinfo);
 }
 
 int TimetagCommand::CancelJob(const int job_id) {
@@ -112,12 +103,18 @@ int TimetagCommand::AddJob(time_t timestamp, char * executable) {
   if (!IsFileExists(AT_RUNNER) || !IsFileExists(AT_EXEC)){
       return CS1_FILE_DOES_NOT_EXIST;
   }
-  char * time_string = TimetagCommand::GetCustomTime(AT_FORMAT, timestamp, 0);
+  char time_string[13] = {0};
+  TimetagCommand::GetCustomTime(AT_FORMAT, time_string, 13, timestamp);
+  printf("Formatted date: %s\r\n",time_string);
+
   char add_job_command[CMD_BUFFER_LEN] = {0};
-  sprintf(add_job_command, "%s %s %s", AT_RUNNER, time_string, executable);
-  printf ( "Commmand: %s\r\n", add_job_command);
+  sprintf(add_job_command, "%s %s %s\r\n", AT_RUNNER, &time_string, executable);
+
+  printf ( "Command: %s\r\n", add_job_command);
+
   std::string output = SysExec(add_job_command);
   printf ( "Output: %s\r\n",output.c_str() );
+
   int retval = atoi(output.c_str());
   if (retval <= 0) { retval = -1; }
   return retval;
