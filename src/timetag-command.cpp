@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <SpaceDecl.h>
 #include <time.h>
+#include <string.h>
 #include <fileIO.h>
 #include <iostream>
 #define CMD_BUFFER_LEN 190
@@ -41,15 +42,26 @@ TimetagCommand::~TimetagCommand()
 
 void* TimetagCommand::Execute()
 {
-    struct TimetagBytes result_struct;
-    int job_id = TimetagCommand::AddJob(this->timestamp,this->command);
+    // TODO, all dynamic memory allocation should be performed with new/delete, not malloc/free
+    unsigned char * execute_result = (unsigned char *) malloc (TIMETAG_CMD_SIZE);
+    short int job_id = TimetagCommand::AddJob(this->timestamp,this->command);
+    struct TimetagBytes info_bytes;
+    info_bytes.job_id = job_id;
+    info_bytes.job_timestamp = this->timestamp;
+    info_bytes.job_command = this->command;
+    memcpy (execute_result, &info_bytes, TIMETAG_CMD_SIZE); 
+    return (void*)execute_result;
+}
 
-    // TODO return should be standardized. e.g. [command][exit_status]
-    result_struct.job_id = job_id;
-    result_struct.job_timestamp = this->timestamp;
-    result_struct.job_command = this->command;
-
-    return (void*) &result_struct;
+void* TimetagCommand::ParseResult(unsigned char * timetag_result_bytes)
+{
+  // TODO log results with shakespeare
+  static struct TimetagBytes result_struct = {0};
+  memcpy (&result_struct,timetag_result_bytes,TIMETAG_CMD_SIZE); 
+  printf ("JOB ID: %d\r\n",result_struct.job_id);
+  printf ("JOB TIME: %ld\r\n",result_struct.job_timestamp);
+  printf ("JOB COMMAND: %s\r\n",result_struct.job_command);
+  return (void*)&result_struct;
 }
 
 /**
@@ -57,7 +69,7 @@ void* TimetagCommand::Execute()
  */
 // TODO use fork and kill zombies (if necessary)
 std::string TimetagCommand::SysExec(char* orig_cmd) {
-  char command[CMD_BUFFER_LEN] = {0};
+  char command[TIMETAG_MAX_JOB_COMMAND] = {0};
   sprintf(command, orig_cmd, "2>&1"); // redirect stderr to stdout
 
   FILE * exec_pipe = popen(command, "r");
@@ -71,7 +83,6 @@ std::string TimetagCommand::SysExec(char* orig_cmd) {
   }
   pclose(exec_pipe);
   return result;
-  // TODO perhaps this function should return exit status and write output to data pipe
 }
 
 // TODO -> mainly for testing purposes but consider replacing or adding to another library instead of here.
@@ -89,14 +100,8 @@ int TimetagCommand::CancelJob(const int job_id) {
   // delete from at spool
   sprintf(cancel_job_command, "atrm %d", job_id);
   std::string output = SysExec(cancel_job_command);
-  printf ( "Output: %s\r\n",output.c_str() );
- 
-  // TODO send to output pipe, store this detailed list remotely only, and reference vs local atq!
-  sprintf(cancel_job_command, "sed -i '/^job %d.*/d' schedule.log", job_id);
-  output = SysExec(cancel_job_command);
-  printf ( "Output: %s\r\n",output.c_str() );
 
-  return 0;
+  return atoi(output.c_str());
 }
 
 int TimetagCommand::AddJob(time_t timestamp, char * executable) {
@@ -105,17 +110,28 @@ int TimetagCommand::AddJob(time_t timestamp, char * executable) {
   }
   char time_string[13] = {0};
   TimetagCommand::GetCustomTime(AT_FORMAT, time_string, 13, timestamp);
-  printf("Formatted date: %s\r\n",time_string);
+
+  #ifdef CS1_DEBUG
+      printf ("Formatted date: %s\r\n",time_string);
+  #endif
 
   char add_job_command[CMD_BUFFER_LEN] = {0};
   sprintf(add_job_command, "%s %s %s\r\n", AT_RUNNER, &time_string, executable);
 
-  printf ( "Command: %s\r\n", add_job_command);
+  #ifdef CS1_DEBUG
+      printf ( "Command: %s\r\n", add_job_command);
+  #endif
 
   std::string output = SysExec(add_job_command);
-  printf ( "Output: %s\r\n",output.c_str() );
 
   int retval = atoi(output.c_str());
+
+  #ifdef CS1_DEBUG
+    printf ( "Job ID: %d\r\n, ", retval );
+  #endif
+
   if (retval <= 0) { retval = -1; }
   return retval;
 }
+
+

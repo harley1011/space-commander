@@ -55,6 +55,12 @@ TEST(TimetagTestGroup, AddJob)
   time_t rawtime = date.GetTimeT();
 
   int result = command->AddJob(rawtime,task);
+
+  if ( command != NULL ) {
+    delete command;
+    command = NULL;
+  }
+
   if (result > 0) {
      test_result=0; 
   }
@@ -75,6 +81,12 @@ TEST(TimetagTestGroup, CancelJob)
   time_t rawtime = date.GetTimeT();
 
   int result = command->AddJob(rawtime,task);
+
+  if (command != NULL ) {
+    delete command;
+    command = NULL;
+  }
+
   if (result > 0) {
      add_result=0; 
   }
@@ -84,6 +96,35 @@ TEST(TimetagTestGroup, CancelJob)
   CHECK_EQUAL(0, cancel_result);
 }
 
+TEST(TimetagTestGroup, FullExecution)
+{
+  int test_result = -1;
+  
+  char task[48] = "grep -HinT --color=auto something /tmp/test.log";
+  command_buf[0] = TIMETAG_CMD; 
+  memcpy(command_buf+1,task,48); 
+
+  ICommand* command = CommandFactory::CreateCommand(command_buf);
+  char * execute_result = (char *)command->Execute();
+
+  command->ParseResult(execute_result); 
+  static struct TimetagBytes result_struct = {0};
+  memcpy (&result_struct,execute_result,TIMETAG_CMD_SIZE); 
+  
+  if (command != NULL ) {
+    delete command;
+    command = NULL;
+  }
+  if (execute_result != NULL ) {
+    free (execute_result);
+  }
+
+  printf("JOB ID: %d",result_struct.job_id);
+  if (result_struct.job_id > 0) {
+    test_result = 0; 
+  }
+  CHECK_EQUAL(test_result,0);
+}
 /* 
 TEST(TimetagTestGroup, EscapeCharacters)
 {

@@ -97,11 +97,9 @@ ICommand* CommandFactory::CreateUpdate(char* data) {
 }
 
 ICommand* CommandFactory::CreateTimetag(char* data) {
-    time_t timestamp = SpaceString::getUInt(data+2);
-    char command[245]; // data[10] holds the data length)
-    memcpy (command, (char*)data+11,data[10]); 
-    //char * command = GetCommand();
-    //char * date_time = GetDateTime();
+    time_t timestamp = SpaceString::getUInt(data+1);
+    char command[TIMETAG_MAX_JOB_COMMAND];
+    memcpy ( command, (char*)data+9, TIMETAG_MAX_JOB_COMMAND ); 
 
     TimetagCommand* result = new TimetagCommand(command, timestamp);
     return result;
