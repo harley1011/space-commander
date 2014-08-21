@@ -64,14 +64,14 @@ TEST(TimetagTestGroup, AddJob)
   if (result > 0) {
      test_result=0; 
   }
-  CHECK_EQUAL(0, test_result);
+  CHECK_EQUAL(CS1_SUCCESS, test_result);
 }
 
 TEST(TimetagTestGroup, CancelJob)
 {
   int add_result=-1;
 
-  char task[48] = "grep -HinT --color=auto something /tmp/test.log";
+  char task[48] = "grep -HinT --color=auto canceljob /tmp/test.log";
   command_buf[0] = TIMETAG_CMD; 
   memcpy(command_buf+1,task,48); 
 
@@ -90,19 +90,23 @@ TEST(TimetagTestGroup, CancelJob)
   if (result > 0) {
      add_result=0; 
   }
-  CHECK_EQUAL(0, add_result);
+  CHECK_EQUAL(CS1_SUCCESS, add_result);
 
   int cancel_result = command->CancelJob(result); 
-  CHECK_EQUAL(0, cancel_result);
+  CHECK_EQUAL(CS1_SUCCESS, cancel_result);
 }
 
 TEST(TimetagTestGroup, FullExecution)
 {
   int test_result = -1;
   
-  char task[48] = "grep -HinT --color=auto something /tmp/test.log";
   command_buf[0] = TIMETAG_CMD; 
-  memcpy(command_buf+1,task,48); 
+  Date date(2014, 9, 15, 10, 10, 10);
+  time_t rawtime = date.GetTimeT();
+  memcpy(command_buf+1,&rawtime,SIZEOF_TIMET); 
+
+  char task[48] = "grep -HinT --color=auto execution /tmp/test.log";
+  memcpy(command_buf+9,task,48); 
 
   ICommand* command = CommandFactory::CreateCommand(command_buf);
   char * execute_result = (char *)command->Execute();
@@ -123,7 +127,7 @@ TEST(TimetagTestGroup, FullExecution)
   if (result_struct.job_id > 0) {
     test_result = 0; 
   }
-  CHECK_EQUAL(test_result,0);
+  CHECK_EQUAL(CS1_SUCCESS,test_result);
 }
 /* 
 TEST(TimetagTestGroup, EscapeCharacters)

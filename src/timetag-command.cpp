@@ -35,7 +35,7 @@ TimetagCommand::TimetagCommand(char * command, time_t timestamp)
 TimetagCommand::~TimetagCommand()
 {
     if (command != NULL) {
-        delete command;
+        free (command);
         command = NULL;
     }
 }
@@ -111,24 +111,18 @@ int TimetagCommand::AddJob(time_t timestamp, char * executable) {
   char time_string[13] = {0};
   TimetagCommand::GetCustomTime(AT_FORMAT, time_string, 13, timestamp);
 
-  #ifdef CS1_DEBUG
-      printf ("Formatted date: %s\r\n",time_string);
-  #endif
+  printf ("Formatted date: %s\r\n",time_string);
 
   char add_job_command[CMD_BUFFER_LEN] = {0};
   sprintf(add_job_command, "%s %s %s\r\n", AT_RUNNER, &time_string, executable);
 
-  #ifdef CS1_DEBUG
-      printf ( "Command: %s\r\n", add_job_command);
-  #endif
+  printf ( "Command: %s\r\n", add_job_command);
 
   std::string output = SysExec(add_job_command);
 
   int retval = atoi(output.c_str());
 
-  #ifdef CS1_DEBUG
-    printf ( "Job ID: %d\r\n, ", retval );
-  #endif
+  printf ( "Job ID: %d\r\n, ", retval );
 
   if (retval <= 0) { retval = -1; }
   return retval;
