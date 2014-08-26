@@ -15,7 +15,6 @@
 
 #include "CppUTest/TestHarness.h"
 #include "CppUTest/MemoryLeakDetectorMallocMacros.h"
-#include "shakespeare.h"
 #include "SpaceDecl.h"
 #include "SpaceString.h"
 #include "command-factory.h"
@@ -25,7 +24,6 @@
 #include "commands.h"
 #include "subsystems.h"
 #include "dirUtl.h"
-
 #define PROCESS "settime"
 //constant in command_buf
 static char command_buf[SETTIME_CMD_SIZE] = {'\0'};
@@ -60,20 +58,21 @@ TEST(SetTimeTestGroup, Check_Settime)
 
     command_buf[0] = '0';
     memcpy(command_buf+1,&rawtime,sizeof(rawtime));
-    int* result = 0; 
+    char* result = 0; 
     ICommand* command = CommandFactory::CreateCommand(command_buf);
-    result = (int*)command->Execute();
-    CHECK(result);
+    result = (char*)command->Execute();
+    int wasSet = 48 -result[1];
+    CHECK(wasSet);
     time_t newtime;
     time(&newtime);
     CHECK(newtime-rawtime < 1);        
     std::cerr << "[DEBUG] " << __FILE__ << "Raw Seconds elapsed " << rawtime << " time is currently " << newtime << " difference is " << newtime - rawtime << endl;
-    FILE* logfile;
+   /* FILE* logfile;
     logfile=Shakespeare::open_log("/var/log/job-template",PROCESS);
      // write to log via shakespeare
      if(logfile!=NULL) {
         Shakespeare::log(logfile, Shakespeare::NOTICE, PROCESS, sprintf("Raw seconds elapsed since epoch is %d", rawtime ));
-        } 
+        }*/ 
     if ( command != NULL)
     {
         delete command;

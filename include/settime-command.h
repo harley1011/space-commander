@@ -35,7 +35,7 @@ public:
 
         this->seconds = mktime(timeinfo);
     }
-
+    
     char GetYearSince1900()  { return year; };
     char GetMonth()     { return month; };
     char GetDay()       { return day; };
@@ -44,7 +44,8 @@ public:
     char GetSecond()    { return second; };
     time_t GetSeconds() { return seconds; };
     void* Execute();
-
+    void* ParseResult(const char *result, const char *filename);
+        
 private:
     char year;
     char month;
