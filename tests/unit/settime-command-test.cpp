@@ -57,10 +57,14 @@ TEST(SetTimeTestGroup, Check_Settime)
     time(&rawtime);
 
     command_buf[0] = '0';
+ //    command_buf[1] = SpaceString::get8Char(command_buf+1,rawtime);
     memcpy(command_buf+1,&rawtime,sizeof(rawtime));
     char* result = 0; 
     ICommand* command = CommandFactory::CreateCommand(command_buf);
     result = (char*)command->Execute();
+   
+    const char* dest = ""; 
+    InfoBytesSetTime* getsettime_info = (InfoBytesSetTime*)(dynamic_cast<SetTimeCommand*>(command)->ParseResult(result,dest));
     int wasSet = 48 -result[1];
     CHECK(wasSet);
     time_t newtime;
@@ -78,6 +82,11 @@ TEST(SetTimeTestGroup, Check_Settime)
         delete command;
         command = NULL;
     }
+    if (result) {
+        free(result);
+        result = 0;
+
+       }
 }
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 *

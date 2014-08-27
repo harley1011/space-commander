@@ -8,6 +8,12 @@
 
 using namespace std;
 
+struct InfoBytesSetTime
+{
+    char timeStatus;
+    time_t timeSet;
+
+};
 class SetTimeCommand : public ICommand {
 public:
     SetTimeCommand(time_t time ) {

@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <SpaceString.h>
 //#include <shakespeare.h>
 #define PROCESS "settime"
 
@@ -12,7 +13,10 @@
 
 void* SetTimeCommand::Execute(){
     struct timeval tv;
-    char result[10];
+    char *result;
+    result = (char*)malloc(sizeof(char) * 10);
+
+    
     result[0] = '0';
     tv.tv_sec = GetSeconds();   
     tv.tv_usec = 0;
@@ -30,9 +34,12 @@ void* SetTimeCommand::ParseResult(const char *result, const char *filename)
     if(!result) {
         return (void*)0;
     }
+    InfoBytesSetTime info_bytes;
+    info_bytes.timeStatus = result[1];
     char timeStatus = result[1];
-    time_t timeSet;
-    memcpy(&timeSet, result+3,sizeof(time_t));
+    time_t timeSet = SpaceString::getTimet(result+2);
+//    memcpy(&timeSet, result+2,sizeof(time_t));
+    info_bytes.timeSet = timeSet;
 /*    FILE* logfile;
     logfile=Shakespeare::open_log("/var/log/job-template",PROCESS);
      // write to log via shakespeare
@@ -40,5 +47,5 @@ void* SetTimeCommand::ParseResult(const char *result, const char *filename)
         Shakespeare::log(logfile, Shakespeare::NOTICE, PROCESS, sprintf("Raw seconds elapsed since epoch is %d", rawtime ));
         } 
   */  
-    return (void*)1;
+    return (void*)&info_bytes;
 }
