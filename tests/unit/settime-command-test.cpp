@@ -57,19 +57,21 @@ TEST(SetTimeTestGroup, Check_Settime)
     time(&rawtime);
 
     command_buf[0] = '0';
- //    command_buf[1] = SpaceString::get8Char(command_buf+1,rawtime);
+  //command_buf[1] = SpaceString::get8Char(command_buf+1,rawtime);
     memcpy(command_buf+1,&rawtime,sizeof(rawtime));
-    char* result = 0; 
+    
     ICommand* command = CommandFactory::CreateCommand(command_buf);
-    result = (char*)command->Execute();
+    char* result = (char*)command->Execute();
    
-    const char* dest = ""; 
-    InfoBytesSetTime* getsettime_info = (InfoBytesSetTime*)(dynamic_cast<SetTimeCommand*>(command)->ParseResult(result,dest));
-    int wasSet = 48 -result[1];
-    CHECK(wasSet);
+    InfoBytesSetTime* getsettime_info = (InfoBytesSetTime*)(dynamic_cast<SetTimeCommand*>(command)->ParseResult(result,""));
+
+    CHECK(getsettime_info->time_status == '1');
+    
+    CHECK(getsettime_info->time_set == rawtime);
     time_t newtime;
     time(&newtime);
     CHECK(newtime-rawtime < 1);        
+
     std::cerr << "[DEBUG] " << __FILE__ << "Raw Seconds elapsed " << rawtime << " time is currently " << newtime << " difference is " << newtime - rawtime << endl;
    /* FILE* logfile;
     logfile=Shakespeare::open_log("/var/log/job-template",PROCESS);

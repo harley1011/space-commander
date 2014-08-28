@@ -34,12 +34,10 @@ void* SetTimeCommand::ParseResult(const char *result, const char *filename)
     if(!result) {
         return (void*)0;
     }
-    InfoBytesSetTime info_bytes;
-    info_bytes.timeStatus = result[1];
-    char timeStatus = result[1];
-    time_t timeSet = SpaceString::getTimet(result+2);
-//    memcpy(&timeSet, result+2,sizeof(time_t));
-    info_bytes.timeSet = timeSet;
+    static struct InfoBytesSetTime info_bytes = {0};
+    info_bytes.time_status = result[1];
+    info_bytes.time_set = SpaceString::getTimet(result+2);
+
 /*    FILE* logfile;
     logfile=Shakespeare::open_log("/var/log/job-template",PROCESS);
      // write to log via shakespeare

@@ -63,8 +63,8 @@ DeleteLogCommand::~DeleteLogCommand()
 void* DeleteLogCommand::Execute() 
 {
     char buffer[CS1_PATH_MAX] = {'\0'};
-    const char* good_str = "0 DeleteLogCommand : removed ";
-    const char* bad_str = "1 DeleteLogCommand : failed "; 
+    const char* good_str = "0"; // DeleteLogCommand : removed ";
+    const char* bad_str = "1"; // DeleteLogCommand : failed "; 
     const char* folder = 0;
 
     int size =  strlen(this->filename) + 1;
@@ -83,10 +83,10 @@ void* DeleteLogCommand::Execute()
     #endif
 
     if (remove(buffer) == 0) {
-        size += strlen(good_str) + 1;
+       // size += strlen(good_str) + 1;
         sprintf(buffer, "%s", good_str);
     } else {
-        size += strlen(bad_str) + 1;
+       // size += strlen(bad_str) + 1;
         sprintf(buffer, "%s",  bad_str);
     }
     
@@ -184,6 +184,15 @@ char* DeleteLogCommand::ExtractFilenameFromFile()
 void* DeleteLogCommand::ParseResult(const char *result, const char *filename)
 {
     if (!result) {
-        return 0;
+        return (void*)0;
     }
+
+    static struct InfoBytesDeleteLog info_bytes;
+    int size = strlen(result) - 1;
+    info_bytes.delete_status = result[0];
+    info_bytes.filename = (char*) malloc(size);
+    memcpy(info_bytes.filename,result+1, size);
+
+    return (void*)&info_bytes;
+ 
 }

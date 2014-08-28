@@ -10,8 +10,8 @@ using namespace std;
 
 struct InfoBytesSetTime
 {
-    char timeStatus;
-    time_t timeSet;
+    char time_status;
+    time_t time_set;
 
 };
 class SetTimeCommand : public ICommand {

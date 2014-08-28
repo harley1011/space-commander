@@ -18,6 +18,10 @@
 #define LOG 0x0
 #define TGZ 0x1
 
+struct InfoBytesDeleteLog {
+    char delete_status;
+    char* filename;
+};
 class DeleteLogCommand : public ICommand 
 {
     private :
