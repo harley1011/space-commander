@@ -63,7 +63,7 @@ TEST(SetTimeTestGroup, Check_Settime)
     ICommand* command = CommandFactory::CreateCommand(command_buf);
     char* result = (char*)command->Execute();
    
-    InfoBytesSetTime* getsettime_info = (InfoBytesSetTime*)(dynamic_cast<SetTimeCommand*>(command)->ParseResult(result,""));
+    InfoBytesSetTime* getsettime_info = (InfoBytesSetTime*)command->ParseResult(result);
 
     CHECK(getsettime_info->time_status == '1');
     

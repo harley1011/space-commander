@@ -29,7 +29,7 @@ void* SetTimeCommand::Execute(){
     result[1] = '1';
     return (void*)result;
 }
-void* SetTimeCommand::ParseResult(const char *result, const char *filename)
+void* SetTimeCommand::ParseResult(const char *result)
 {
     if(!result) {
         return (void*)0;
