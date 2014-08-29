@@ -50,8 +50,7 @@ public:
     char GetSecond()    { return second; };
     time_t GetSeconds() { return seconds; };
     void* Execute();
-    void* ParseResult(const char *result, const char *filename);
-        
+    void* ParseResult(const char * result);        
 private:
     char year;
     char month;

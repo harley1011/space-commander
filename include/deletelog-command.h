@@ -38,7 +38,7 @@ class DeleteLogCommand : public ICommand
         char FindType();
         void SaveFilename(ino_t inode);
         char* ExtractFilenameFromFile();
-        void* ParseResult(const char *result, const char *filename);
+        void* ParseResult(const char *result);
  
 };
 

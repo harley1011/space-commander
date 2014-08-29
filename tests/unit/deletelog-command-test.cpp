@@ -71,7 +71,7 @@ TEST(DeleteLogTestGroup, DeleteLog_UsingInode_fileIsDeleted)
     ICommand* command = CommandFactory::CreateCommand(command_buf);
     char* result = (char*)command->Execute();
     
-    InfoBytesDeleteLog* deletelog_info = (InfoBytesDeleteLog*)(dynamic_cast<DeleteLogCommand*>(command)->ParseResult(result,""));
+    InfoBytesDeleteLog* deletelog_info = (InfoBytesDeleteLog*)command->ParseResult(result);
 
     CHECK_EQUAL(-1, access(filetest_path, F_OK));
 

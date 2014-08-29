@@ -181,7 +181,7 @@ char* DeleteLogCommand::ExtractFilenameFromFile()
 
     return this->filename;
 }
-void* DeleteLogCommand::ParseResult(const char *result, const char *filename)
+void* DeleteLogCommand::ParseResult(const char *result)
 {
     if (!result) {
         return (void*)0;

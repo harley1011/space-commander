@@ -34,10 +34,11 @@ void* UpdateCommand::Execute() {
 
     return result;         
 }
-void* UpdateCommand::ParseResult(const char* result)
+void* UpdateCommand::ParseResult(const char *result)
 {
-
-
+    static struct InfoBytesUpdate info_bytes;
+    info_bytes.bytes_written = result; 
+    return (void*)&info_bytes;
 
 
 }
