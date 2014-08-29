@@ -26,14 +26,14 @@ DEBUGFLAGS=-ggdb -g -gdwarf-2 -g3 #gdwarf-2 + g3 provides macro info to gdb
 #++++++++++++++++++++
 # includes
 #--------------------
-INCLUDES = -I./include/ -I$(SPACE_LIB)/shakespeare/inc -I$(SPACE_LIB)/include -I$(SPACE_UPTDATER)/include -I$(SPACE_SCRIPT)/tgz-wizard/include -I$(SPACE_UTLS)/include
+INCLUDES = -I./include/ -I$(SPACE_LIB)/include -I$(SPACE_UPTDATER)/include -I$(SPACE_SCRIPT)/tgz-wizard/include -I$(SPACE_UTLS)/include
 INCTESTPATH = -I./tests/unit/stubs/ -I./tests/helpers/include/
 
 #
 #++++++++++++++++++++
 # Libraries
 #--------------------
-LIBPATH=-L./lib/  -L$(SPACE_LIB)/shakespeare/lib -L$(CPPUTEST_HOME)/lib -L$(SPACE_UTLS)/lib
+LIBPATH=-L./lib/ -L$(SPACE_LIB)/shakespeare/lib -L$(CPPUTEST_HOME)/lib -L$(SPACE_UTLS)/lib
 
 make_dir:
 	mkdir -p bin && mkdir -p lib
@@ -67,7 +67,7 @@ ENV = -DCS1_DEBUG  $(UTEST_ENV)  #-DPRESERVE
 #--------------------
 buildBin: make_dir bin/space-commander
 
-bin/%.o: src/%.cpp include/%.h
+bin/%.o: src/%.cpp include/%.h 
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCLUDES) -c $< -o $@ $(ENV) 
 
 bin/space-commander: src/space-commander-main.cpp $(OBJECTS)
@@ -84,7 +84,6 @@ lib/libfileIO.a:
 
 bin/AllTests: tests/unit/AllTests.cpp  $(UNIT_TEST) $(OBJECTS) 
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCLUDES) $(LIBPATH) -o $@ $^ $(LIBS) $(ENV)
-
 #
 #++++++++++++++++++++
 #  MicroBlaze 

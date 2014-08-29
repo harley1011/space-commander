@@ -122,8 +122,6 @@ TEST(TimetagTestGroup, FullExecution)
   if (execute_result != NULL ) {
     free (execute_result);
   }
-
-  printf("JOB ID: %d",result_struct.job_id);
   if (result_struct.job_id > 0) {
     test_result = 0; 
   }

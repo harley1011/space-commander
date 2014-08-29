@@ -34,7 +34,6 @@ class TimetagCommand : public ICommand
       TimetagCommand(char * command, time_t timestamp);
       ~TimetagCommand();
       void * Execute();
-      std::string SysExec(char* orig_cmd); 
       int GetCustomTime(std::string format, char * output_date, int output_length, time_t);
       int AddJob(time_t timestamp, char * executable);
       int CancelJob(const int job_id);

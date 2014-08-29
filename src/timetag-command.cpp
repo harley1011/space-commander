@@ -15,10 +15,14 @@
 #include <string.h>
 #include <fileIO.h>
 #include <iostream>
-#define CMD_BUFFER_LEN 190
-#define AT_RUNNER "/usr/bin/at-runner.sh"
-#define AT_EXEC "/usr/bin/at"
-#define AT_FORMAT "%Y%m%d%H%M"
+#include <SystemProcess.h>
+#include <shakespeare.h>
+#define LOG_PATH        "/home/logs/commander/"
+#define PROCESS         "TIMETAG"
+#define CMD_BUFFER_LEN  190
+#define AT_RUNNER       "/usr/bin/at-runner.sh"
+#define AT_EXEC         "/usr/bin/at"
+#define AT_FORMAT       "%Y%m%d%H%M"
 
 TimetagCommand::TimetagCommand()
 {
@@ -58,74 +62,54 @@ void* TimetagCommand::ParseResult(unsigned char * timetag_result_bytes)
   // TODO log results with shakespeare
   static struct TimetagBytes result_struct = {0};
   memcpy (&result_struct,timetag_result_bytes,TIMETAG_CMD_SIZE); 
-  printf ("JOB ID: %d\r\n",result_struct.job_id);
-  printf ("JOB TIME: %ld\r\n",result_struct.job_timestamp);
-  printf ("JOB COMMAND: %s\r\n",result_struct.job_command);
+  char log_entry[255];
+  sprintf (log_entry,"%d ",result_struct.job_id);
+  sprintf (log_entry,"%ld ",result_struct.job_timestamp);
+  sprintf (log_entry,"%s",result_struct.job_command);
+  Shakespeare::log_shorthand(LOG_PATH, Shakespeare::NOTICE, PROCESS, log_entry);
   return (void*)&result_struct;
-}
-
-/**
- * Function to execute a command and get output
- */
-// TODO use fork and kill zombies (if necessary)
-std::string TimetagCommand::SysExec(char* orig_cmd) {
-  char command[TIMETAG_MAX_JOB_COMMAND] = {0};
-  sprintf(command, orig_cmd, "2>&1"); // redirect stderr to stdout
-
-  FILE * exec_pipe = popen(command, "r");
-  if (!exec_pipe) return "ERROR, failed to open pipe";
-  char buffer[CMD_BUFFER_LEN];
-  std::string result = "";
-  while( !feof(exec_pipe) ) {
-    if ( fgets(buffer, CMD_BUFFER_LEN, exec_pipe) != NULL ) {
-      result+=buffer;
-    }
-  }
-  pclose(exec_pipe);
-  return result;
 }
 
 // TODO -> mainly for testing purposes but consider replacing or adding to another library instead of here.
 // TODO -> thorough testing
 // http://linux.die.net/man/3/strftime
-int TimetagCommand::GetCustomTime(std::string format, char * output_date, int output_length, time_t rawtime) {
+int TimetagCommand::GetCustomTime(std::string format, char * output_date, int output_length, time_t rawtime) 
+{
     struct tm * timeinfo;
     timeinfo = localtime(&rawtime);
     return strftime(output_date,output_length,format.c_str(),timeinfo);
 }
 
-int TimetagCommand::CancelJob(const int job_id) {
+int TimetagCommand::CancelJob(const int job_id) 
+{
   char cancel_job_command[CMD_BUFFER_LEN] = {0};
 
   // delete from at spool
   sprintf(cancel_job_command, "atrm %d", job_id);
-  std::string output = SysExec(cancel_job_command);
+  SystemProcess * process = new SystemProcess(cancel_job_command);
+  std::string output = process->Execute();
+  delete process;
 
   return atoi(output.c_str());
 }
 
-int TimetagCommand::AddJob(time_t timestamp, char * executable) {
+int TimetagCommand::AddJob(time_t timestamp, char * executable) 
+{
   if (!IsFileExists(AT_RUNNER) || !IsFileExists(AT_EXEC)){
       return CS1_FILE_DOES_NOT_EXIST;
   }
   char time_string[13] = {0};
   TimetagCommand::GetCustomTime(AT_FORMAT, time_string, 13, timestamp);
 
-  printf ("Formatted date: %s\r\n",time_string);
-
   char add_job_command[CMD_BUFFER_LEN] = {0};
-  sprintf(add_job_command, "%s %s %s\r\n", AT_RUNNER, &time_string, executable);
+  sprintf(add_job_command, "%s %s %s\r\n", AT_RUNNER, time_string, executable);
 
-  printf ( "Command: %s\r\n", add_job_command);
-
-  std::string output = SysExec(add_job_command);
+  SystemProcess * process = new SystemProcess(add_job_command);
+  std::string output = process->Execute();
+  delete process;
 
   int retval = atoi(output.c_str());
-
-  printf ( "Job ID: %d\r\n, ", retval );
 
   if (retval <= 0) { retval = -1; }
   return retval;
 }
-
-
