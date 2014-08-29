@@ -20,7 +20,7 @@
 
 struct InfoBytesDeleteLog {
     char delete_status;
-    char* filename;
+    const char* filename;
 };
 class DeleteLogCommand : public ICommand 
 {

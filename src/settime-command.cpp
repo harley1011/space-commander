@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <SpaceString.h>
-//#include <shakespeare.h>
+#include <shakespeare.h>
 #define PROCESS "settime"
 
 

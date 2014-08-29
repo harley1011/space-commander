@@ -190,8 +190,7 @@ void* DeleteLogCommand::ParseResult(const char *result, const char *filename)
     static struct InfoBytesDeleteLog info_bytes;
     int size = strlen(result) - 1;
     info_bytes.delete_status = result[0];
-    info_bytes.filename = (char*) malloc(size);
-    memcpy(info_bytes.filename,result+1, size);
+    info_bytes.filename = result + 1;
 
     return (void*)&info_bytes;
  

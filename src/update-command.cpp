@@ -34,4 +34,10 @@ void* UpdateCommand::Execute() {
 
     return result;         
 }
+void* UpdateCommand::ParseResult(const char* result)
+{
 
+
+
+
+}

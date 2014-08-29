@@ -29,6 +29,7 @@ public:
     }
 
     void* Execute();
+    void* ParseResult(const char* result);
     char* GetPath()       { return path; }
     int   GetDataLength() { return data_length; }
 private:

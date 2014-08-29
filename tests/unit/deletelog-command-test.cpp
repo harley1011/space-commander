@@ -83,11 +83,7 @@ TEST(DeleteLogTestGroup, DeleteLog_UsingInode_fileIsDeleted)
         free(result);
         result = 0;
     }
-    if (deletelog_info)
-    {
-        free(deletelog_info->filename);
-        deletelog_info = 0;
-    }
+    
     if (command != NULL){
         delete command;
         command = NULL;
