@@ -6,10 +6,10 @@ BEAGLECC=arm-linux-gnueabi-g++
 #++++++++++++++++++++
 # Paths
 #--------------------
+CPPUTEST_HOME = ../CppUTest
 SPACE_LIB = ../space-lib
 SPACE_UTLS = $(SPACE_LIB)/utls
 SPACE_UPTDATER = ../space-updater
-CPPUTEST_HOME = ../CppUTest
 SPACE_SCRIPT = ../space-script
 
 #
@@ -112,25 +112,20 @@ clean:
 
 
 
+#
 #++++++++++++++++++++
 # buildLib 
 #--------------------
-staticlibs.tar: make_dir lib/NamedPipe.a lib/Net2Com.a
-	tar -cf $@ include/NamedPipe.h include/Net2Com.h lib/NamedPipe.a lib/Net2Com.a
+staticlibs.tar: make_dir lib/libNet2Com.a
+	tar -cf $@ include/NamedPipe.h include/Net2Com.h lib/libNet2Com.a
 
-staticlibsQ6.tar: lib/NamedPipe-mbcc.a lib/Net2Com-mbcc.a
-	tar -cf $@ include/NamedPipe.h include/Net2Com.h lib/NamedPipe-mbcc.a lib/Net2Com-mbcc.a
+staticlibsQ6.tar: make_dir lib/libNet2Com-mbcc.a
+	tar -cf $@ include/NamedPipe.h include/Net2Com.h lib/libNet2Com-mbcc.a
 
-lib/NamedPipe.a: bin/NamedPipe.o
+lib/libNet2Com.a: bin/NamedPipe.o bin/Net2Com.o
 	ar -cvq $@ $^
 
-lib/Net2Com.a: bin/Net2Com.o
-	ar -cvq $@ $^
-
-lib/NamedPipe-mbcc.a: bin/NamedPipeQ6.o
-	ar -cvq $@ $^
-
-lib/Net2Com-mbcc.a: bin/Net2ComQ6.o
+lib/libNet2Com-mbcc.a: bin/NamedPipeQ6.o bin/Net2ComQ6.o
 	ar -cvq $@ $^
 
 
