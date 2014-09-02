@@ -29,6 +29,11 @@ SKIP_TEST=0
 GROUP_LIST=(getlog deletelog net2com commander) # insert the group of the test here.
 
 
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#
+# NAME : usage
+#
+#------------------------------------------------------------------------------
 usage()
 {
     echo "usage : cscomtest.sh  [-u] [-g testGroup] [-n testName] [-m numberOfRuns][-v][-s]"
@@ -45,10 +50,11 @@ usage()
     echo
 }
 
-
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #
-# Parses command line arguments
+# Parsing command line arguments
 #
+#------------------------------------------------------------------------------
 argType=""
 while getopts "cqg:n:uvm:s" opt; do
     case "$opt" in
@@ -73,9 +79,11 @@ while getopts "cqg:n:uvm:s" opt; do
 done
 
 
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #
-# GROUP
+# Test groups
 #
+#------------------------------------------------------------------------------
 if [ "$GROUP" != "" ]; then
     case $GROUP in 
         'getlog')       ARGUMENTS="-g GetLogTestGroup" ;;
@@ -87,10 +95,11 @@ fi
 
 ARGUMENTS="$ARGUMENTS $SINGLE_TEST" 
 
-
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #
-# Execute
+# Clean
 #
+#------------------------------------------------------------------------------
 if [ $CLEAN -eq 1 ]; then
     echo ""
     echo "=== Clean ==="
