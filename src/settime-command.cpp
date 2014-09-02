@@ -7,7 +7,7 @@
 #include <time.h>
 #include <SpaceString.h>
 #include <shakespeare.h>
-#define PROCESS "settime"
+#define PROCESS "Commander"
 
 
 
@@ -38,12 +38,15 @@ void* SetTimeCommand::ParseResult(const char *result)
     info_bytes.time_status = result[1];
     info_bytes.time_set = SpaceString::getTimet(result+2);
 
-/*    FILE* logfile;
+    FILE* logfile;
     logfile=Shakespeare::open_log("/var/log/job-template",PROCESS);
      // write to log via shakespeare
+    int test = info_bytes.time_set;
+    char buffer[50];
+    sprintf(buffer,"Raw seconds elapsed since epoch is %d",info_bytes.time_set);
      if(logfile!=NULL) {
-        Shakespeare::log(logfile, Shakespeare::NOTICE, PROCESS, sprintf("Raw seconds elapsed since epoch is %d", rawtime ));
+        Shakespeare::log(logfile, Shakespeare::NOTICE, PROCESS, buffer);
         } 
-  */  
+   
     return (void*)&info_bytes;
 }

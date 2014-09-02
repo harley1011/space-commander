@@ -172,3 +172,4 @@ TEST(DeleteLogTestGroup, FindType_ReturnsLOG)
         command = NULL;
     }
 }
+TEST(DeleteLogTestGroup, 

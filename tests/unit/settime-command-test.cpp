@@ -107,4 +107,30 @@ TEST(SetTimeTestGroup, Endian_Checker)
     char  temp = (*(char *)&x);
     CHECK(temp == LE);
 }
-
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*
+* GROUP : SetTimeTestGroup
+*
+* NAME : Settime_Parseresult
+* 
+*-----------------------------------------------------------------------------*/
+TEST(SetTimeTestGroup,Settime_Parseresult)
+{
+    command_buf[0] = '0';
+    
+    time_t rawtime = 100;
+    memcpy(command_buf+1,&rawtime,sizeof(rawtime));
+    
+    ICommand* command = CommandFactory::CreateCommand(command_buf);
+ 
+    char* result = (char*)malloc(sizeof(char) * 10);
+    result[0] = '0';
+    result[1] = '1';
+    memcpy(result+2,&rawtime, sizeof(time_t));
+    InfoBytesSetTime* getsettime_info = (InfoBytesSetTime*)command->ParseResult(result);
+    CHECK(getsettime_info->time_set == rawtime);
+    if (result) {
+        free(result);
+        result = 0;
+    }
+}
