@@ -7,8 +7,7 @@
 #include <time.h>
 #include <SpaceString.h>
 #include <shakespeare.h>
-#define PROCESS "Commander"
-
+#include "commands.h"
 
 
 void* SetTimeCommand::Execute(){
@@ -17,16 +16,16 @@ void* SetTimeCommand::Execute(){
     result = (char*)malloc(sizeof(char) * 10);
 
     
-    result[0] = '0';
+    result[0] = SETTIME_CMD;
     tv.tv_sec = GetSeconds();   
     tv.tv_usec = 0;
     memcpy(result+2, &tv.tv_sec, sizeof(time_t)); 
     if (settimeofday(&tv, 0) != 0){
         perror ("Error! settimeofday()\n");
-        result[1] = '0';
+        result[1] = FAILURE_CMD;
         return (void*)result;        
     }
-    result[1] = '1';
+    result[1] = SUCCES_CMD;
     return (void*)result;
 }
 void* SetTimeCommand::ParseResult(const char *result)
@@ -42,9 +41,14 @@ void* SetTimeCommand::ParseResult(const char *result)
     logfile=Shakespeare::open_log("/var/log/job-template",PROCESS);
      // write to log via shakespeare
     int test = info_bytes.time_set;
-    char buffer[50];
-    sprintf(buffer,"Raw seconds elapsed since epoch is %d",info_bytes.time_set);
-     if(logfile!=NULL) {
+    char buffer[80];
+   
+    if(info_bytes.time_status == '1')
+       sprintf(buffer,"SetTime success. Time set to %d seconds since epoch",info_bytes.time_set);
+    else
+       sprintf(buffer,"SetTime failure. Time failed to set %d seconds since epoch",info_bytes.time_set);
+
+   if(logfile!=NULL) {
         Shakespeare::log(logfile, Shakespeare::NOTICE, PROCESS, buffer);
         } 
    

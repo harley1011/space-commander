@@ -24,7 +24,6 @@
 #include "commands.h"
 #include "subsystems.h"
 #include "dirUtl.h"
-#define PROCESS "settime"
 //constant in command_buf
 static char command_buf[SETTIME_CMD_SIZE] = {'\0'};
 // Test when changing envrionments such as kernel, make sure time_t is either 4 bytes or 8 bytes
@@ -119,7 +118,7 @@ TEST(SetTimeTestGroup,Settime_Parseresult)
     command_buf[0] = '0';
     
     time_t rawtime = 100;
-    memcpy(command_buf+1,&rawtime,sizeof(rawtime));
+    memcpy(command_buf+1,&rawtime,sizeof(time_t));
     
     ICommand* command = CommandFactory::CreateCommand(command_buf);
  
@@ -133,4 +132,10 @@ TEST(SetTimeTestGroup,Settime_Parseresult)
         free(result);
         result = 0;
     }
+    if ( command != NULL)
+    {
+        delete command;
+        command = NULL;
+    }
+
 }

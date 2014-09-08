@@ -1,6 +1,10 @@
 #ifndef COMMANDS_H_
 #define COMMANDS_H_
 
+#define SUCCES_CMD 0x31
+#define FAILURE_CMD 0x30
+
+#define PROCESS "COMMANDER"
 
 #define SETTIME_CMD 0x30
 #define GETTIME_CMD 0X31
