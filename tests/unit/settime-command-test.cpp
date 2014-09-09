@@ -24,6 +24,8 @@
 #include "commands.h"
 #include "subsystems.h"
 #include "dirUtl.h"
+#include "commands.h"
+#include "subsystems.h"
 //constant in command_buf
 static char command_buf[SETTIME_CMD_SIZE] = {'\0'};
 // Test when changing envrionments such as kernel, make sure time_t is either 4 bytes or 8 bytes
@@ -64,7 +66,7 @@ TEST(SetTimeTestGroup, Check_Settime)
    
     InfoBytesSetTime* getsettime_info = (InfoBytesSetTime*)command->ParseResult(result);
 
-    CHECK(getsettime_info->time_status == '1');
+    CHECK(getsettime_info->time_status == CS1_SUCCESS);
     
     CHECK(getsettime_info->time_set == rawtime);
     time_t newtime;
@@ -123,11 +125,12 @@ TEST(SetTimeTestGroup,Settime_Parseresult)
     ICommand* command = CommandFactory::CreateCommand(command_buf);
  
     char* result = (char*)malloc(sizeof(char) * 10);
-    result[0] = '0';
-    result[1] = '1';
+    result[0] = SETTIME_CMD;
+    result[1] = CS1_SUCCESS;
     memcpy(result+2,&rawtime, sizeof(time_t));
     InfoBytesSetTime* getsettime_info = (InfoBytesSetTime*)command->ParseResult(result);
     CHECK(getsettime_info->time_set == rawtime);
+    CHECK(getsettime_info->time_status == CS1_SUCCESS);
     if (result) {
         free(result);
         result = 0;

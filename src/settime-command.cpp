@@ -8,7 +8,10 @@
 #include <SpaceString.h>
 #include <shakespeare.h>
 #include "commands.h"
+#include "SpaceDecl.h"
+#include "subsystems.h"
 
+extern const char* s_cs1_subsystems[];
 
 void* SetTimeCommand::Execute(){
     struct timeval tv;
@@ -22,10 +25,10 @@ void* SetTimeCommand::Execute(){
     memcpy(result+2, &tv.tv_sec, sizeof(time_t)); 
     if (settimeofday(&tv, 0) != 0){
         perror ("Error! settimeofday()\n");
-        result[1] = FAILURE_CMD;
+        result[1] = CS1_FAILURE;
         return (void*)result;        
     }
-    result[1] = SUCCES_CMD;
+    result[1] = CS1_SUCCESS;
     return (void*)result;
 }
 void* SetTimeCommand::ParseResult(const char *result)
@@ -38,18 +41,18 @@ void* SetTimeCommand::ParseResult(const char *result)
     info_bytes.time_set = SpaceString::getTimet(result+2);
 
     FILE* logfile;
-    logfile=Shakespeare::open_log("/var/log/job-template",PROCESS);
+    logfile=Shakespeare::open_log("/home/logs",s_cs1_subsystems[COMMANDER]);
      // write to log via shakespeare
     int test = info_bytes.time_set;
     char buffer[80];
    
-    if(info_bytes.time_status == '1')
+    if(info_bytes.time_status == CS1_SUCCESS)
        sprintf(buffer,"SetTime success. Time set to %d seconds since epoch",info_bytes.time_set);
     else
        sprintf(buffer,"SetTime failure. Time failed to set %d seconds since epoch",info_bytes.time_set);
 
    if(logfile!=NULL) {
-        Shakespeare::log(logfile, Shakespeare::NOTICE, PROCESS, buffer);
+        Shakespeare::log(logfile, Shakespeare::NOTICE, s_cs1_subsystems[COMMANDER], buffer);
         } 
    
     return (void*)&info_bytes;
