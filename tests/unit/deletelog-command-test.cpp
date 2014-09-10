@@ -76,9 +76,9 @@ TEST(DeleteLogTestGroup, DeleteLog_UsingInode_fileIsDeleted)
     CHECK_EQUAL(-1, access(filetest_path, F_OK));
 
     char status[2] = {'\0'};
-    strncpy(status, result, 1);
+    strncpy(status, result + 1, 1);
     CHECK_EQUAL(0, atoi(status));
-    CHECK(deletelog_info->delete_status == '0');
+    CHECK(deletelog_info->delete_status == CS1_SUCCESS);
     if (result) {
         free(result);
         result = 0;
@@ -112,7 +112,7 @@ TEST(DeleteLogTestGroup, Execute_FileIsDeleted)
   //  InfoBytesDeleteLog* getdeletelog_info = (InfoBytesDeleteLog*)(dynamic_cast<DeleteLogCommand*>(command)->ParseResult(result,""));
 
     char status[2] = {'\0'};
-    strncpy(status, result, 1);
+    strncpy(status, result + 1, 1);
 
     CHECK_EQUAL(-1, access(filetest_path, F_OK));
     CHECK_EQUAL(0, atoi(status));

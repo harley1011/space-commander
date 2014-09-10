@@ -198,7 +198,7 @@ TEST(CommanderTestGroup, DeleteLog_Success)
     CHECK_EQUAL(-1, access(filetest_path, F_OK));
 
     char status[2] = {'\0'};
-    strncpy(status, result, 1);
+    strncpy(status, result + 1, 1);
     CHECK_EQUAL(0, atoi(status));
 }
 
