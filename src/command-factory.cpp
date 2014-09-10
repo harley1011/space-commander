@@ -40,10 +40,7 @@ ICommand* CommandFactory::CreateCommand(char * data) {
         }
         case '7': {
             return CommandFactory::CreateDeleteLog(data);
-        }
-        case '8': {
-            return CommandFactory::CreateTimetag(data);
-        }
+        } 
     }
 
     return NULL;
@@ -93,15 +90,6 @@ ICommand* CommandFactory::CreateUpdate(char* data) {
     char* fileData = GetPath(data, fileDataLength, offset);
 
     UpdateCommand* result = new UpdateCommand(path, fileDataLength, fileData);
-    return result;
-}
-
-ICommand* CommandFactory::CreateTimetag(char* data) {
-    char * command = (char *) malloc (TIMETAG_MAX_JOB_COMMAND);
-    time_t timestamp = SpaceString::getUInt(data+1);
-    memcpy ( command, (char*)data+9, TIMETAG_MAX_JOB_COMMAND ); 
-
-    TimetagCommand* result = new TimetagCommand(command, timestamp);
     return result;
 }
 

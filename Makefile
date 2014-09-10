@@ -48,11 +48,11 @@ CPPUTEST_LIBS=-lCppUTest -lCppUTestExt
 #
 # All Object files, do not use wildcard, add the ones you need explicitly!
 #
-OBJECTS = bin/Net2Com.o bin/NamedPipe.o bin/command-factory.o bin/deletelog-command.o  bin/decode-command.o bin/getlog-command.o bin/gettime-command.o bin/reboot-command.o bin/settime-command.o bin/update-command.o bin/base64.o bin/subsystems.o bin/fileIO.o lib/libfileIO.a bin/timetag-command.o
+OBJECTS = bin/Net2Com.o bin/NamedPipe.o bin/command-factory.o bin/deletelog-command.o  bin/decode-command.o bin/getlog-command.o bin/gettime-command.o bin/reboot-command.o bin/settime-command.o bin/update-command.o bin/base64.o bin/subsystems.o bin/fileIO.o lib/libfileIO.a #bin/timetag-command.o
 #
 # CppUTest files, no wildcard, add files explicitly!
 #
-UNIT_TEST = tests/unit/Net2Com-test.cpp  tests/unit/deletelog-command-test.cpp  tests/unit/getlog-command-test.cpp tests/unit/commander-test.cpp tests/unit/timetag-test.cpp
+UNIT_TEST = tests/unit/Net2Com-test.cpp  tests/unit/deletelog-command-test.cpp  tests/unit/getlog-command-test.cpp tests/unit/commander-test.cpp #tests/unit/timetag-test.cpp
 CS1_UTEST_DIR="cs1_utest" # as defined in SpaceDecl.h
 
 #
