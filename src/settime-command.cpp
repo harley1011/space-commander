@@ -42,8 +42,7 @@ void* SetTimeCommand::ParseResult(const char *result)
 
     FILE* logfile;
     logfile=Shakespeare::open_log("/home/logs",s_cs1_subsystems[COMMANDER]);
-     // write to log via shakespeare
-    int test = info_bytes.time_set;
+    
     char buffer[80];
    
     if(info_bytes.time_status == CS1_SUCCESS)

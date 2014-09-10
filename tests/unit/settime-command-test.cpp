@@ -102,6 +102,14 @@ TEST(SetTimeTestGroup, Check_Bytes_Of_Timet_On_System)
 {
     CHECK(sizeof(time_t) ==  SIZEOF_TIMET );
 }
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*
+* GROUP : SetTimeTestGroup
+*
+* NAME : Endian_Checker
+* 
+*-----------------------------------------------------------------------------*/
+
 TEST(SetTimeTestGroup, Endian_Checker)
 { 
     short x=0x0100;

@@ -172,3 +172,11 @@ TEST(DeleteLogTestGroup, FindType_ReturnsLOG)
         command = NULL;
     }
 }
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*
+* NAME : DeleteLogTestGroup :: FindType_ReturnsLOG
+* 
+* PURPOSE : Successfully determines the type of the file 
+*
+*-----------------------------------------------------------------------------*/
+
