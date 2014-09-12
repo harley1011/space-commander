@@ -26,7 +26,7 @@ DEBUGFLAGS=-ggdb -g -gdwarf-2 -g3 #gdwarf-2 + g3 provides macro info to gdb
 #++++++++++++++++++++
 # includes
 #--------------------
-INCLUDES = -I./include/ -I$(SPACE_LIB)/include -I$(SPACE_UPTDATER)/include -I$(SPACE_SCRIPT)/tgz-wizard/include -I$(SPACE_UTLS)/include
+INCLUDES = -I./include/ -I$(SPACE_LIB)/include -I$(SPACE_UPTDATER)/include -I$(SPACE_SCRIPT)/tgz-wizard/include -I$(SPACE_UTLS)/include -I$(SPACE_LIB)/shakespeare/inc
 INCTESTPATH = -I./tests/unit/stubs/ -I./tests/helpers/include/
 
 #
@@ -59,7 +59,7 @@ CS1_UTEST_DIR="cs1_utest" # as defined in SpaceDecl.h
 # ENV : either CS1_UTEST for test environment or empty for PROD, perform a 'make clean' when changing this parameter
 #
 UTEST_ENV=-DCS1_UTEST $(MEM_LEAK_MACRO) $(CPPUTEST_LIBS) 
-ENV = -DCS1_DEBUG  $(UTEST_ENV)  #-DPRESERVE
+ENV = -DCS1_DEBUG  $(UTEST_ENV)  -DPRESERVE
 
 #
 #++++++++++++++++++++

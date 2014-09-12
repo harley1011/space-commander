@@ -8,6 +8,7 @@
 
 #include "Net2Com.h"
 #include "command-factory.h"
+#include "shakespeare.h"
 #include "SpaceDecl.h"
 
 const string LAST_COMMAND_FILENAME("last-command");
@@ -75,7 +76,7 @@ int main()
                               */
     }
 
-    fprintf(stderr, "Commander waiting commands from ground...\n");
+    Shakespeare::log_3(Shakespeare::NOTICE, "Commander", "Waiting commands from ground...");
 
     while (true) {
         memset(info_buffer, 0, sizeof(char) * 255);
@@ -129,8 +130,7 @@ int main()
                                         fclose(fp_last_command);
                                         command = CommandFactory::CreateCommand(previous_command_buffer);
                                         if (command != NULL) {
-                                            fprintf(stderr, "%s\n", "Executing command");
-                                            fflush(stdout);
+                                            Shakespeare::log_3(Shakespeare::NOTICE, "Commander", "Executing command");
 
                                             char* result  = (char* )command->Execute();
                                             if (result != NULL) {
