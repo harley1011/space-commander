@@ -18,6 +18,7 @@
 
 #include <assert.h>
 
+#include "shakespeare.h"
 #include "SpaceString.h"
 #include "subsystems.h"
 #include "commands.h"
@@ -510,21 +511,30 @@ void* GetLogCommand::ParseResult(const char *result, const char *filename)
     result += GETLOG_INFO_SIZE; 
 
     // 2. Save data as a file
+
+    FILE* logfile;
+    logfile=Shakespeare::open_log("/home/logs",s_cs1_subsystems[COMMANDER]);
+
+   
     FILE *pFile = fopen(filename, "wb");
 
     if (!pFile) {
         fprintf(stderr, "[ERROR] %s:%s:%d cannot create the file %s\n", __FILE__, __func__, __LINE__, filename);
     }
-
+    int bytes = 0;
     while (*result != EOF) {
-        fwrite(result, 1, 1, pFile);       
+    //    fwrite(result, 1, 1, pFile);       
         result++;
+        bytes++;
     }
+    char buffer[bytes];
+    memcpy(buffer,result-bytes,bytes); 
+    Shakespeare::log(logfile,Shakespeare::NOTICE,s_cs1_subsystems[COMMANDER],buffer);
 
     fclose(pFile);
 
     info_bytes.next_file_in_result_buffer = this->HasNextFile(result);
-
+    
     return (void*)&info_bytes; 
 }
 
