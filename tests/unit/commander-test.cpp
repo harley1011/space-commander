@@ -51,14 +51,15 @@ TEST_GROUP(CommanderTestGroup)
 
         if (pid == 0) {
             if(execl("./"SPACE_COMMANDER_BIN, SPACE_COMMANDER_BIN, NULL) == -1){
-                fprintf(stderr, "[ERROR] %s:%s:%d ", __FILE__, __func__, __LINE__);
+                fprintf(stderr, "[ERROR] %s:%s:%d \n", __FILE__, __func__, __LINE__);
                 exit(EXIT_FAILURE);
             }
         }
 
         // Make sure the commander is running
         while (system("ps aux | grep bin/space-commander 1>/dev/null") != 0){
-           usleep(1000); 
+            fprintf(stderr, "[INFO] waiting for the commander to start\n");
+            usleep(1000); 
         }
 
         netman = Net2Com::create_netman();
