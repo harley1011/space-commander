@@ -10,6 +10,7 @@
 #include "Net2Com.h"
 #include "command-factory.h"
 #include "shakespeare.h"
+#include "subsystems.h"
 #include "SpaceDecl.h"
 
 const string LAST_COMMAND_FILENAME("last-command");
@@ -51,7 +52,7 @@ int main()
                               */
     }
 
-    Shakespeare::log_3(Shakespeare::NOTICE, "Commander", 
+    Shakespeare::log_3(Shakespeare::NOTICE, s_cs1_subsystems[COMMANDER], 
                                             "Waiting commands from ground...");
 
     while (true) 
@@ -94,7 +95,7 @@ int perform(int bytes)
 
         std::ostringstream msg;
         msg << "Read from info pipe = " << (unsigned int)read << " bytes";
-        Shakespeare::log_3(Shakespeare::NOTICE, "Commander", msg.str());
+        Shakespeare::log_3(Shakespeare::NOTICE, s_cs1_subsystems[COMMANDER], msg.str());
 
         switch (read) 
         {
@@ -111,7 +112,7 @@ int perform(int bytes)
                     if (data_bytes > 0) {
                         std::ostringstream msg;
                         msg << "Read " << data_bytes << " bytes from ground station: ";
-                        Shakespeare::log_3(Shakespeare::NOTICE, "Commander", msg.str());
+                        Shakespeare::log_3(Shakespeare::NOTICE, s_cs1_subsystems[COMMANDER], msg.str());
 
                         for(uint8_t z = 0; z < data_bytes; ++z){
                             uint8_t c = buffer[z];
@@ -147,7 +148,9 @@ int perform(int bytes)
 
                                 if (command != NULL) 
                                 {
-                                    Shakespeare::log_3(Shakespeare::NOTICE, "Commander", "Executing command");
+                                    Shakespeare::log_3(Shakespeare::NOTICE, 
+                                                                    s_cs1_subsystems[COMMANDER], 
+                                                                            "Executing command");
 
                                     char* result  = (char* )command->Execute();
                                     if (result != NULL) {
