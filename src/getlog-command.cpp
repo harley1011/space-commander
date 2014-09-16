@@ -523,7 +523,7 @@ void* GetLogCommand::ParseResult(const char *result, const char *filename)
     }
     int bytes = 0;
     while (*result != EOF) {
-    //    fwrite(result, 1, 1, pFile);       
+        fwrite(result, 1, 1, pFile);       
         result++;
         bytes++;
     }

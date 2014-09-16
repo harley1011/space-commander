@@ -13,11 +13,29 @@
 
 extern const char* s_cs1_subsystems[];
 
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*
+* NAME : SetTimeCommand
+*
+* ARGUMENTS : time  : input - time to set 
+* 
+*-----------------------------------------------------------------------------*/
+SetTimeCommand::SetTimeCommand(time_t time) {
+    this->seconds = time;
+}
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*
+* NAME : Execute
+*
+* PURPOSE : Sets the time of the device to 'time'
+*
+* RETURNS : A buffer contaning the cmd number, cmd status, and time set
+* 
+*-----------------------------------------------------------------------------*/
 void* SetTimeCommand::Execute(){
     struct timeval tv;
     char *result;
-    result = (char*)malloc(sizeof(char) * 10);
-
+    result = (char*)malloc(sizeof(char) * SETTIME_RTN_SIZE);
     
     result[0] = SETTIME_CMD;
     tv.tv_sec = GetSeconds();   
@@ -31,6 +49,18 @@ void* SetTimeCommand::Execute(){
     result[1] = CS1_SUCCESS;
     return (void*)result;
 }
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*
+* NAME : ParseResult
+*
+* PURPOSE : Parse the result buffer returned by the execute function
+*
+* ARGUMENTS : result    : pointer to the result buffer
+*
+* RETURNS : struct InfoBytes* to STATIC memory
+* 
+*-----------------------------------------------------------------------------*/
+
 void* SetTimeCommand::ParseResult(const char *result)
 {
     if(!result) {

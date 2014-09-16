@@ -182,12 +182,13 @@ char* DeleteLogCommand::ExtractFilenameFromFile()
 *
 * NAME : ParseResult 
 *
-* PURPOSE : To parse the result recieved on the ground commander from executed commands
+* PURPOSE : Parses the result buffer returned by the execute function
+*
+* ARGUMENTS : result    : pointer to the result buffer
 *
 * RETURN : A InfoBytes containing delete_status, and filename
 * 
 *-----------------------------------------------------------------------------*/
-
 void* DeleteLogCommand::ParseResult(const char *result)
 {
     if (!result || result[0] != DELETELOG_CMD) {
@@ -198,7 +199,7 @@ void* DeleteLogCommand::ParseResult(const char *result)
     int size = strlen(result) - 1;
     info_bytes.delete_status = result[1];
     info_bytes.filename = result + 2;
-    char buffer[80];
+    char buffer[100];
 
     FILE* logfile;
     logfile=Shakespeare::open_log("/home/logs",s_cs1_subsystems[COMMANDER]);
