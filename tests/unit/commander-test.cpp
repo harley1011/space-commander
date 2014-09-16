@@ -123,8 +123,8 @@ TEST(CommanderTestGroup, GetLog_Oldest_Success)
     #endif
 
     CHECK_EQUAL(0, getlog_info.next_file_in_result_buffer);
-    CHECK(*(result + GETLOG_INFO_SIZE + UTEST_SIZE_OF_TEST_FILES) == EOF);
-    CHECK(*(result + GETLOG_INFO_SIZE + UTEST_SIZE_OF_TEST_FILES + 1) == EOF);
+    CHECK(*(result + 2 + GETLOG_INFO_SIZE + UTEST_SIZE_OF_TEST_FILES) == EOF);
+    CHECK(*(result + GETLOG_INFO_SIZE + UTEST_SIZE_OF_TEST_FILES + 3) == EOF);
     CHECK(diff(dest, path));     
 
     // Cleanup

@@ -118,11 +118,13 @@ void* GetLogCommand::Execute()
     bytes += GetLogCommand::GetEndBytes(buffer + bytes);
 
     // allocate the result buffer
-    result = (char*)malloc(sizeof(char) * bytes);
-
+    result = (char*)malloc(sizeof(char) * bytes + 2);
+    
+    result[0] = GETLOG_CMD;
+    result[1] = CS1_SUCCESS;
     if (result) {
         // Saves the tgz data in th result buffer
-        memcpy(result, buffer, bytes);
+        memcpy(result+2, buffer, bytes);
     }
 
 
@@ -506,6 +508,7 @@ void* GetLogCommand::ParseResult(const char *result, const char *filename)
 
     static struct InfoBytes info_bytes = {0};
 
+    info_bytes.getlog_status = result[1];
     // 1. Get InfoBytes
     this->BuildInfoBytesStruct(&info_bytes, result);
     result += GETLOG_INFO_SIZE; 
@@ -522,8 +525,9 @@ void* GetLogCommand::ParseResult(const char *result, const char *filename)
         fprintf(stderr, "[ERROR] %s:%s:%d cannot create the file %s\n", __FILE__, __func__, __LINE__, filename);
     }
     int bytes = 0;
+    result += 2;
     while (*result != EOF) {
-        fwrite(result, 1, 1, pFile);       
+        fwrite(result , 1, 1, pFile);       
         result++;
         bytes++;
     }
