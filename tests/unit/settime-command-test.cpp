@@ -36,7 +36,7 @@ TEST_GROUP(SetTimeTestGroup)
 {
     void setup()
     {
-
+        command_buf[0] = SETTIME_CMD;
     }
     void teardown()
     {
@@ -57,9 +57,8 @@ TEST(SetTimeTestGroup, Check_Settime)
     time_t rawtime;
     time(&rawtime);
 
-    command_buf[0] = '0';
-  //command_buf[1] = SpaceString::get8Char(command_buf+1,rawtime);
-    memcpy(command_buf+1,&rawtime,sizeof(rawtime));
+    char* convert = SpaceString::getTimetInChar(command_buf+1,rawtime);
+//    memcpy(command_buf+1,&rawtime,sizeof(rawtime));
     
     ICommand* command = CommandFactory::CreateCommand(command_buf);
     char* result = (char*)command->Execute();
@@ -73,13 +72,9 @@ TEST(SetTimeTestGroup, Check_Settime)
     time(&newtime);
     CHECK(newtime-rawtime < 1);        
 
+#ifdef CS1_DEBUG
     std::cerr << "[DEBUG] " << __FILE__ << "Raw Seconds elapsed " << rawtime << " time is currently " << newtime << " difference is " << newtime - rawtime << endl;
-   /* FILE* logfile;
-    logfile=Shakespeare::open_log("/var/log/job-template",PROCESS);
-     // write to log via shakespeare
-     if(logfile!=NULL) {
-        Shakespeare::log(logfile, Shakespeare::NOTICE, PROCESS, sprintf("Raw seconds elapsed since epoch is %d", rawtime ));
-        }*/ 
+#endif    
     if ( command != NULL)
     {
         delete command;
@@ -100,7 +95,7 @@ TEST(SetTimeTestGroup, Check_Settime)
 *-----------------------------------------------------------------------------*/
 TEST(SetTimeTestGroup, Check_Bytes_Of_Timet_On_System)
 {
-    CHECK(sizeof(time_t) ==  SIZEOF_TIMET );
+    CHECK(sizeof(time_t) ==  8 );
 }
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 *
@@ -124,9 +119,7 @@ TEST(SetTimeTestGroup, Endian_Checker)
 * 
 *-----------------------------------------------------------------------------*/
 TEST(SetTimeTestGroup,Settime_Parseresult)
-{
-    command_buf[0] = '0';
-    
+{    
     time_t rawtime = 100;
     memcpy(command_buf+1,&rawtime,sizeof(time_t));
     
@@ -148,5 +141,4 @@ TEST(SetTimeTestGroup,Settime_Parseresult)
         delete command;
         command = NULL;
     }
-
 }

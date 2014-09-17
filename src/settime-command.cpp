@@ -76,9 +76,9 @@ void* SetTimeCommand::ParseResult(const char *result)
     char buffer[80];
    
     if(info_bytes.time_status == CS1_SUCCESS)
-       sprintf(buffer,"SetTime success. Time set to %d seconds since epoch",info_bytes.time_set);
+       sprintf(buffer,"SetTime success. Time set to %u seconds since epoch",(unsigned)info_bytes.time_set);
     else
-       sprintf(buffer,"SetTime failure. Time failed to set %d seconds since epoch",info_bytes.time_set);
+       sprintf(buffer,"SetTime failure. Time failed to set %u seconds since epoch",(unsigned)info_bytes.time_set);
 
    if(logfile!=NULL) {
         Shakespeare::log(logfile, Shakespeare::NOTICE, s_cs1_subsystems[COMMANDER], buffer);
