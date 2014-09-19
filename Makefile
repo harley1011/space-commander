@@ -126,6 +126,9 @@ staticlibs.tar: make_dir lib/libNet2Com.a
 staticlibsQ6.tar: make_dir lib/libNet2Com-mbcc.a
 	tar -cf $@ include/NamedPipe.h include/Net2Com.h lib/libNet2Com-mbcc.a
 
+lib/libNamedPipe.a: bin/NamedPipe.o bin/Net2Com.o
+	ar -crv $@ $^
+
 lib/libNet2Com.a: bin/NamedPipe.o bin/Net2Com.o
 	ar -crv $@ $^
 
