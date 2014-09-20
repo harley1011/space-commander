@@ -57,7 +57,7 @@ TEST(SetTimeTestGroup, Check_Settime)
     time_t rawtime;
     time(&rawtime);
 
-    char* convert = SpaceString::getTimetInChar(command_buf+1,rawtime);
+    SpaceString::getTimetInChar(command_buf+1,rawtime);
 //    memcpy(command_buf+1,&rawtime,sizeof(rawtime));
     
     ICommand* command = CommandFactory::CreateCommand(command_buf);
@@ -118,7 +118,7 @@ TEST(SetTimeTestGroup, Endian_Checker)
 * NAME : Settime_Parseresult
 * 
 *-----------------------------------------------------------------------------*/
-TEST(SetTimeTestGroup,Settime_Parseresult)
+TEST(SetTimeTestGroup,SetTime_ParseResult)
 {    
     time_t rawtime = 100;
     memcpy(command_buf+1,&rawtime,sizeof(time_t));

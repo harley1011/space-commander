@@ -174,9 +174,14 @@ TEST(DeleteLogTestGroup, FindType_ReturnsLOG)
 }
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 *
-* NAME : DeleteLogTestGroup :: FindType_ReturnsLOG
+* NAME : DeleteLogTestGroup :: DeleteLog_ParseResult
 * 
 * PURPOSE : Successfully determines the type of the file 
 *
 *-----------------------------------------------------------------------------*/
+TEST(DeleteLogTestGroup, DeleteLog_ParseResult)
+{
+    
 
+
+}

@@ -8,6 +8,7 @@
 using namespace std;
 struct InfoBytesUpdate{
     const char* bytes_written; 
+    char update_status;
 };
 class UpdateCommand : public ICommand {
 public:

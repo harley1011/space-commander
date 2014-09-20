@@ -2,6 +2,13 @@
 #include <stdio.h>
 #include "base64.h"
 #include <cstring>
+#include "commands.h"
+#include "subsystems.h"
+#include "SpaceString.h"
+#include "SpaceDecl.h"
+#include "shakespeare.h"
+
+extern const char* s_cs1_subsystems[];
 
 void* UpdateCommand::Execute() {
     FILE* fp_update_file = NULL;
@@ -27,9 +34,11 @@ void* UpdateCommand::Execute() {
 
         fclose(fp_update_file); 
 
-        result = (char* )malloc(sizeof(char) * 50);
-        memset(result, '\0', sizeof(char) * 50);
+        result = (char* )malloc(sizeof(char) * 52);
+        memset(result + 2, '\0', sizeof(char) * 50);
         sprintf(result, "%lld", (long long)bytes_written);
+        result[0] = UPDATE_CMD;
+        result[1] = CS1_SUCCESS;
     }
 
     return result;         
@@ -37,7 +46,23 @@ void* UpdateCommand::Execute() {
 void* UpdateCommand::ParseResult(const char *result)
 {
     static struct InfoBytesUpdate info_bytes;
-    info_bytes.bytes_written = result; 
+    info_bytes.update_status = result[1];
+    info_bytes.bytes_written = result + 2; 
+
+    FILE* logfile;
+
+    char buffer[80];
+    logfile=Shakespeare::open_log("/home/logs",s_cs1_subsystems[COMMANDER]);
+    if(info_bytes.update_status == CS1_SUCCESS)
+        sprintf(buffer,"Update success. File %s deleted",info_bytes.bytes_written);
+    else
+        sprintf(buffer,"Update failure. File %s not deleted",info_bytes.bytes_written);
+
+    if (logfile != NULL){
+        Shakespeare::log(logfile,Shakespeare::NOTICE,s_cs1_subsystems[COMMANDER], buffer);
+    }
+
+
     return (void*)&info_bytes;
 
 
