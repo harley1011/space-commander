@@ -52,12 +52,7 @@ OBJECTS = bin/subsystems.o bin/Net2Com.o bin/NamedPipe.o bin/command-factory.o b
 #
 # CppUTest files, no wildcard, add files explicitly!
 #
-<<<<<<< HEAD
-UNIT_TEST = tests/unit/Net2Com-test.cpp  tests/unit/deletelog-command-test.cpp  tests/unit/getlog-command-test.cpp tests/unit/commander-test.cpp #tests/unit/timetag-test.cpp
-=======
 UNIT_TEST = tests/unit/Net2Com-test.cpp  tests/unit/deletelog-command-test.cpp  tests/unit/getlog-command-test.cpp tests/unit/commander-test.cpp tests/unit/settime-command-test.cpp
-
->>>>>>> settime
 CS1_UTEST_DIR="cs1_utest" # as defined in SpaceDecl.h
 
 #
