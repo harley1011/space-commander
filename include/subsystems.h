@@ -18,7 +18,7 @@ extern const char* s_cs1_subsystems[];
 #define SOFTWARE     0x06
 #define UPDATER      0x07
 #define WATCH_PUPPY  0x08
-#define COMMANDER    0x09
+#define COMMANDER    0x09 
 
 #define UNDEF_SUB    0xFF
 
