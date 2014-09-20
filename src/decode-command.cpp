@@ -70,11 +70,4 @@ void* DecodeCommand::Execute() {
 
     return result;         
 }
-void* DecodeCommand::ParseResult(const char *result)
-{
-
-
-
-
-}
 

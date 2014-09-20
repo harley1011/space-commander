@@ -70,20 +70,18 @@ TEST(DeleteLogTestGroup, DeleteLog_UsingInode_fileIsDeleted)
 
     ICommand* command = CommandFactory::CreateCommand(command_buf);
     char* result = (char*)command->Execute();
-    
-    InfoBytesDeleteLog* deletelog_info = (InfoBytesDeleteLog*)command->ParseResult(result);
 
     CHECK_EQUAL(-1, access(filetest_path, F_OK));
 
     char status[2] = {'\0'};
-    strncpy(status, result + 1, 1);
+    strncpy(status, result, 1);
     CHECK_EQUAL(0, atoi(status));
-    CHECK(deletelog_info->delete_status == CS1_SUCCESS);
+
     if (result) {
         free(result);
         result = 0;
     }
-    
+
     if (command != NULL){
         delete command;
         command = NULL;
@@ -108,11 +106,9 @@ TEST(DeleteLogTestGroup, Execute_FileIsDeleted)
     
     ICommand* command = CommandFactory::CreateCommand(data);
     char* result = (char*)command->Execute();
-    
-  //  InfoBytesDeleteLog* getdeletelog_info = (InfoBytesDeleteLog*)(dynamic_cast<DeleteLogCommand*>(command)->ParseResult(result,""));
 
     char status[2] = {'\0'};
-    strncpy(status, result + 1, 1);
+    strncpy(status, result, 1);
 
     CHECK_EQUAL(-1, access(filetest_path, F_OK));
     CHECK_EQUAL(0, atoi(status));
@@ -171,17 +167,4 @@ TEST(DeleteLogTestGroup, FindType_ReturnsLOG)
         delete command;
         command = NULL;
     }
-}
-/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-*
-* NAME : DeleteLogTestGroup :: DeleteLog_ParseResult
-* 
-* PURPOSE : Successfully determines the type of the file 
-*
-*-----------------------------------------------------------------------------*/
-TEST(DeleteLogTestGroup, DeleteLog_ParseResult)
-{
-    
-
-
 }

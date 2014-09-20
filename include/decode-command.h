@@ -21,8 +21,7 @@ public:
         if (destPath != NULL) { delete destPath; }
     }
 
-    void* Execute();       
-    void* ParseResult(const char *result);
+    void* Execute();
     char* GetDestPath() { return destPath; }
     char* GetSrcPath()  { return srcPath; }
     int IsExecutable()  { return isExecutable; }

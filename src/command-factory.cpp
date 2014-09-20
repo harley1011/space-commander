@@ -1,7 +1,6 @@
 #include <cstddef>
 #include <stdlib.h>
 #include <cstring>
-#include <time.h>
 
 #include "SpaceDecl.h"
 #include "SpaceString.h"
@@ -95,10 +94,7 @@ ICommand* CommandFactory::CreateUpdate(char* data) {
 }
 
 ICommand* CommandFactory::CreateSetTime(char* data) {
-    time_t timeRecieved;
-    memcpy(&timeRecieved, data + 1, 8);
-
-    SetTimeCommand* result = new SetTimeCommand(timeRecieved);
+    SetTimeCommand* result = new SetTimeCommand(data[0], data[1], data[2], data[3], data[4], data[5]);
     return result;
 }
 

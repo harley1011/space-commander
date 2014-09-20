@@ -18,7 +18,6 @@
 
 #include <assert.h>
 
-#include "shakespeare.h"
 #include "SpaceString.h"
 #include "subsystems.h"
 #include "commands.h"
@@ -118,13 +117,11 @@ void* GetLogCommand::Execute()
     bytes += GetLogCommand::GetEndBytes(buffer + bytes);
 
     // allocate the result buffer
-    result = (char*)malloc(sizeof(char) * bytes + 2);
-    
-    result[0] = GETLOG_CMD;
-    result[1] = CS1_SUCCESS;
+    result = (char*)malloc(sizeof(char) * bytes);
+
     if (result) {
         // Saves the tgz data in th result buffer
-        memcpy(result+2, buffer, bytes);
+        memcpy(result, buffer, bytes);
     }
 
 
@@ -508,37 +505,26 @@ void* GetLogCommand::ParseResult(const char *result, const char *filename)
 
     static struct InfoBytes info_bytes = {0};
 
-    info_bytes.getlog_status = result[1];
     // 1. Get InfoBytes
     this->BuildInfoBytesStruct(&info_bytes, result);
     result += GETLOG_INFO_SIZE; 
 
     // 2. Save data as a file
-
-    FILE* logfile;
-    logfile=Shakespeare::open_log("/home/logs",s_cs1_subsystems[COMMANDER]);
-
-   
     FILE *pFile = fopen(filename, "wb");
 
     if (!pFile) {
         fprintf(stderr, "[ERROR] %s:%s:%d cannot create the file %s\n", __FILE__, __func__, __LINE__, filename);
     }
-    int bytes = 0;
-    result += 2;
+
     while (*result != EOF) {
-        fwrite(result , 1, 1, pFile);       
+        fwrite(result, 1, 1, pFile);       
         result++;
-        bytes++;
     }
-    char buffer[bytes];
-    memcpy(buffer,result-bytes,bytes); 
-    Shakespeare::log(logfile,Shakespeare::NOTICE,s_cs1_subsystems[COMMANDER],buffer);
 
     fclose(pFile);
 
     info_bytes.next_file_in_result_buffer = this->HasNextFile(result);
-    
+
     return (void*)&info_bytes; 
 }
 

@@ -59,7 +59,6 @@ using namespace std;
                              */
 struct InfoBytes
 {
-    char getlog_status;
     ino_t inode;
     const char *next_file_in_result_buffer;
 };
