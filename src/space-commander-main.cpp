@@ -29,6 +29,7 @@ static int perform(int bytes);
 static char info_buffer[255] = {'\0'};
 static Net2Com* commander = 0; 
 
+extern const char* s_cs1_subsystems[];
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  *
  * NAME : main 
