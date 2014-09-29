@@ -42,7 +42,9 @@ void* SetTimeCommand::Execute(){
     tv.tv_usec = 0;
     memcpy(result+2, &tv.tv_sec, sizeof(time_t)); 
     if (settimeofday(&tv, 0) != 0){
-        perror ("Error! settimeofday()\n");
+        #ifdef CS1_DEBUG
+            perror ("Error! settimeofday()\n");
+        #endif
         result[1] = CS1_FAILURE;
         return (void*)result;        
     }

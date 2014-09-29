@@ -12,6 +12,7 @@
 #include <dirent.h>     // DIR
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
 #include "CppUTest/TestHarness.h"
 #include "CppUTest/MemoryLeakDetectorMallocMacros.h"
@@ -54,48 +55,40 @@ TEST_GROUP(SetTimeTestGroup)
 *-----------------------------------------------------------------------------*/
 TEST(SetTimeTestGroup, Check_Settime)
 {
-    time_t rawtime;
-    time(&rawtime);
+    if (getuid() == 0)
+    {
+        time_t rawtime;
+        time(&rawtime);
 
-    SpaceString::getTimetInChar(command_buf+1,rawtime);
+     SpaceString::getTimetInChar(command_buf+1,rawtime);
 //    memcpy(command_buf+1,&rawtime,sizeof(rawtime));
     
-    ICommand* command = CommandFactory::CreateCommand(command_buf);
-    char* result = (char*)command->Execute();
+        ICommand* command = CommandFactory::CreateCommand(command_buf);
+        char* result = (char*)command->Execute();
    
-    InfoBytesSetTime* getsettime_info = (InfoBytesSetTime*)command->ParseResult(result);
+        InfoBytesSetTime* getsettime_info = (InfoBytesSetTime*)command->ParseResult(result);
 
-    CHECK(getsettime_info->time_status == CS1_SUCCESS);
+        CHECK(getsettime_info->time_status == CS1_SUCCESS);
     
-    CHECK(getsettime_info->time_set == rawtime);
-    time_t newtime;
-    time(&newtime);
-    CHECK(newtime-rawtime < 1);        
+        CHECK(getsettime_info->time_set == rawtime);
+        time_t newtime;
+        time(&newtime);
+        CHECK(newtime-rawtime < 1);        
 
 #ifdef CS1_DEBUG
-    std::cerr << "[DEBUG] " << __FILE__ << "Raw Seconds elapsed " << rawtime << " time is currently " << newtime << " difference is " << newtime - rawtime << endl;
+        std::cerr << "[DEBUG] " << __FILE__ << "Raw Seconds elapsed " << rawtime << " time is currently " << newtime << " difference is " << newtime - rawtime << endl;
 #endif    
-    if ( command != NULL)
-    {
-        delete command;
-        command = NULL;
+        if ( command != NULL)
+        {
+            delete command;
+            command = NULL;
+        }
+        if (result) 
+        {
+            free(result);
+            result = 0;
+        }
     }
-    if (result) {
-        free(result);
-        result = 0;
-
-       }
-}
-/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-*
-* GROUP : SetTimeTestGroup
-*
-* NAME : Check_Bytes_Of_Timet_On_System
-* 
-*-----------------------------------------------------------------------------*/
-TEST(SetTimeTestGroup, Check_Bytes_Of_Timet_On_System)
-{
-    CHECK(sizeof(time_t) ==  8 );
 }
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 *
@@ -132,6 +125,7 @@ TEST(SetTimeTestGroup,SetTime_ParseResult)
     InfoBytesSetTime* getsettime_info = (InfoBytesSetTime*)command->ParseResult(result);
     CHECK(getsettime_info->time_set == rawtime);
     CHECK(getsettime_info->time_status == CS1_SUCCESS);
+    
     if (result) {
         free(result);
         result = 0;
