@@ -55,13 +55,12 @@ TEST_GROUP(SetTimeTestGroup)
 *-----------------------------------------------------------------------------*/
 TEST(SetTimeTestGroup, Check_Settime)
 {
-    if (getuid() == 0)
+    if (getuid() == 0)//This command can only be executed as root user
     {
         time_t rawtime;
         time(&rawtime);
 
      SpaceString::getTimetInChar(command_buf+1,rawtime);
-//    memcpy(command_buf+1,&rawtime,sizeof(rawtime));
     
         ICommand* command = CommandFactory::CreateCommand(command_buf);
         char* result = (char*)command->Execute();
