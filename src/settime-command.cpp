@@ -35,16 +35,14 @@ SetTimeCommand::SetTimeCommand(time_t time) {
 void* SetTimeCommand::Execute(){
     struct timeval tv;
     char *result;
-    result = (char*)malloc(sizeof(char) * SETTIME_RTN_SIZE);
+    result = (char*)malloc(sizeof(char) * (SETTIME_RTN_SIZE + CMD_HEAD_SIZE) );
     
     result[0] = SETTIME_CMD;
     tv.tv_sec = GetSeconds();   
     tv.tv_usec = 0;
-    memcpy(result+2, &tv.tv_sec, sizeof(time_t)); 
+    memcpy(result+CMD_HEAD_SIZE, &tv.tv_sec, sizeof(time_t)); 
     if (settimeofday(&tv, 0) != 0){
-        #ifdef CS1_DEBUG
-            perror ("Error! settimeofday()\n");
-        #endif
+        perror ("Error! settimeofday()\n");
         result[1] = CS1_FAILURE;
         return (void*)result;        
     }
@@ -70,7 +68,7 @@ void* SetTimeCommand::ParseResult(const char *result)
     }
     static struct InfoBytesSetTime info_bytes = {0};
     info_bytes.time_status = result[1];
-    info_bytes.time_set = SpaceString::getTimet(result+2);
+    info_bytes.time_set = SpaceString::getTimet(result+CMD_HEAD_SIZE);
 
     FILE* logfile;
     logfile=Shakespeare::open_log("/home/logs",s_cs1_subsystems[COMMANDER]);

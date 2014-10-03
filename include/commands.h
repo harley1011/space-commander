@@ -8,4 +8,7 @@
 #define REBOOT_CMD 0x34
 #define DECODE_CMD 0x35
 #define DELETELOG_CMD 0x36
+
+#define CMD_HEAD_SIZE 2
+
 #endif

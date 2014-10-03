@@ -6,7 +6,10 @@
 #include <cstdlib>
 
 using namespace std;
-
+struct InfoBytesUpdate{
+    const char* bytes_written; 
+    char update_status;
+};
 class UpdateCommand : public ICommand {
 public:
     UpdateCommand(char* path, int data_length, char* file_data) {
@@ -29,6 +32,7 @@ public:
     }
 
     void* Execute();
+    void* ParseResult(const char* result);
     char* GetPath()       { return path; }
     int   GetDataLength() { return data_length; }
 private:

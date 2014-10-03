@@ -51,15 +51,14 @@ TEST_GROUP(CommanderTestGroup)
 
         if (pid == 0) {
             if(execl("./"SPACE_COMMANDER_BIN, SPACE_COMMANDER_BIN, NULL) == -1){
-                fprintf(stderr, "[ERROR] %s:%s:%d \n", __FILE__, __func__, __LINE__);
+                fprintf(stderr, "[ERROR] %s:%s:%d ", __FILE__, __func__, __LINE__);
                 exit(EXIT_FAILURE);
             }
         }
 
         // Make sure the commander is running
         while (system("ps aux | grep bin/space-commander 1>/dev/null") != 0){
-            fprintf(stderr, "[INFO] waiting for the commander to start\n");
-            usleep(1000); 
+           usleep(1000); 
         }
 
         netman = Net2Com::create_netman();
@@ -124,8 +123,8 @@ TEST(CommanderTestGroup, GetLog_Oldest_Success)
     #endif
 
     CHECK_EQUAL(0, getlog_info.next_file_in_result_buffer);
-    CHECK(*(result + GETLOG_INFO_SIZE + UTEST_SIZE_OF_TEST_FILES) == EOF);
-    CHECK(*(result + GETLOG_INFO_SIZE + UTEST_SIZE_OF_TEST_FILES + 1) == EOF);
+    CHECK(*(result + 2 + GETLOG_INFO_SIZE + UTEST_SIZE_OF_TEST_FILES) == EOF);
+    CHECK(*(result + GETLOG_INFO_SIZE + UTEST_SIZE_OF_TEST_FILES + 3) == EOF);
     CHECK(diff(dest, path));     
 
     // Cleanup
@@ -199,7 +198,7 @@ TEST(CommanderTestGroup, DeleteLog_Success)
     CHECK_EQUAL(-1, access(filetest_path, F_OK));
 
     char status[2] = {'\0'};
-    strncpy(status, result, 1);
+    strncpy(status, result + 1, 1);
     CHECK_EQUAL(0, atoi(status));
 }
 
