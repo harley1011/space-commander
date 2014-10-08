@@ -103,7 +103,7 @@ TEST(TimetagTestGroup, FullExecution)
   command_buf[0] = TIMETAG_CMD; 
   Date date(2014, 9, 15, 10, 10, 10);
   time_t rawtime = date.GetTimeT();
-  memcpy(command_buf+1,&rawtime,SIZEOF_TIMET); 
+  memcpy(command_buf+1,&rawtime,sizeof(time_t)); 
 
   char task[48] = "grep -HinT --color=auto execution /tmp/test.log";
   memcpy(command_buf+9,task,48); 

@@ -86,8 +86,8 @@ int TimetagCommand::CancelJob(const int job_id)
 
   // delete from at spool
   sprintf(cancel_job_command, "atrm %d", job_id);
-  SystemProcess * process = new SystemProcess(cancel_job_command);
-  std::string output = process->Execute();
+  SystemProcess * process = new SystemProcess();
+  std::string output = process->Execute(cancel_job_command);
   delete process;
 
   return atoi(output.c_str());
@@ -104,8 +104,8 @@ int TimetagCommand::AddJob(time_t timestamp, char * executable)
   char add_job_command[CMD_BUFFER_LEN] = {0};
   sprintf(add_job_command, "%s %s %s\r\n", AT_RUNNER, time_string, executable);
 
-  SystemProcess * process = new SystemProcess(add_job_command);
-  std::string output = process->Execute();
+  SystemProcess * process = new SystemProcess();
+  std::string output = process->Execute(add_job_command);
   delete process;
 
   int retval = atoi(output.c_str());
