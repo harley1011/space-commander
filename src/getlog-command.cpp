@@ -533,7 +533,7 @@ void* GetLogCommand::ParseResult(const char *result, const char *filename)
     }
     char buffer[bytes];
     memcpy(buffer,result-bytes,bytes); 
-    Shakespeare::log(logfile,Shakespeare::NOTICE,s_cs1_subsystems[COMMANDER],buffer);
+    Shakespeare::log(logfile,Shakespeare::NOTICE,s_cs1_subsystems[COMMANDER],"GetLog success. " + buffer);
 
     fclose(pFile);
 
