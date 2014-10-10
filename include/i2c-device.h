@@ -1,14 +1,17 @@
-#include <stdio.h>
+#ifndef I2C_DEVICE_H
+#define I2C_DEVICE_H
+
 
 class I2CDevice {
-    public:
-        int I2CBus;
-        int I2CAddress;
+public:
+    I2CDevice(int i2c_bus, int i2c_address, int buffer_size);
+    int I2CRead();
+    int I2CWrite();
 
-        I2CDevice(int bus, int address);
-        int I2CRead();
-        int I2CWrite();
-
-
-
-}
+private:
+    int i2c_bus;
+    int i2c_address;
+    int buffer_size;
+    char* reg_buffer;
+};
+#endif
