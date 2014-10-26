@@ -70,8 +70,6 @@ void* SetTimeCommand::ParseResult(const char *result)
     info_bytes.time_status = result[1];
     info_bytes.time_set = SpaceString::getTimet(result+CMD_HEAD_SIZE);
 
-    FILE* logfile;
-    logfile=Shakespeare::open_log("/home/logs",s_cs1_subsystems[COMMANDER]);
     
     char buffer[80];
    
@@ -80,9 +78,7 @@ void* SetTimeCommand::ParseResult(const char *result)
     else
        sprintf(buffer,"SetTime failure. Time failed to set %u seconds since epoch",(unsigned)info_bytes.time_set);
 
-   if(logfile!=NULL) {
-        Shakespeare::log(logfile, Shakespeare::NOTICE, s_cs1_subsystems[COMMANDER], buffer);
-        } 
+        Shakespeare::log(Shakespeare::NOTICE, s_cs1_subsystems[COMMANDER], buffer);
    
     return (void*)&info_bytes;
 }

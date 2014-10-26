@@ -515,8 +515,6 @@ void* GetLogCommand::ParseResult(const char *result, const char *filename)
 
     // 2. Save data as a file
 
-    FILE* logfile;
-    logfile=Shakespeare::open_log("/home/logs",s_cs1_subsystems[COMMANDER]);
 
    
     FILE *pFile = fopen(filename, "wb");
@@ -532,8 +530,10 @@ void* GetLogCommand::ParseResult(const char *result, const char *filename)
         bytes++;
     }
     char buffer[bytes];
-    memcpy(buffer,result-bytes,bytes); 
-    Shakespeare::log(logfile,Shakespeare::NOTICE,s_cs1_subsystems[COMMANDER],"GetLog success. " + buffer);
+    sprintf(buffer,"GetLog success. %s",bytes);
+  //  memcpy(buffer,result-bytes,bytes); 
+    
+    Shakespeare::log(Shakespeare::NOTICE,s_cs1_subsystems[COMMANDER], buffer);
 
     fclose(pFile);
 
