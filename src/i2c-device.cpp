@@ -29,7 +29,7 @@ I2CDevice::I2CDevice(int i2c_bus, char* filename)
 * PURPOSE : Constructor for rd/wr to i2c devices
 *
 *-----------------------------------------------------------------------------*/
-I2CDevice::I2CDevice(int i2c_rtc)
+I2CDevice::I2CDevice(int i2c_bus)
 {
     this->i2c_bus = i2c_bus;
 }
@@ -61,7 +61,7 @@ int I2CDevice::I2CWriteToRTC(struct rtc_time rt)
 {   
     char* fileHandler;
     sprintf(fileHandler,"/dev/rtc%d",i2c_bus);
-    int file = open(filename,O_RDWR);
+    int file = open(fileHandler,O_RDWR);
     
     if (file < 0 )
     {

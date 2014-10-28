@@ -6,7 +6,7 @@
 class I2CDevice {
 public:
     I2CDevice(int i2c_bus,char* filename);
-    I2CDevice(int i2c_rtc);
+    I2CDevice(int i2c_bus);
     int I2CRead();
     int I2CWrite();
     int I2CWriteToRTC(struct rtc_time rt); 
