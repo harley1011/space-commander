@@ -41,8 +41,14 @@ I2CDevice::I2CDevice(int i2c_rtc)
 *
 *-----------------------------------------------------------------------------*/
 
-int I2CDevice::I2CRead()
+int I2CDevice::I2CRead(char* filename)
 {
+    int file = open(filename,O_RDWR);
+    if ( file < 0 )
+        printf("Open failed and returned errno %s \n", sterror(errno));
+        
+    char* answer;
+    file = ioctl(file,IOCTL_READ,answer); 
 }
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 *
