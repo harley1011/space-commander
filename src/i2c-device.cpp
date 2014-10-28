@@ -4,8 +4,9 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <linux/i2c.h>
-#include <linux/i2c-dev.h>
+#include <unistd.h>
+#include <string.h>
+#include <errno.h>
 
 #include "i2c-device.h"
 
@@ -13,15 +14,24 @@
 *
 * NAME : I2CDevice
 * 
-* PURPOSE : Constructor
+* PURPOSE : Constructor for reading from i2c devices file handlers
 *
 *-----------------------------------------------------------------------------*/
-I2CDevice::I2CDevice(int i2c_bus, int i2c_address, int buffer_size)
+I2CDevice::I2CDevice(int i2c_bus, char* filename)
 {
     this->i2c_bus = i2c_bus;
-    this->i2c_address = i2c_address;
-    this->buffer_size = buffer_size;
-    reg_buffer = new char[buffer_size];
+    this->filename = filename;
+}
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*
+* NAME : I2CDevice
+* 
+* PURPOSE : Constructor for rd/wr to i2c devices
+*
+*-----------------------------------------------------------------------------*/
+I2CDevice::I2CDevice(int i2c_rtc)
+{
+    this->i2c_bus = i2c_bus;
 }
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 *
@@ -33,29 +43,35 @@ I2CDevice::I2CDevice(int i2c_bus, int i2c_address, int buffer_size)
 
 int I2CDevice::I2CRead()
 {
-    char* filename;
-    sprintf(filename,"/dev/i2c-%d",i2c_bus);
-    
+}
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*
+* NAME : I2CWriteToRTC
+* 
+* PURPOSE : Write to the i2c-device register
+*
+*-----------------------------------------------------------------------------*/
+int I2CDevice::I2CWriteToRTC(struct rtc_time rt)
+{   
+    char* fileHandler;
+    sprintf(fileHandler,"/dev/rtc%d",i2c_bus);
     int file = open(filename,O_RDWR);
     
     if (file < 0 )
     {
-        fprintf(stderr,"Error failed to open i2c-device on %s",filename);
-        return -1;       
-    }
-    
-    if (ioctl(file,I2C_SLAVE,i2c_address) < 0)
-    {
-        fprintf(stderr,"Error failed to open i2c slave address %d", i2c_address);
-        return -1;
-    }
+        printf("Open failed and returned errno %s \n", strerror(errno));
 
-    if (read(file,reg_buffer,buffer_size) != 2)
-    {   
-        fprint(stderr,"Error failed to read from i2c-device on %s with address %s", filename,i2c_address); 
-        return -1
     }
-    return 1;
+    else
+    {
+        file = ioctl(file,RTC_SET_TIME,&rt);
+        if ( file < 0 )
+        {
+            printf("Ioctl failed and returned errno %s \n", strerror(errno));
+        }
+        
+    }
+    close(file);            
 }
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 *
@@ -66,7 +82,9 @@ int I2CDevice::I2CRead()
 *-----------------------------------------------------------------------------*/
 int I2CDevice::I2CWrite()
 {
-    return 1;
+        
 
+
+    
 
 }
