@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <errno.h>
+#include <linux/i2c-dev.h>
 
 #include "i2c-device.h"
 
@@ -48,7 +49,7 @@ int I2CDevice::I2CRead(char* filename)
         printf("Open failed and returned errno %s \n", sterror(errno));
         
     char* answer;
-    file = ioctl(file,IOCTL_READ,answer); 
+    file = ioctl(file,I2C_SLAVE,answer); 
 }
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 *
