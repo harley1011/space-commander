@@ -44,12 +44,17 @@ I2CDevice::I2CDevice(int i2c_bus)
 
 int I2CDevice::I2CRead(char* filename)
 {
-    int file = open(filename,O_RDWR);
+    FILE* file = fopen(filename,O_RDONLY);
+    char readBuff[100];
     if ( file < 0 )
-        printf("Open failed and returned errno %s \n", sterror(errno));
-        
-    char* answer;
-    file = ioctl(file,I2C_SLAVE,answer); 
+        printf("Fopen failed and returned errno %s \n", sterror(errno));
+    else
+    {
+        fgets(readBuff,10,file);
+        fclose(file);
+    }
+    printf("The value read is %s",readBuff);
+//    file = ioctl(file,I2C_SLAVE,answer); 
 }
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 *
