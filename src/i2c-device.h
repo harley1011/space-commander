@@ -3,6 +3,7 @@
 
 #include <linux/rtc.h>
 
+#define I2C_MAX_BUF_SIZE 50
 class I2CDevice {
 public:
     I2CDevice(int i2c_bus);

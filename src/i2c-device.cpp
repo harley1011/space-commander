@@ -32,18 +32,26 @@ I2CDevice::I2CDevice(int i2c_bus)
 
 int I2CDevice::I2CRead(char* filename)
 {
-    int file = open(filename,O_RDONLY);
-    char readBuff[100];
-    if ( file < 0 )
-        printf("Fopen failed and returned errno %s \n", strerror(errno));
-    else
-    {
-	read(file,readBuff,1);
-       // fgets(readBuff,10,file);
-        close(file);
+    FILE* file;
+    char i2cBuffer[I2C_MAX_BUF_SIZE];
+    if ( (file = fopen(filename,"r")) == null )
+    {  
+        char* errorMsg;
+        sprintf(errorMsg,"Fopen failed to open I2C device at path %s and returned error message %s \n",filename, strerror(errno));
+        //Shakespeare::log(Priority::ERROR,s_cs1_subsystems[Hardware],errorMsg);
+        //return CS1_FAILURE;
+        return -1;
     }
+    if ((fgets(i2cBuffer,I2C_MAX_BUF_SIZE,file)))
+    {
+        char* errorMsg;
+        sprintf(errorMsg,"Fgets failed to read I2C device at path %s and returned error message %s \n",filename, strerror(errno));
+        //Shakespeare::log(Priority::ERROR,s_cs1_subsystems[Hardware],errorMsg);
+    }
+    fclose(file);  
     printf("The value read is %s",readBuff);
-//    file = ioctl(file,I2C_SLAVE,answer); 
+    
+    return 1;
 }
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 *
@@ -60,15 +68,20 @@ int I2CDevice::I2CWriteToRTC(struct rtc_time rt)
     
     if (file < 0 )
     {
-        printf("Open failed and returned errno %s \n", strerror(errno));
-
+        char* errorMsg;
+        sprintf(errorMsg,"Open failed to open RTC at %s and returned errno %s \n", fileHandler,strerror(errno));
+        //Shakespeare::log(Priority:ERROR,s_cs1_subsystems[Hardware],errorMsg);
+        return -1;
     }
     else
     {
         file = ioctl(file,RTC_SET_TIME,&rt);
         if ( file < 0 )
         {
-            printf("Ioctl failed and returned errno %s \n", strerror(errno));
+            char* errorMsg;
+            sprintf(errorMsg,"IOCTL failed to set RTC at %s and returned errno %s \n", fileHandler,strerror(errno));
+        //Shakespeare::log(Priority:ERROR,s_cs1_subsystems[Hardware],errorMsg);
+
         }
         
     }
