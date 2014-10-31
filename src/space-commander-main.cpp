@@ -29,7 +29,7 @@ static int perform(int bytes);
 static char info_buffer[255] = {'\0'};
 static Net2Com* commander = 0; 
 
-extern const char* s_cs1_subsystems[];
+const char* LOGNAME = cs1_systems[CS1_COMMANDER];
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  *
  * NAME : main 
@@ -53,7 +53,7 @@ int main()
                               */
     }
 
-    Shakespeare::log_3(Shakespeare::NOTICE, s_cs1_subsystems[COMMANDER], 
+    Shakespeare::log(Shakespeare::NOTICE, LOGNAME, 
                                             "Waiting commands from ground...");
 
     while (true) 
@@ -96,7 +96,7 @@ int perform(int bytes)
 
         std::ostringstream msg;
         msg << "Read from info pipe = " << (unsigned int)read << " bytes";
-        Shakespeare::log_3(Shakespeare::NOTICE, s_cs1_subsystems[COMMANDER], msg.str());
+        Shakespeare::log(Shakespeare::NOTICE, LOGNAME, msg.str());
 
         switch (read) 
         {
@@ -113,7 +113,7 @@ int perform(int bytes)
                     if (data_bytes > 0) {
                         std::ostringstream msg;
                         msg << "Read " << data_bytes << " bytes from ground station: ";
-                        Shakespeare::log_3(Shakespeare::NOTICE, s_cs1_subsystems[COMMANDER], msg.str());
+                        Shakespeare::log(Shakespeare::NOTICE, LOGNAME, msg.str());
 
                         for(uint8_t z = 0; z < data_bytes; ++z){
                             uint8_t c = buffer[z];
@@ -149,8 +149,8 @@ int perform(int bytes)
 
                                 if (command != NULL) 
                                 {
-                                    Shakespeare::log_3(Shakespeare::NOTICE, 
-                                                                    s_cs1_subsystems[COMMANDER], 
+                                    Shakespeare::log(Shakespeare::NOTICE, 
+                                                                    LOGNAME, 
                                                                             "Executing command");
 
                                     char* result  = (char* )command->Execute();
