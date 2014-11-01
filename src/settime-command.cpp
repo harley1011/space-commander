@@ -12,6 +12,7 @@
 #include "subsystems.h"
 
 extern const char* s_cs1_subsystems[];
+const char* ST_LOGNAME = cs1_systems[CS1_COMMANDER];
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 *
@@ -70,7 +71,6 @@ void* SetTimeCommand::ParseResult(const char *result)
     info_bytes.time_status = result[1];
     info_bytes.time_set = SpaceString::getTimet(result+CMD_HEAD_SIZE);
 
-    
     char buffer[80];
    
     if(info_bytes.time_status == CS1_SUCCESS)
@@ -78,7 +78,7 @@ void* SetTimeCommand::ParseResult(const char *result)
     else
        sprintf(buffer,"SetTime failure. Time failed to set %u seconds since epoch",(unsigned)info_bytes.time_set);
 
-        Shakespeare::log(Shakespeare::NOTICE, s_cs1_subsystems[COMMANDER], buffer);
+    Shakespeare::log(Shakespeare::NOTICE, ST_LOGNAME, buffer);
    
     return (void*)&info_bytes;
 }
