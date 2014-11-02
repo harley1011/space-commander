@@ -1,17 +1,12 @@
 #ifndef I2C_DEVICE_H
 #define I2C_DEVICE_H
 
+#include <linux/rtc.h>
 
-class I2CDevice {
-public:
-    I2CDevice(int i2c_bus, int i2c_address, int buffer_size);
-    int I2CRead();
+#define I2C_MAX_BUF_SIZE 50
+namespace I2CDevice {
+    int I2CRead(char* filename, char* i2c_buffer);
     int I2CWrite();
-
-private:
-    int i2c_bus;
-    int i2c_address;
-    int buffer_size;
-    char* reg_buffer;
+    int I2CWriteToRTC(struct rtc_time rt,int i2c_bus); 
 };
 #endif

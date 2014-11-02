@@ -73,7 +73,8 @@ int I2CDevice::I2CWriteToRTC(struct rtc_time rt,int bus_number)
         }
         
     }
-    close(file);            
+    close(file);
+    return 1;            
 }
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 *
@@ -84,7 +85,7 @@ int I2CDevice::I2CWriteToRTC(struct rtc_time rt,int bus_number)
 *-----------------------------------------------------------------------------*/
 int I2CDevice::I2CWrite()
 {
-        
+    return 1;
 
 
     

@@ -5,12 +5,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <linux/rtc.h>
 #include <SpaceString.h>
 #include <shakespeare.h>
+#include "i2c-device.h"
 #include "commands.h"
 #include "SpaceDecl.h"
 #include "subsystems.h"
-
 extern const char* s_cs1_subsystems[];
 const char* ST_LOGNAME = cs1_systems[CS1_COMMANDER];
 
@@ -23,6 +24,18 @@ const char* ST_LOGNAME = cs1_systems[CS1_COMMANDER];
 *-----------------------------------------------------------------------------*/
 SetTimeCommand::SetTimeCommand(time_t time) {
     this->seconds = time;
+    this->rtc_bus_number = -1;
+}
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*
+* NAME : SetTimeCommand
+*
+* ARGUMENTS : time  : input - time to set 
+* 
+*-----------------------------------------------------------------------------*/
+SetTimeCommand::SetTimeCommand(time_t time, int rtc_bus_number) {
+    this->seconds = time;
+    this->rtc_bus_number = rtc_bus_number;
 }
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 *
@@ -39,6 +52,7 @@ void* SetTimeCommand::Execute(){
     result = (char*)malloc(sizeof(char) * SETTIME_RTN_SIZE);
     
     result[0] = SETTIME_CMD;
+    result[1] = CS1_FAILURE;
     tv.tv_sec = GetSeconds();   
     tv.tv_usec = 0;
     memcpy(result+2, &tv.tv_sec, sizeof(time_t)); 
@@ -49,7 +63,15 @@ void* SetTimeCommand::Execute(){
         result[1] = CS1_FAILURE;
         return (void*)result;        
     }
-    result[1] = CS1_SUCCESS;
+    if (rtc_bus_number > -1)
+    {
+        struct tm * time_info = localtime(&tv.tv_sec);
+        struct rtc_time rt = { time_info->tm_sec, time_info->tm_min, time_info->tm_hour, time_info->tm_mday, time_info->tm_mon, time_info->tm_year, time_info->tm_wday,time_info->tm_yday,time_info->tm_isdst};
+        if (I2CDevice::I2CWriteToRTC(rt,rtc_bus_number) == -1)
+            result[1] = CS1_FAILURE; 
+
+
+    }
     return (void*)result;
 }
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
