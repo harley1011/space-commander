@@ -19,9 +19,11 @@ struct InfoBytesSetTime
 class SetTimeCommand : public ICommand {
 public:
     SetTimeCommand(time_t time);  
+    SetTimeCommand(time_t time, int rtc_bus_number);   
     time_t GetSeconds() { return seconds; };
     void* Execute();
-    void* ParseResult(const char * result);        
+    void* ParseResult(const char * result);
+    int rtc_bus_number;        
 private:
     time_t seconds;
 };
