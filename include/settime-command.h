@@ -1,6 +1,6 @@
 #ifndef SETTIME_COMMAND_H
 #define SETTIME_COMMAND_H
-#define SETTIME_CMD_SIZE 1 + sizeof(time_t)
+#define SETTIME_CMD_SIZE 3 + sizeof(time_t)
 #define SETTIME_RTN_SIZE 2 + sizeof(time_t)
 
 #include "icommand.h"
@@ -19,11 +19,11 @@ struct InfoBytesSetTime
 class SetTimeCommand : public ICommand {
 public:
     SetTimeCommand(time_t time);  
-    SetTimeCommand(time_t time, int rtc_bus_number);   
+    SetTimeCommand(time_t time, char rtc_bus_number);   
     time_t GetSeconds() { return seconds; };
     void* Execute();
     void* ParseResult(const char * result);
-    int rtc_bus_number;        
+    char rtc_bus_number;        
 private:
     time_t seconds;
 };

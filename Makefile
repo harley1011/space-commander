@@ -48,7 +48,7 @@ CPPUTEST_LIBS=-lCppUTest -lCppUTestExt
 #
 # All Object files, do not use wildcard, add the ones you need explicitly!
 #
-OBJECTS = bin/i2c-device.o bin/subsystems.o bin/Net2Com.o bin/NamedPipe.o bin/command-factory.o bin/deletelog-command.o  bin/decode-command.o bin/getlog-command.o bin/gettime-command.o bin/reboot-command.o bin/settime-command.o bin/update-command.o bin/base64.o bin/subsystems.o 
+OBJECTS = bin/subsystems.o bin/Net2Com.o bin/NamedPipe.o bin/command-factory.o bin/deletelog-command.o  bin/decode-command.o bin/getlog-command.o bin/gettime-command.o bin/reboot-command.o bin/settime-command.o bin/update-command.o bin/base64.o bin/subsystems.o 
 
 #
 # CppUTest files, no wildcard, add files explicitly!

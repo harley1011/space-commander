@@ -13,6 +13,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <fstream>
 
 #include "CppUTest/TestHarness.h"
 #include "CppUTest/MemoryLeakDetectorMallocMacros.h"
@@ -21,6 +22,7 @@
 #include "command-factory.h"
 #include "getlog-command.h"
 #include "icommand.h"
+#include "settime-command.h"
 #include "fileIO.h"
 #include "commands.h"
 #include "subsystems.h"
@@ -60,11 +62,12 @@ TEST(SetTimeTestGroup, Check_Settime)
         time_t rawtime;
         time(&rawtime);
 
-     SpaceString::getTimetInChar(command_buf+1,rawtime);
+        SpaceString::getTimetInChar(command_buf+1,rawtime);
     
         ICommand* command = CommandFactory::CreateCommand(command_buf);
         char* result = (char*)command->Execute();
-   
+        command_buf[SETTIME_CMD_SIZE - 1] = char(0x255);   
+
         InfoBytesSetTime* getsettime_info = (InfoBytesSetTime*)command->ParseResult(result);
 
         CHECK(getsettime_info->time_status == CS1_SUCCESS);
@@ -135,3 +138,51 @@ TEST(SetTimeTestGroup,SetTime_ParseResult)
         command = NULL;
     }
 }
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*
+* GROUP : SetTimeTestGroup
+*
+* NAME : Check_Settime_Rtc
+* 
+*-----------------------------------------------------------------------------*/
+/*TEST(SetTimeTestGroup, Check_Settime_Rtc)
+{
+    std::ifstream ifs;
+    ifs.open("/dev/rtc1",std::ifstream::in);
+    if ( ifs)
+    if (getuid() == 0)//This command can only be executed as root user
+    {
+        ifs.close();
+        time_t rawtime;
+        time(&rawtime);
+        
+        SpaceString::getTimetInChar(command_buf+1,rawtime);
+        command_buf[SETTIME_CMD_SIZE - 1] = 0x01;
+        
+        ICommand* command = CommandFactory::CreateCommand(command_buf);
+        char* result = (char*)command->Execute();
+   
+        InfoBytesSetTime* getsettime_info = (InfoBytesSetTime*)command->ParseResult(result);
+
+        CHECK(getsettime_info->time_status == CS1_SUCCESS);
+    
+        CHECK(getsettime_info->time_set == rawtime);
+        time_t newtime;
+        time(&newtime);
+        CHECK(newtime-rawtime < 1);        
+
+#ifdef CS1_DEBUG
+        std::cerr << "[DEBUG] " << __FILE__ << "Raw Seconds elapsed " << rawtime << " time is currently " << newtime << " difference is " << newtime - rawtime << endl;
+#endif    
+        if ( command != NULL)
+        {
+            delete command;
+            command = NULL;
+        }
+        if (result) 
+        {
+            free(result);
+            result = 0;
+        }
+    }
+}*/
