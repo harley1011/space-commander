@@ -33,7 +33,7 @@ SetTimeCommand::SetTimeCommand(time_t time) {
 * ARGUMENTS : time  : input - time to set 
 * 
 *-----------------------------------------------------------------------------*/
-SetTimeCommand::SetTimeCommand(time_t time, int rtc_bus_number) {
+SetTimeCommand::SetTimeCommand(time_t time, char rtc_bus_number) {
     this->seconds = time;
     this->rtc_bus_number = rtc_bus_number;
 }
@@ -61,11 +61,12 @@ void* SetTimeCommand::Execute(){
         result[1] = CS1_FAILURE;
         return (void*)result;        
     }
-    if (rtc_bus_number > -1)
+    if (rtc_bus_number != 0x255)
     {
+        int rtc_bus_number_convert = (int)rtc_bus_number;
         struct tm * time_info = localtime(&tv.tv_sec);
         struct rtc_time rt = { time_info->tm_sec, time_info->tm_min, time_info->tm_hour, time_info->tm_mday, time_info->tm_mon, time_info->tm_year, time_info->tm_wday,time_info->tm_yday,time_info->tm_isdst};
-        if (I2CDevice::I2CWriteToRTC(rt,rtc_bus_number) == -1)
+        if (I2CDevice::I2CWriteToRTC(rt,rtc_bus_number_convert) == -1)
             result[1] = CS1_FAILURE; 
 
 
