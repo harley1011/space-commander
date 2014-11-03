@@ -145,7 +145,7 @@ TEST(SetTimeTestGroup,SetTime_ParseResult)
 * NAME : Check_Settime_Rtc
 * 
 *-----------------------------------------------------------------------------*/
-/*TEST(SetTimeTestGroup, Check_Settime_Rtc)
+TEST(SetTimeTestGroup, Check_Settime_Rtc)
 {
     std::ifstream ifs;
     ifs.open("/dev/rtc1",std::ifstream::in);
@@ -185,4 +185,4 @@ TEST(SetTimeTestGroup,SetTime_ParseResult)
             result = 0;
         }
     }
-}*/
+}
