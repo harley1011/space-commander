@@ -1,7 +1,7 @@
 #ifndef SETTIME_COMMAND_H
 #define SETTIME_COMMAND_H
 
-#define SETTIME_CMD_SIZE 1 + sizeof(time_t)
+#define SETTIME_CMD_SIZE 2 + sizeof(time_t)
 #define SETTIME_RTN_SIZE sizeof(time_t)
 
 #include "icommand.h"

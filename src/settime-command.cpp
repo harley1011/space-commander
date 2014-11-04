@@ -52,7 +52,7 @@ void* SetTimeCommand::Execute(){
     result = (char*)malloc(sizeof(char) * (SETTIME_RTN_SIZE + CMD_HEAD_SIZE) );
     
     result[0] = SETTIME_CMD;
-    result[1] = CS1_FAILURE;
+    result[1] = CS1_SUCCESS;
     tv.tv_sec = GetSeconds();   
     tv.tv_usec = 0;
     memcpy(result+CMD_HEAD_SIZE, &tv.tv_sec, sizeof(time_t)); 
@@ -61,7 +61,7 @@ void* SetTimeCommand::Execute(){
         result[1] = CS1_FAILURE;
         return (void*)result;        
     }
-    if (rtc_bus_number != 0x255)
+    if (rtc_bus_number != EOF)
     {
         int rtc_bus_number_convert = (int)rtc_bus_number;
         struct tm * time_info = localtime(&tv.tv_sec);
