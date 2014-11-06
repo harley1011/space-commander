@@ -17,6 +17,7 @@ const string LAST_COMMAND_FILENAME("last-command");
 const int COMMAND_RESEND_INDEX = 0;
 const char COMMAND_RESEND_CHAR = '!';
 const int MAX_COMMAND_SIZE     = 255;
+const int MAX_BUFFER_SIZE      = 255;
 
 const char ERROR_CREATING_COMMAND  = '1';
 const char ERROR_EXECUTING_COMMAND = '2';
@@ -25,7 +26,7 @@ const char ERROR_EXECUTING_COMMAND = '2';
 static void out_of_memory_handler();
 static int perform(int bytes);
 
-
+static char log_buffer[255] = {0};
 static char info_buffer[255] = {'\0'};
 static Net2Com* commander = 0; 
 
@@ -46,7 +47,8 @@ int main()
                                                     Icom_w_net_r, Inet_w_com_r);
 
     if (!commander) {
-        fprintf(stderr, "[ERROR] %s:%s:%d Failed in Net2Com instanciation\n", 
+        memset(log_buffer,0,MAX_BUFFER_SIZE);
+        snprintf(log_buffer, MAX_BUFFER_SIZE, "[ERROR] %s:%s:%d Failed in Net2Com instanciation\n", 
                                                 __FILE__, __func__, __LINE__);
         return EXIT_FAILURE; /* watch-puppy will take care of 
                               * restarting space-commander
@@ -85,6 +87,9 @@ int main()
  *-----------------------------------------------------------------------------*/
 int perform(int bytes)
 {
+#ifdef CS1_DEBUG
+    char debug_buffer[255] = {0};
+#endif
     char* buffer = NULL;    // TODO  This buffer scared me ! 
     int read_total = 0;
     ICommand* command  = NULL;
@@ -94,9 +99,11 @@ int perform(int bytes)
     for(int i = 0; i != bytes; i++) {
         read = (unsigned char)info_buffer[i];
 
+#ifdef CS1_DEBUG
         std::ostringstream msg;
         msg << "Read from info pipe = " << (unsigned int)read << " bytes";
         Shakespeare::log(Shakespeare::NOTICE, LOGNAME, msg.str());
+#endif
 
         switch (read) 
         {
@@ -111,21 +118,20 @@ int perform(int bytes)
                     data_bytes = commander->ReadFromDataPipe(buffer, read_total);
 
                     if (data_bytes > 0) {
-                        std::ostringstream msg;
-                        msg << "Read " << data_bytes << " bytes from ground station: ";
-                        Shakespeare::log(Shakespeare::NOTICE, LOGNAME, msg.str());
-
-                        for(uint8_t z = 0; z < data_bytes; ++z){
-                            uint8_t c = buffer[z];
-                            fprintf(stderr, "0x%02X ", c);
-                        }
-
-                        fprintf(stderr, "\n");
-                        fflush(stdout);
+#ifdef CS1_DEBUG
+                          std::ostringstream msg;
+                          msg << "Read " << data_bytes << " bytes from ground station: ";
+                          memset (debug_buffer,0,255);
+                          for(uint8_t z = 0; z < data_bytes; ++z){
+                              uint8_t c = buffer[z];
+                              snprintf(debug_buffer,5, "0x%02X ", c);
+                              msg << debug_buffer;
+                          }
+                          Shakespeare::log(Shakespeare::NOTICE, LOGNAME, msg.str());
+#endif
 
                         if (data_bytes != read_total) {
-                            fprintf(stderr, "Something went wrong !!\n");
-                            fflush(stdout);
+                            Shakespeare::log(Shakespeare::ERROR, LOGNAME, "Something went wrong !!");
                             read_total = 0;
                             break;
                         }
@@ -155,8 +161,9 @@ int perform(int bytes)
 
                                     char* result  = (char* )command->Execute();
                                     if (result != NULL) {
-                                        fprintf(stderr, "Command output = %s\n", result);
-                                        fflush(stdout);
+                                        memset(log_buffer,0,MAX_BUFFER_SIZE);
+                                        snprintf(log_buffer, MAX_BUFFER_SIZE, "Command output = %s\n", result);
+                                        Shakespeare::log(Shakespeare::NOTICE,LOGNAME,log_buffer);
 
                                         commander->WriteToDataPipe(result);
                                         free(result); // TODO allocate result buffer with new in all icommand subclasses and use delete
