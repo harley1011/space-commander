@@ -174,14 +174,28 @@ TEST(DeleteLogTestGroup, FindType_ReturnsLOG)
 }
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 *
-* NAME : DeleteLogTestGroup :: DeleteLog_ParseResult
-* 
-* PURPOSE : Successfully determines the type of the file 
+* GROUP : DeleteLogTestGroup  
 *
+* PURPOSE : Attempt to delete a file that doesn't exist
+* 
 *-----------------------------------------------------------------------------*/
-TEST(DeleteLogTestGroup, DeleteLog_ParseResult)
+TEST(DeleteLogTestGroup, DeleteLog_NonExistent_File)
 {
+    char data[] = "7_filetest.log";
+
+    ICommand* command = CommandFactory::CreateCommand(data);
+    char* result = (char*)command->Execute();
     
+    InfoBytesDeleteLog* deletelog_info = (InfoBytesDeleteLog*)command->ParseResult(result);
 
-
+    CHECK(deletelog_info->delete_status == CS1_FAILURE);
+    if (result) {
+        free(result);
+        result = 0;
+    }
+    
+    if (command != NULL){
+        delete command;
+        command = NULL;
+    }
 }
