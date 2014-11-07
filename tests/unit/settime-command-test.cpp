@@ -194,3 +194,39 @@ TEST(SetTimeTestGroup, Check_Settime_Rtc)
         }
     }
 }
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*
+* GROUP : SetTimeTestGroup
+*
+* NAME : Check_Settime_Fail
+* 
+*-----------------------------------------------------------------------------*/
+TEST(SetTimeTestGroup, Check_Settime_Fail)
+{   
+    if (getuid() == 0)
+    {
+        time_t rawtime = -1;
+        //time(&rawtime);
+
+        SpaceString::getTimetInChar(command_buf+1,rawtime);
+        command_buf[SETTIME_CMD_SIZE - 1] = 0xFF;   
+        ICommand* command = CommandFactory::CreateCommand(command_buf);
+        char* result = (char*)command->Execute();
+
+        InfoBytesSetTime* getsettime_info = (InfoBytesSetTime*)command->ParseResult(result);
+
+        CHECK(getsettime_info->time_status == CS1_FAILURE);
+    
+        //CHECK(getsettime_info->time_set == rawtime);
+
+        if ( command != NULL)
+        {
+            delete command;
+            command = NULL;
+        }
+        if (result) {
+            free(result);
+            result = 0;
+        }
+    }
+}

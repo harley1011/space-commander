@@ -57,7 +57,6 @@ void* SetTimeCommand::Execute(){
     tv.tv_usec = 0;
     memcpy(result+CMD_HEAD_SIZE, &tv.tv_sec, sizeof(time_t)); 
     if (settimeofday(&tv, 0) != 0){
-        perror ("Error! settimeofday()\n");
         result[1] = CS1_FAILURE;
         return (void*)result;        
     }
