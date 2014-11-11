@@ -10,6 +10,8 @@
 #define FILENAME_TMP "filename.tmp" 
 
 extern const char* s_cs1_subsystems[];
+const char* ST_LOGNAME = cs1_systems[CS1_COMMANDER];
+
 /* TODO  issue if you have two instances of space-commander running! (which should not happen)
 
                                     *        add timestamp...?
@@ -201,16 +203,13 @@ void* DeleteLogCommand::ParseResult(const char *result)
     info_bytes.filename = result + CMD_HEAD_SIZE;
     char buffer[100];
 
-    FILE* logfile;
-    logfile=Shakespeare::open_log("/home/logs",s_cs1_subsystems[COMMANDER]);
+    
     if(info_bytes.delete_status == CS1_SUCCESS)
         sprintf(buffer,"DeleteLog success. File %s deleted",info_bytes.filename);
     else
         sprintf(buffer,"DeleteLog failure. File %s not deleted",info_bytes.filename);
 
-    if (logfile != NULL){
-        Shakespeare::log(logfile,Shakespeare::NOTICE,s_cs1_subsystems[COMMANDER], buffer);
-        }
+    Shakespeare::log(Shakespeare::NOTICE,ST_LOGNAME, buffer);
 
     return (void*)&info_bytes;
  

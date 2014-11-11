@@ -13,7 +13,7 @@
 #include "SpaceDecl.h"
 #include "subsystems.h"
 extern const char* s_cs1_subsystems[];
-const char* ST_LOGNAME = cs1_systems[CS1_COMMANDER];
+//const char* ST_LOGNAME = cs1_systems[CS1_COMMANDER];
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 *
@@ -100,7 +100,7 @@ void* SetTimeCommand::ParseResult(const char *result)
     else
        sprintf(buffer,"SetTime failure. Time failed to set %u seconds since epoch",(unsigned)info_bytes.time_set);
 
-    Shakespeare::log(Shakespeare::NOTICE, ST_LOGNAME, buffer);
+    Shakespeare::log(Shakespeare::NOTICE, cs1_systems[CS1_COMMANDER], buffer);
    
     return (void*)&info_bytes;
 }

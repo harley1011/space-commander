@@ -53,7 +53,34 @@ void create_file(const char* path, const char* msg)
     fprintf(file, "%s", msg);
     fclose(file);
 }
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*
+* GROUP : GetLogTestGroup
+*
+* NAME : Execute_OPT_NOOPT_NOFILES
+* 
+*-----------------------------------------------------------------------------*/
+TEST(GetLogTestGroup, Execute_OPT_NOOPT_NOFILES)
+{
+    // This is the Command to create on the ground.
+    GetLogCommand ground_cmd(OPT_NOOPT, 0, 0, 0);
+    ground_cmd.GetCmdStr(command_buf);
 
+    ICommand *command = CommandFactory::CreateCommand(command_buf);
+    char* result = (char*)command->Execute();
+
+    CHECK(result[1] == CS1_FAILURE);
+    // Cleanup
+    if (command){
+        delete command;
+        command = NULL;
+    }
+
+    if (result) {
+        free(result);
+        result = 0;
+    }
+}
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 *
 * GROUP : GetLogTestGroup

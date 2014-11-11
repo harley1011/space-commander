@@ -25,6 +25,7 @@
 #include "getlog-command.h"
 
 extern const char* s_cs1_subsystems[];  // defined in subsystems.cpp
+const char* ST_LOGNAME2 = cs1_systems[CS1_COMMANDER];
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 *
@@ -74,7 +75,7 @@ void* GetLogCommand::Execute()
     * result : [INFO] + [TGZ DATA] + [END]
     * INFO : use inode instead of filename to limit the size
     */
-    
+    int get_log_status = CS1_SUCCESS; 
     char *result = 0;
 
     char filepath[CS1_PATH_MAX] = {'\0'};
@@ -92,28 +93,34 @@ void* GetLogCommand::Execute()
 #ifdef CS1_DEBUG
         fprintf(stderr, "[DEBUG] %s() - file_to_retreive : %s\n", __func__, file_to_retreive);
 #endif
+        if ( file_to_retreive[0] != '\0' )
+        {
+            SpaceString::BuildPath(filepath, CS1_TGZ, file_to_retreive);
 
-        SpaceString::BuildPath(filepath, CS1_TGZ, file_to_retreive);
+            // Prepares Info bytes 
+            GetLogCommand::GetInfoBytes(buffer, filepath);
+            bytes += GETLOG_INFO_SIZE; 
 
-        // Prepares Info bytes 
-        GetLogCommand::GetInfoBytes(buffer, filepath);
-        bytes += GETLOG_INFO_SIZE; 
+            // Reads the file in 'buffer'
+            bytes += GetLogCommand::ReadFile(buffer + bytes, filepath); 
 
-        // Reads the file in 'buffer'
-        bytes += GetLogCommand::ReadFile(buffer + bytes, filepath); 
+            // add END bytes 
+            bytes += GetLogCommand::GetEndBytes(buffer + bytes);
 
-        // add END bytes 
-        bytes += GetLogCommand::GetEndBytes(buffer + bytes);
-
-        // Track
-        number_of_files_to_retreive--; 
-        this->MarkAsProcessed(filepath); /* 'filepath' is considered as processed for this instance of the GetLogCommand
+            // Track
+            number_of_files_to_retreive--; 
+            this->MarkAsProcessed(filepath); /* 'filepath' is considered as processed for this instance of the GetLogCommand
                                          *  if you send a new GetLogCommand with the same parameters, 'filepath' will not
                                          *  be considered as processed. i.e. the processed_files array belongs to this 
                                          *  instance only
                                          */
+        }
+        else
+        {
+            get_log_status = CS1_FAILURE;
+            number_of_files_to_retreive--;
+        }    
     }
-
     // add END bytes
     bytes += GetLogCommand::GetEndBytes(buffer + bytes);
 
@@ -121,7 +128,7 @@ void* GetLogCommand::Execute()
     result = (char*)malloc(sizeof(char) * (bytes + CMD_HEAD_SIZE));
     
     result[0] = GETLOG_CMD;
-    result[1] = CS1_SUCCESS;
+    result[1] = get_log_status;
     if (result) {
         // Saves the tgz data in th result buffer
         memcpy(result+CMD_HEAD_SIZE, buffer, bytes);
@@ -536,7 +543,7 @@ void* GetLogCommand::ParseResult(const char *result, const char *filename)
     memcpy(buffer + msg_size,result-bytes,bytes);
   //  memcpy(buffer,result-bytes,bytes); 
     
-    Shakespeare::log(Shakespeare::NOTICE,s_cs1_subsystems[COMMANDER], buffer);
+    Shakespeare::log(Shakespeare::NOTICE,ST_LOGNAME2, buffer);
 
     fclose(pFile);
 
