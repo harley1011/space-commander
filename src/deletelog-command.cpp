@@ -87,14 +87,13 @@ void* DeleteLogCommand::Execute()
         fprintf(stderr, "[DEBUG] %s():%d - %s/%s\n", __func__, __LINE__, folder, this->filename);
     #endif
 
-    char* result = (char*)malloc(sizeof(char) * size);
-    
+    char* result = (char*)malloc(sizeof(char) * size + 1);
     if (remove(buffer) == 0) {
-        sprintf(result, "%c%c",DELETELOG_CMD,CS1_SUCCESS );
+        snprintf(result, size, "%c%c%s",DELETELOG_CMD,CS1_SUCCESS,this->filename );
     } else {   
-        sprintf(result, "%c%c",DELETELOG_CMD,CS1_FAILURE);
+        snprintf(result, size, "%c%c%s",DELETELOG_CMD,CS1_FAILURE,this->filename );
     }
-    memcpy(result+CMD_HEAD_SIZE,this->filename,size -CMD_HEAD_SIZE);
+   // memcpy(result+CMD_HEAD_SIZE,this->filename,size -CMD_HEAD_SIZE);
 
     return (void*)result;
 }
@@ -205,9 +204,9 @@ void* DeleteLogCommand::ParseResult(const char *result)
 
     
     if(info_bytes.delete_status == CS1_SUCCESS)
-        sprintf(buffer,"DeleteLog success. File %s deleted",info_bytes.filename);
+        sprintf(buffer,"DeleteLog success: File %s deleted",info_bytes.filename);
     else
-        sprintf(buffer,"DeleteLog failure. File %s not deleted",info_bytes.filename);
+        sprintf(buffer,"DeleteLog failure: File %s not deleted",info_bytes.filename);
 
     Shakespeare::log(Shakespeare::NOTICE,ST_LOGNAME, buffer);
 

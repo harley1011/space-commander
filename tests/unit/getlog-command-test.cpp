@@ -70,6 +70,9 @@ TEST(GetLogTestGroup, Execute_OPT_NOOPT_NOFILES)
     char* result = (char*)command->Execute();
 
     CHECK(result[1] == CS1_FAILURE);
+    InfoBytes getlog_info = *static_cast<InfoBytes*>(dynamic_cast<GetLogCommand*>(command)->ParseResult(result));
+
+    CHECK(getlog_info.getlog_status == CS1_FAILURE);
     // Cleanup
     if (command){
         delete command;

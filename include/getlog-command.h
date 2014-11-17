@@ -83,7 +83,7 @@ class GetLogCommand : public ICommand
         
         char* GetCmdStr(char* cmd_buf);
         void* ParseResult(const char *result, const char *filename);
-        //void* ParseResult(const char *result); TODO
+        void* ParseResult(const char *result); 
 
         char* GetNextFile(void);
         size_t ReadFile(char *buffer, const char *filename);

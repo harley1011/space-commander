@@ -75,7 +75,7 @@ void* GetLogCommand::Execute()
     * result : [INFO] + [TGZ DATA] + [END]
     * INFO : use inode instead of filename to limit the size
     */
-    int get_log_status = CS1_SUCCESS; 
+    char get_log_status = CS1_SUCCESS; 
     char *result = 0;
 
     char filepath[CS1_PATH_MAX] = {'\0'};
@@ -516,42 +516,92 @@ void* GetLogCommand::ParseResult(const char *result, const char *filename)
     static struct InfoBytes info_bytes = {0};
 
     info_bytes.getlog_status = result[1];
-    // 1. Get InfoBytes
-    this->BuildInfoBytesStruct(&info_bytes, result);
-    result += GETLOG_INFO_SIZE; 
+    if ( info_bytes.getlog_status == CS1_SUCCESS)
+    {
+        // 1. Get InfoBytes
+        this->BuildInfoBytesStruct(&info_bytes, result);
+        result += GETLOG_INFO_SIZE; 
 
-    // 2. Save data as a file
-
-
+        // 2. Save data as a file
      
-    FILE *pFile = fopen(filename, "wb");
+        FILE *pFile = fopen(filename, "wb");
 
-    if (!pFile) {
-        fprintf(stderr, "[ERROR] %s:%s:%d cannot create the file %s\n", __FILE__, __func__, __LINE__, filename);
-    }
-    int bytes = 0;
-    result += CMD_HEAD_SIZE;
-    while (*result != EOF) {
-        fwrite(result , 1, 1, pFile);       
-        result++;
-        bytes++;
-    }
-    char* success_msg = "GetLog success. ";
-    int msg_size = strlen(success_msg);
-    char buffer[bytes + msg_size];
-    memcpy(buffer,success_msg,msg_size);
-    memcpy(buffer + msg_size,result-bytes,bytes);
-  //  memcpy(buffer,result-bytes,bytes); 
+        if (!pFile) {
+            fprintf(stderr, "[ERROR] %s:%s:%d cannot create the file %s\n", __FILE__, __func__, __LINE__, filename);
+        }
+        int bytes = 0;
+        result += CMD_HEAD_SIZE;
+        while (*result != EOF) {
+            fwrite(result , 1, 1, pFile);       
+            result++;
+            bytes++;
+        }
+        char* success_msg = "GetLog success: ";
+        int msg_size = strlen(success_msg);
+        char buffer[bytes + msg_size];
+        memcpy(buffer,success_msg,msg_size);
+        memcpy(buffer + msg_size,result-bytes,bytes);
     
-    Shakespeare::log(Shakespeare::NOTICE,ST_LOGNAME2, buffer);
+        Shakespeare::log(Shakespeare::NOTICE,ST_LOGNAME2, buffer);
 
-    fclose(pFile);
+        fclose(pFile);
 
-    info_bytes.next_file_in_result_buffer = this->HasNextFile(result);
+        info_bytes.next_file_in_result_buffer = this->HasNextFile(result);
+    }
+    else
+       Shakespeare::log(Shakespeare::NOTICE,ST_LOGNAME2, "GetLog failure: No files may exist");
+    return (void*)&info_bytes;    
+}
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*
+* NAME : ParseResult                                                        TODO UnitTest me
+* 
+* PURPOSE : Parses the result buffer returned by the execute function.
+*
+* ARGUMENTS : result    : pointer to the result buffer
+*             filepath  : string of the form "path/file.log" (if the file exists,
+*                         it will be overwritten)
+*   
+* RETURN : struct InfoBytes* to STATIC memory (Make a COPY!)
+*
+* DESCRIPTION :
+*
+*-----------------------------------------------------------------------------*/
+void* GetLogCommand::ParseResult(const char* result)
+{
+    if (!result) {
+        return 0;
+    }
+
+    static struct InfoBytes info_bytes = {0};
+
+    info_bytes.getlog_status = result[1];
+    // 1. Get InfoBytes
+    if ( info_bytes.getlog_status == CS1_SUCCESS)
+    {
+        this->BuildInfoBytesStruct(&info_bytes, result);
+        result += GETLOG_INFO_SIZE; 
+
+        int bytes = 0;
+        result += CMD_HEAD_SIZE;
+        while (*result != EOF) {
+            result++;
+            bytes++;
+            }
+        char* status_msg = "GetLog success with : ";
+        
+        int msg_size = strlen(status_msg);
+        char buffer[bytes + msg_size];
+        memcpy(buffer,status_msg,msg_size);
+        memcpy(buffer + msg_size,result-bytes,bytes);
+        Shakespeare::log(Shakespeare::NOTICE,ST_LOGNAME2, buffer);
+        info_bytes.next_file_in_result_buffer = this->HasNextFile(result);
+    }
+    else
+        Shakespeare::log(Shakespeare::NOTICE,ST_LOGNAME2, "GetLog failure: No files may exist");
     
     return (void*)&info_bytes; 
 }
-
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 *
 * NAME : HasNextFile 
