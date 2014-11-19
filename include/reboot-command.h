@@ -6,7 +6,6 @@
 struct InfoBytesReboot
 {
     char reboot_status;
-
 };
 
 class RebootCommand : public ICommand {

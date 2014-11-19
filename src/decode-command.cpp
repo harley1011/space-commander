@@ -1,8 +1,12 @@
 #include "decode-command.h"
+#include "shakespeare.h"
+#include "SpaceDecl.h"
+#include "commands.h"
 #include <stdio.h>
 #include "base64.h"
 #include <cstring>
 #include <sys/stat.h>
+
 
 void* DecodeCommand::Execute() {
     FILE* fpDestFile = NULL;
@@ -63,18 +67,20 @@ void* DecodeCommand::Execute() {
             fflush(stdout);
         }
 
-        result = (char* )malloc(sizeof(char) * 50);
-        memset(result, '\0', sizeof(char) * 50);
-        sprintf(result, "%lld", (long long)bytes_written);
+        result = (char* )malloc(sizeof(char) * 50 + CMD_HEAD_SIZE);
+        memset(result + CMD_HEAD_SIZE, '\0', sizeof(char) * 50);
+        sprintf(result + CMD_HEAD_SIZE, "%lld", (long long)bytes_written);
+        result[0] = DECODE_CMD;
+        result[1] = CS1_SUCCESS;
     }
 
     return result;         
 }
 void* DecodeCommand::ParseResult(const char *result)
 {
-
-
-
-
+    if (!result || result[0] != DECODE_CMD){
+        Shakespeare::log(Shakespeare::NOTICE,cs1_systems[CS1_COMMANDER],"Decode failure: Can't parse result");
+        return (void*)0;
+    }
 }
 

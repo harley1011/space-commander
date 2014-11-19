@@ -25,7 +25,6 @@
 #include "getlog-command.h"
 
 extern const char* s_cs1_subsystems[];  // defined in subsystems.cpp
-const char* ST_LOGNAME2 = cs1_systems[CS1_COMMANDER];
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 *
@@ -518,38 +517,35 @@ void* GetLogCommand::ParseResult(const char *result, const char *filename)
     info_bytes.getlog_status = result[1];
     if ( info_bytes.getlog_status == CS1_SUCCESS)
     {
+        result += CMD_HEAD_SIZE;
         // 1. Get InfoBytes
-        this->BuildInfoBytesStruct(&info_bytes, result);
+        this->BuildInfoBytesStruct(&info_bytes, result + CMD_HEAD_SIZE);
         result += GETLOG_INFO_SIZE; 
-
         // 2. Save data as a file
-     
+        info_bytes.getlog_message = result; 
         FILE *pFile = fopen(filename, "wb");
 
         if (!pFile) {
             fprintf(stderr, "[ERROR] %s:%s:%d cannot create the file %s\n", __FILE__, __func__, __LINE__, filename);
         }
         int bytes = 0;
-        result += CMD_HEAD_SIZE;
         while (*result != EOF) {
             fwrite(result , 1, 1, pFile);       
             result++;
             bytes++;
         }
-        char* success_msg = "GetLog success: ";
-        int msg_size = strlen(success_msg);
-        char buffer[bytes + msg_size];
-        memcpy(buffer,success_msg,msg_size);
-        memcpy(buffer + msg_size,result-bytes,bytes);
-    
-        Shakespeare::log(Shakespeare::NOTICE,ST_LOGNAME2, buffer);
-
-        fclose(pFile);
-
+        char success_msg[] = "GetLog success with inode %u and with message(%i bytes): %s";
+        char getlog_message[bytes];
+        memcpy(getlog_message,info_bytes.getlog_message,bytes);
+        info_bytes.message_bytes_size = bytes;
+        char buffer[strlen(success_msg) + bytes];
+        snprintf(buffer,strlen(success_msg) + bytes, success_msg,(unsigned int)info_bytes.getlog_status,bytes,getlog_message);
+        Shakespeare::log(Shakespeare::NOTICE,cs1_systems[CS1_COMMANDER], buffer);
         info_bytes.next_file_in_result_buffer = this->HasNextFile(result);
+        fclose(pFile);
     }
     else
-       Shakespeare::log(Shakespeare::NOTICE,ST_LOGNAME2, "GetLog failure: No files may exist");
+       Shakespeare::log(Shakespeare::NOTICE,cs1_systems[CS1_COMMANDER], "GetLog failure: No files may exist");
     return (void*)&info_bytes;    
 }
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -569,7 +565,8 @@ void* GetLogCommand::ParseResult(const char *result, const char *filename)
 *-----------------------------------------------------------------------------*/
 void* GetLogCommand::ParseResult(const char* result)
 {
-    if (!result) {
+    if (!result || result[0] != GETLOG_CMD) {
+        Shakespeare::log(Shakespeare::NOTICE,cs1_systems[CS1_COMMANDER],"GetLog failure: Can't parse result");
         return 0;
     }
 
@@ -579,26 +576,26 @@ void* GetLogCommand::ParseResult(const char* result)
     // 1. Get InfoBytes
     if ( info_bytes.getlog_status == CS1_SUCCESS)
     {
-        this->BuildInfoBytesStruct(&info_bytes, result);
-        result += GETLOG_INFO_SIZE; 
-
-        int bytes = 0;
         result += CMD_HEAD_SIZE;
+        this->BuildInfoBytesStruct(&info_bytes, result + CMD_HEAD_SIZE);
+        result += GETLOG_INFO_SIZE; 
+        info_bytes.getlog_message = result;
+        int bytes = 0;
         while (*result != EOF) {
             result++;
             bytes++;
             }
-        char* status_msg = "GetLog success with : ";
-        
-        int msg_size = strlen(status_msg);
-        char buffer[bytes + msg_size];
-        memcpy(buffer,status_msg,msg_size);
-        memcpy(buffer + msg_size,result-bytes,bytes);
-        Shakespeare::log(Shakespeare::NOTICE,ST_LOGNAME2, buffer);
+         char success_msg[] = "GetLog success with inode %u and with message(%i bytes): %s";
+        char getlog_message[bytes];
+        memcpy(getlog_message,info_bytes.getlog_message,bytes);
+        info_bytes.message_bytes_size = bytes;
+        char buffer[strlen(success_msg) + bytes];
+        snprintf(buffer,strlen(success_msg) + bytes, success_msg,(unsigned int)info_bytes.getlog_status,bytes,getlog_message);
+        Shakespeare::log(Shakespeare::NOTICE,cs1_systems[CS1_COMMANDER], buffer);
         info_bytes.next_file_in_result_buffer = this->HasNextFile(result);
     }
     else
-        Shakespeare::log(Shakespeare::NOTICE,ST_LOGNAME2, "GetLog failure: No files may exist");
+        Shakespeare::log(Shakespeare::NOTICE,cs1_systems[CS1_COMMANDER], "GetLog failure: No files may exist");
     
     return (void*)&info_bytes; 
 }

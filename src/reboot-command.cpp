@@ -18,7 +18,7 @@ extern const char* s_cs1_subsystems[];
 * 
 *-----------------------------------------------------------------------------*/
 void* RebootCommand::Execute(){
-    char* result = (char*)malloc(sizeof(char) * REBOOT_RTN_SIZE); 
+    char* result = (char*)malloc(sizeof(char) * CMD_HEAD_SIZE); 
     reboot(CMD_HEAD_SIZE);
     result[0] = REBOOT_CMD;
     result[1] = CS1_SUCCESS;
@@ -37,12 +37,12 @@ void* RebootCommand::Execute(){
 *-----------------------------------------------------------------------------*/
 void* RebootCommand::ParseResult(const char * result)
 {
+    if (!result || result[0] != REBOOT_CMD ){
+        Shakespeare::log(Shakespeare::NOTICE,cs1_systems[CS1_COMMANDER],"Reboot failure: Can't parse result");
+        return (void*)0;    
+}
     static struct InfoBytesReboot info_bytes = {0};
     info_bytes.reboot_status = result[1];
-
-    FILE* logfile;
-    logfile=Shakespeare::open_log("home/logs",s_cs1_subsystems[COMMANDER]);
-
     char buffer[60];
     
     if(info_bytes.reboot_status == CS1_SUCCESS)
@@ -50,10 +50,8 @@ void* RebootCommand::ParseResult(const char * result)
     else
         sprintf(buffer, "Reboot failure.");
 
-    if(logfile!=NULL) {
-        Shakespeare::log(logfile, Shakespeare::NOTICE,s_cs1_subsystems[COMMANDER], buffer);
-    }
-    
+    Shakespeare::log(Shakespeare::NOTICE,s_cs1_subsystems[COMMANDER], buffer);
+        
     return (void*)&info_bytes;
 
 }

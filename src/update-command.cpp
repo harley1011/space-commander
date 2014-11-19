@@ -45,23 +45,24 @@ void* UpdateCommand::Execute() {
 }
 void* UpdateCommand::ParseResult(const char *result)
 {
+    if(!result || result[0] != SETTIME_CMD) {
+        Shakespeare::log(Shakespeare::NOTICE,cs1_systems[CS1_COMMANDER],"Possible update failure: Can't parse result");
+        return (void*)0;
+    }
+
     static struct InfoBytesUpdate info_bytes;
     info_bytes.update_status = result[1];
     info_bytes.bytes_written = result + CMD_HEAD_SIZE; 
 
     FILE* logfile;
 
-    char buffer[80];
-    logfile=Shakespeare::open_log("/home/logs",s_cs1_subsystems[COMMANDER]);
+    char buffer[100];
     if(info_bytes.update_status == CS1_SUCCESS)
-        sprintf(buffer,"Update success. File %s deleted",info_bytes.bytes_written);
+        snprintf(buffer,100,"Update success: Bytes written %s ",info_bytes.bytes_written);
     else
-        sprintf(buffer,"Update failure. File %s not deleted",info_bytes.bytes_written);
-
-    if (logfile != NULL){
-        Shakespeare::log(logfile,Shakespeare::NOTICE,s_cs1_subsystems[COMMANDER], buffer);
-    }
-
+        snprintf(buffer,100,"Update failure: Unknown"); 
+  
+    Shakespeare::log(logfile,Shakespeare::NOTICE,s_cs1_subsystems[COMMANDER], buffer);
 
     return (void*)&info_bytes;
 

@@ -61,7 +61,9 @@ struct InfoBytes
 {
     char getlog_status;
     ino_t inode;
+    const char *getlog_message;
     const char *next_file_in_result_buffer;
+    int message_bytes_size;
 };
 
 class GetLogCommand : public ICommand 

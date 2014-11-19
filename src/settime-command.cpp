@@ -13,7 +13,7 @@
 #include "SpaceDecl.h"
 #include "subsystems.h"
 extern const char* s_cs1_subsystems[];
-//const char* ST_LOGNAME = cs1_systems[CS1_COMMANDER];
+const char* ST_LOGNAME = cs1_systems[CS1_COMMANDER];
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 *
@@ -76,7 +76,7 @@ void* SetTimeCommand::Execute(){
 *
 * NAME : ParseResult
 *
-* PURPOSE : Parse the result buffer returned by the execute function
+* PURPOSE : Parse the result buffer returned by the execute function and logs it with shakespeare
 *
 * ARGUMENTS : result    : pointer to the result buffer
 *
@@ -86,19 +86,20 @@ void* SetTimeCommand::Execute(){
 
 void* SetTimeCommand::ParseResult(const char *result)
 {
-    if(!result) {
+    if(!result || result[0] != SETTIME_CMD) {
+        Shakespeare::log(Shakespeare::NOTICE,cs1_systems[CS1_COMMANDER],"Possible SetTime failure: Can't parse result");
         return (void*)0;
     }
     static struct InfoBytesSetTime info_bytes = {0};
     info_bytes.time_status = result[1];
     info_bytes.time_set = SpaceString::getTimet(result+CMD_HEAD_SIZE);
 
-    char buffer[80];
+    char buffer[100];
    
     if(info_bytes.time_status == CS1_SUCCESS)
-       sprintf(buffer,"SetTime success: Time set to %u seconds since epoch",(unsigned)info_bytes.time_set);
+       snprintf(buffer,100,"SetTime success: Time set to %u seconds since epoch",(unsigned)info_bytes.time_set);
     else
-       sprintf(buffer,"SetTime failure: Time failed to set %u seconds since epoch",(unsigned)info_bytes.time_set);
+       snprintf(buffer,100,"SetTime failure: Time failed to set %u seconds since epoch",(unsigned)info_bytes.time_set);
 
     Shakespeare::log(Shakespeare::NOTICE, cs1_systems[CS1_COMMANDER], buffer);
    

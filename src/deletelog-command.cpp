@@ -10,7 +10,6 @@
 #define FILENAME_TMP "filename.tmp" 
 
 extern const char* s_cs1_subsystems[];
-const char* ST_LOGNAME = cs1_systems[CS1_COMMANDER];
 
 /* TODO  issue if you have two instances of space-commander running! (which should not happen)
 
@@ -193,6 +192,7 @@ char* DeleteLogCommand::ExtractFilenameFromFile()
 void* DeleteLogCommand::ParseResult(const char *result)
 {
     if (!result || result[0] != DELETELOG_CMD) {
+        Shakespeare::log(Shakespeare::NOTICE,cs1_systems[CS1_COMMANDER],"DeleteLog failure: Can't parse result");
         return (void*)0;
     }
 
@@ -200,15 +200,15 @@ void* DeleteLogCommand::ParseResult(const char *result)
     int size = strlen(result) - 1;
     info_bytes.delete_status = result[1];
     info_bytes.filename = result + CMD_HEAD_SIZE;
-    char buffer[100];
+    char buffer[100 + size];
 
     
     if(info_bytes.delete_status == CS1_SUCCESS)
-        sprintf(buffer,"DeleteLog success: File %s deleted",info_bytes.filename);
+        snprintf(buffer,100 + size,"DeleteLog success: File %s deleted",info_bytes.filename);
     else
-        sprintf(buffer,"DeleteLog failure: File %s not deleted",info_bytes.filename);
+        snprintf(buffer,100 + size,"DeleteLog failure: File %s not deleted",info_bytes.filename);
 
-    Shakespeare::log(Shakespeare::NOTICE,ST_LOGNAME, buffer);
+    Shakespeare::log(Shakespeare::NOTICE,cs1_systems[CS1_COMMANDER], buffer);
 
     return (void*)&info_bytes;
  
