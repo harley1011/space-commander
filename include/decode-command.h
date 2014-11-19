@@ -7,6 +7,11 @@
 
 using namespace std;
 
+struct InfoBytesDecode
+{
+    char decode_status;
+
+};
 class DecodeCommand : public ICommand {
 public:
     DecodeCommand(char* destPath, char* srcPath, int isExecutable, int totalSize) {

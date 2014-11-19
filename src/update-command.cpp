@@ -8,8 +8,6 @@
 #include "SpaceDecl.h"
 #include "shakespeare.h"
 
-extern const char* s_cs1_subsystems[];
-
 void* UpdateCommand::Execute() {
     FILE* fp_update_file = NULL;
     char* result = NULL;
@@ -54,7 +52,6 @@ void* UpdateCommand::ParseResult(const char *result)
     info_bytes.update_status = result[1];
     info_bytes.bytes_written = result + CMD_HEAD_SIZE; 
 
-    FILE* logfile;
 
     char buffer[100];
     if(info_bytes.update_status == CS1_SUCCESS)
@@ -62,7 +59,7 @@ void* UpdateCommand::ParseResult(const char *result)
     else
         snprintf(buffer,100,"Update failure: Unknown"); 
   
-    Shakespeare::log(logfile,Shakespeare::NOTICE,s_cs1_subsystems[COMMANDER], buffer);
+    Shakespeare::log(Shakespeare::NOTICE,cs1_systems[COMMANDER], buffer);
 
     return (void*)&info_bytes;
 

@@ -12,8 +12,6 @@
 #include "commands.h"
 #include "SpaceDecl.h"
 #include "subsystems.h"
-extern const char* s_cs1_subsystems[];
-const char* ST_LOGNAME = cs1_systems[CS1_COMMANDER];
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 *

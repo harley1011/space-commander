@@ -1,11 +1,13 @@
-#include "decode-command.h"
-#include "shakespeare.h"
-#include "SpaceDecl.h"
-#include "commands.h"
 #include <stdio.h>
 #include "base64.h"
 #include <cstring>
 #include <sys/stat.h>
+#include "decode-command.h"
+#include "shakespeare.h"
+#include "SpaceDecl.h"
+#include "SpaceString.h"
+#include "commands.h"
+#include "subsystems.h"
 
 
 void* DecodeCommand::Execute() {
@@ -82,5 +84,18 @@ void* DecodeCommand::ParseResult(const char *result)
         Shakespeare::log(Shakespeare::NOTICE,cs1_systems[CS1_COMMANDER],"Decode failure: Can't parse result");
         return (void*)0;
     }
+    static struct InfoBytesDecode info_bytes = {0};
+    info_bytes.decode_status = result[1];
+
+    char buffer[100];
+    if(info_bytes.decode_status == CS1_SUCCESS)
+        snprintf(buffer,100,"Decode success: No informaation to report");
+    else
+        snprintf(buffer,100,"Decode failure: Unknown");
+  
+    Shakespeare::log(Shakespeare::NOTICE,cs1_systems[CS1_COMMANDER], buffer);
+
+    return (void*)&info_bytes;
+
 }
 
