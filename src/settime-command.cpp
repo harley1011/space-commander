@@ -85,7 +85,7 @@ void* SetTimeCommand::Execute(){
 void* SetTimeCommand::ParseResult(const char *result)
 {
     if(!result || result[0] != SETTIME_CMD) {
-        Shakespeare::log(Shakespeare::NOTICE,cs1_systems[CS1_COMMANDER],"Possible SetTime failure: Can't parse result");
+        Shakespeare::log(Shakespeare::ERROR,cs1_systems[CS1_COMMANDER],"Possible SetTime failure: Can't parse result");
         return (void*)0;
     }
     static struct InfoBytesSetTime info_bytes = {0};
@@ -95,11 +95,14 @@ void* SetTimeCommand::ParseResult(const char *result)
     char buffer[100];
    
     if(info_bytes.time_status == CS1_SUCCESS)
-       snprintf(buffer,100,"SetTime success: Time set to %u seconds since epoch",(unsigned)info_bytes.time_set);
+    {
+       snprintf(buffer,100,"SetTime success: Time set to %u seconds since epoch",(unsigned)info_bytes.time_set); 
+        Shakespeare::log(Shakespeare::NOTICE, cs1_systems[CS1_COMMANDER], buffer);
+    }
     else
+    {
        snprintf(buffer,100,"SetTime failure: Time failed to set %u seconds since epoch",(unsigned)info_bytes.time_set);
-
-    Shakespeare::log(Shakespeare::NOTICE, cs1_systems[CS1_COMMANDER], buffer);
-   
+       Shakespeare::log(Shakespeare::ERROR, cs1_systems[CS1_COMMANDER], buffer);
+   }
     return (void*)&info_bytes;
 }

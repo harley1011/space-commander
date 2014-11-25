@@ -508,7 +508,8 @@ char* GetLogCommand::GetCmdStr(char* cmd_buf)
 *-----------------------------------------------------------------------------*/
 void* GetLogCommand::ParseResult(const char *result, const char *filename)
 {
-    if (!result) {
+    if (!result || result[0] != GETLOG_CMD) {
+        Shakespeare::log(Shakespeare::ERROR,cs1_systems[CS1_COMMANDER],"GetLog failure: Can't parse result");
         return 0;
     }
 
@@ -545,7 +546,7 @@ void* GetLogCommand::ParseResult(const char *result, const char *filename)
         fclose(pFile);
     }
     else
-       Shakespeare::log(Shakespeare::NOTICE,cs1_systems[CS1_COMMANDER], "GetLog failure: No files may exist");
+       Shakespeare::log(Shakespeare::ERROR,cs1_systems[CS1_COMMANDER], "GetLog failure: No files may exist");
     return (void*)&info_bytes;    
 }
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -566,7 +567,7 @@ void* GetLogCommand::ParseResult(const char *result, const char *filename)
 void* GetLogCommand::ParseResult(const char* result)
 {
     if (!result || result[0] != GETLOG_CMD) {
-        Shakespeare::log(Shakespeare::NOTICE,cs1_systems[CS1_COMMANDER],"GetLog failure: Can't parse result");
+        Shakespeare::log(Shakespeare::ERROR,cs1_systems[CS1_COMMANDER],"GetLog failure: Can't parse result");
         return 0;
     }
 
@@ -595,7 +596,7 @@ void* GetLogCommand::ParseResult(const char* result)
         info_bytes.next_file_in_result_buffer = this->HasNextFile(result);
     }
     else
-        Shakespeare::log(Shakespeare::NOTICE,cs1_systems[CS1_COMMANDER], "GetLog failure: No files may exist");
+        Shakespeare::log(Shakespeare::ERROR,cs1_systems[CS1_COMMANDER], "GetLog failure: No files may exist");
     
     return (void*)&info_bytes; 
 }

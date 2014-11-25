@@ -81,7 +81,7 @@ void* DecodeCommand::Execute() {
 void* DecodeCommand::ParseResult(const char *result)
 {
     if (!result || result[0] != DECODE_CMD){
-        Shakespeare::log(Shakespeare::NOTICE,cs1_systems[CS1_COMMANDER],"Decode failure: Can't parse result");
+        Shakespeare::log(Shakespeare::ERROR,cs1_systems[CS1_COMMANDER],"Decode failure: Can't parse result");
         return (void*)0;
     }
     static struct InfoBytesDecode info_bytes = {0};
@@ -89,12 +89,15 @@ void* DecodeCommand::ParseResult(const char *result)
 
     char buffer[100];
     if(info_bytes.decode_status == CS1_SUCCESS)
+    {    
         snprintf(buffer,100,"Decode success: No informaation to report");
+        Shakespeare::log(Shakespeare::NOTICE,cs1_systems[CS1_COMMANDER], buffer);
+    }
     else
+    {
         snprintf(buffer,100,"Decode failure: Unknown");
-  
-    Shakespeare::log(Shakespeare::NOTICE,cs1_systems[CS1_COMMANDER], buffer);
-
+        Shakespeare::log(Shakespeare::ERROR,cs1_systems[CS1_COMMANDER], buffer);
+    }
     return (void*)&info_bytes;
 
 }

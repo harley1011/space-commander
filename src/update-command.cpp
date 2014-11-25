@@ -44,7 +44,7 @@ void* UpdateCommand::Execute() {
 void* UpdateCommand::ParseResult(const char *result)
 {
     if(!result || result[0] != SETTIME_CMD) {
-        Shakespeare::log(Shakespeare::NOTICE,cs1_systems[CS1_COMMANDER],"Possible update failure: Can't parse result");
+        Shakespeare::log(Shakespeare::ERROR,cs1_systems[CS1_COMMANDER],"Possible update failure: Can't parse result");
         return (void*)0;
     }
 
@@ -55,12 +55,15 @@ void* UpdateCommand::ParseResult(const char *result)
 
     char buffer[100];
     if(info_bytes.update_status == CS1_SUCCESS)
+    {
         snprintf(buffer,100,"Update success: Bytes written %s ",info_bytes.bytes_written);
+        Shakespeare::log(Shakespeare::NOTICE, cs1_systems[CS1_COMMANDER], buffer);
+    }
     else
+    {
         snprintf(buffer,100,"Update failure: Unknown"); 
-  
-    Shakespeare::log(Shakespeare::NOTICE,cs1_systems[COMMANDER], buffer);
-
+        Shakespeare::log(Shakespeare::ERROR,cs1_systems[COMMANDER], buffer);
+    }
     return (void*)&info_bytes;
 
 

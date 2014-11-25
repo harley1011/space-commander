@@ -38,7 +38,7 @@ void* RebootCommand::Execute(){
 void* RebootCommand::ParseResult(const char * result)
 {
     if (!result || result[0] != REBOOT_CMD ){
-        Shakespeare::log(Shakespeare::NOTICE,cs1_systems[CS1_COMMANDER],"Reboot failure: Can't parse result");
+        Shakespeare::log(Shakespeare::ERROR,cs1_systems[CS1_COMMANDER],"Reboot failure: Can't parse result");
         return (void*)0;    
 }
     static struct InfoBytesReboot info_bytes = {0};
@@ -46,12 +46,15 @@ void* RebootCommand::ParseResult(const char * result)
     char buffer[60];
     
     if(info_bytes.reboot_status == CS1_SUCCESS)
+    {
         sprintf(buffer, "Reboot success.");
+        Shakespeare::log(Shakespeare::NOTICE,s_cs1_subsystems[COMMANDER], buffer);
+    }
     else
+    {
         sprintf(buffer, "Reboot failure.");
-
-    Shakespeare::log(Shakespeare::NOTICE,s_cs1_subsystems[COMMANDER], buffer);
-        
+        Shakespeare::log(Shakespeare::ERROR,s_cs1_subsystems[COMMANDER], buffer);
+    }
     return (void*)&info_bytes;
 
 }
