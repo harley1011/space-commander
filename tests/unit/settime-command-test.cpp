@@ -20,7 +20,6 @@
 #include "SpaceDecl.h"
 #include "SpaceString.h"
 #include "command-factory.h"
-#include "getlog-command.h"
 #include "icommand.h"
 #include "settime-command.h"
 #include "fileIO.h"
@@ -89,17 +88,6 @@ TEST(SetTimeTestGroup, Check_Settime)
             result = 0;
         }
     }
-}
-/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-*
-* GROUP : SetTimeTestGroup
-*
-* NAME : Check_Bytes_Of_Timet_On_System
-* 
-*-----------------------------------------------------------------------------*/
-TEST(SetTimeTestGroup, Check_Bytes_Of_Timet_On_System)
-{
-    CHECK(sizeof(time_t) ==  8 );
 }
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 *
