@@ -66,7 +66,7 @@ TEST(SetTimeTestGroup, Check_Settime)
         ICommand* command = CommandFactory::CreateCommand(command_buf);
         char* result = (char*)command->Execute();
 
-        InfoBytesSetTime* getsettime_info = (InfoBytesSetTime*)command->ParseResult(result);
+        InfoBytesSetTime* getsettime_info = (InfoBytesSetTime*)SetTimeCommand::ParseResult(result);
 
         CHECK(getsettime_info->time_status == CS1_SUCCESS);
     
@@ -121,7 +121,7 @@ TEST(SetTimeTestGroup,SetTime_ParseResult)
     result[0] = SETTIME_CMD;
     result[1] = CS1_SUCCESS;
     memcpy(result+2,&rawtime, sizeof(time_t));
-    InfoBytesSetTime* getsettime_info = (InfoBytesSetTime*)command->ParseResult(result);
+    InfoBytesSetTime* getsettime_info = (InfoBytesSetTime*)SetTimeCommand::ParseResult(result);
     CHECK(getsettime_info->time_set == rawtime);
     CHECK(getsettime_info->time_status == CS1_SUCCESS);
     if (result) {
@@ -158,7 +158,7 @@ TEST(SetTimeTestGroup, Check_Settime_Rtc)
         ICommand* command = CommandFactory::CreateCommand(command_buf);
         char* result = (char*)command->Execute();
    
-        InfoBytesSetTime* getsettime_info = (InfoBytesSetTime*)command->ParseResult(result);
+        InfoBytesSetTime* getsettime_info = (InfoBytesSetTime*)SetTimeCommand::ParseResult(result);
 
         CHECK(getsettime_info->time_status == CS1_SUCCESS);
     
@@ -201,7 +201,7 @@ TEST(SetTimeTestGroup, Check_Settime_Fail)
         ICommand* command = CommandFactory::CreateCommand(command_buf);
         char* result = (char*)command->Execute();
 
-        InfoBytesSetTime* getsettime_info = (InfoBytesSetTime*)command->ParseResult(result);
+        InfoBytesSetTime* getsettime_info = (InfoBytesSetTime*)SetTimeCommand::ParseResult(result);
 
         CHECK(getsettime_info->time_status == CS1_FAILURE);
     

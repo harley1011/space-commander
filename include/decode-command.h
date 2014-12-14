@@ -27,7 +27,7 @@ public:
     }
 
     void* Execute();       
-    void* ParseResult(const char *result);
+    static void* ParseResult(const char *result);
     char* GetDestPath() { return destPath; }
     char* GetSrcPath()  { return srcPath; }
     int IsExecutable()  { return isExecutable; }

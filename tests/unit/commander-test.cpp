@@ -201,5 +201,34 @@ TEST(CommanderTestGroup, DeleteLog_Success)
     strncpy(status, result + 1, 1);
     CHECK_EQUAL(0, atoi(status));
 }
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ *
+ * GROUP : CommanderTestGroup
+ *
+ * NAME : SetTime_Success 
+ *
+ *-----------------------------------------------------------------------------*/
+TEST(CommanderTestGroup, SetTime_Success) 
+{
+    char result[RESULT_BUF_SIZE] = {0};
+    time_t rawtime;
+    time(&rawtime);
+    command_buf[0] = SETTIME_CMD;
+    SpaceString::getTimetInChar(command_buf+1,rawtime);
 
+    // use Netman Net2Com to send data to space-commander Net2Com
+    netman->WriteToInfoPipe((unsigned char)SETTIME_CMD_SIZE);
+    netman->WriteToDataPipe(command_buf, SETTIME_CMD_SIZE);
+    netman->WriteToInfoPipe((unsigned char)0xFF);
+    netman->WriteToInfoPipe((unsigned char)0x01);
+    netman->WriteToDataPipe((unsigned char)0x21);
+    netman->WriteToInfoPipe((unsigned char)0xFF);
+
+
+    while (netman->ReadFromDataPipe(result, RESULT_BUF_SIZE) == 0) {
+        // Give enough time to the commander to proceed!
+        usleep(1000);
+    }
+
+}
 

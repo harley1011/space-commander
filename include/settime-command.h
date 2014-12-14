@@ -23,7 +23,7 @@ public:
     SetTimeCommand(time_t time, char rtc_bus_number);   
     time_t GetSeconds() { return seconds; };
     void* Execute();
-    void* ParseResult(const char * result);
+    static void* ParseResult(const char * result);
     char rtc_bus_number;        
 private:
     time_t seconds;

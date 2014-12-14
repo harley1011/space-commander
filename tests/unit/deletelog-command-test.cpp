@@ -71,7 +71,7 @@ TEST(DeleteLogTestGroup, DeleteLog_UsingInode_fileIsDeleted)
     ICommand* command = CommandFactory::CreateCommand(command_buf);
     char* result = (char*)command->Execute();
     
-    InfoBytesDeleteLog* deletelog_info = (InfoBytesDeleteLog*)command->ParseResult(result);
+    InfoBytesDeleteLog* deletelog_info = (InfoBytesDeleteLog*)DeleteLogCommand::ParseResult(result);
 
     CHECK_EQUAL(-1, access(filetest_path, F_OK));
 
@@ -186,7 +186,7 @@ TEST(DeleteLogTestGroup, DeleteLog_NonExistent_File)
     ICommand* command = CommandFactory::CreateCommand(data);
     char* result = (char*)command->Execute();
     
-    InfoBytesDeleteLog* deletelog_info = (InfoBytesDeleteLog*)command->ParseResult(result);
+    InfoBytesDeleteLog* deletelog_info = (InfoBytesDeleteLog*)DeleteLogCommand::ParseResult(result);
 
     CHECK(deletelog_info->delete_status == CS1_FAILURE);
     if (result) {

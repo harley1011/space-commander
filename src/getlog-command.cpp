@@ -578,7 +578,7 @@ void* GetLogCommand::ParseResult(const char* result)
     if ( info_bytes.getlog_status == CS1_SUCCESS)
     {
         result += CMD_HEAD_SIZE;
-        this->BuildInfoBytesStruct(&info_bytes, result + CMD_HEAD_SIZE);
+        info_bytes.inode = SpaceString::getUInt(result + CMD_HEAD_SIZE);
         result += GETLOG_INFO_SIZE; 
         info_bytes.getlog_message = result;
         int bytes = 0;
@@ -593,7 +593,7 @@ void* GetLogCommand::ParseResult(const char* result)
         char buffer[strlen(success_msg) + bytes];
         snprintf(buffer,strlen(success_msg) + bytes, success_msg,(unsigned int)info_bytes.getlog_status,bytes,getlog_message);
         Shakespeare::log(Shakespeare::NOTICE,cs1_systems[CS1_COMMANDER], buffer);
-        info_bytes.next_file_in_result_buffer = this->HasNextFile(result);
+        info_bytes.next_file_in_result_buffer = HasNextFile(result);
     }
     else
         Shakespeare::log(Shakespeare::ERROR,cs1_systems[CS1_COMMANDER], "GetLog failure: No files may exist");

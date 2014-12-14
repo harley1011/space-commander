@@ -20,6 +20,6 @@ class GetTimeCommand : public ICommand {
 public:
     GetTimeCommand() {};
     void* Execute();    // Don't forget to free me. - Willy
-    void* ParseResult(const char *result);
+    static void* ParseResult(const char *result);
 };
 #endif
