@@ -18,10 +18,12 @@
 #define LOG 0x0
 #define TGZ 0x1
 
-struct InfoBytesDeleteLog {
+struct InfoBytesDeleteLog 
+{
     char delete_status;
     const char* filename;
 };
+
 class DeleteLogCommand : public ICommand 
 {
     private :
@@ -38,8 +40,7 @@ class DeleteLogCommand : public ICommand
         char FindType();
         void SaveFilename(ino_t inode);
         char* ExtractFilenameFromFile();
-        static void* ParseResult(const char *result);
- 
+        void* ParseResult(const char *result);
 };
 
 #endif

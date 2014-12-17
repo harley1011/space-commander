@@ -71,7 +71,7 @@ void* DeleteLogCommand::Execute()
     char buffer[CS1_PATH_MAX] = {'\0'};
     const char* folder = 0;
 
-    int size =  strlen(this->filename) + CMD_HEAD_SIZE;
+    int size =  strlen(this->filename) + CMD_HEAD_SIZE + 1; // 1 for NULL terminator
 
     switch(this->type){
         case LOG : folder = CS1_LOGS;
@@ -86,13 +86,12 @@ void* DeleteLogCommand::Execute()
         fprintf(stderr, "[DEBUG] %s():%d - %s/%s\n", __func__, __LINE__, folder, this->filename);
     #endif
 
-    char* result = (char*)malloc(sizeof(char) * size + 1);
+    char* result = (char*)malloc(sizeof(char) * size);
     if (remove(buffer) == 0) {
-        snprintf(result, size, "%c%c%s",DELETELOG_CMD,CS1_SUCCESS,this->filename );
+        snprintf(result, size, "%c%c%s", DELETELOG_CMD, CS1_SUCCESS, this->filename);
     } else {   
-        snprintf(result, size, "%c%c%s",DELETELOG_CMD,CS1_FAILURE,this->filename );
+        snprintf(result, size, "%c%c%s", DELETELOG_CMD, CS1_FAILURE, this->filename);
     }
-   // memcpy(result+CMD_HEAD_SIZE,this->filename,size -CMD_HEAD_SIZE);
 
     return (void*)result;
 }
@@ -191,25 +190,33 @@ char* DeleteLogCommand::ExtractFilenameFromFile()
 *-----------------------------------------------------------------------------*/
 void* DeleteLogCommand::ParseResult(const char *result)
 {
-    if (!result || result[0] != DELETELOG_CMD) {
-        Shakespeare::log(Shakespeare::NOTICE,cs1_systems[CS1_COMMANDER],"DeleteLog failure: Can't parse result");
+    static struct InfoBytesDeleteLog info_bytes;
+
+    if (!result || result[CMD_ID] != DELETELOG_CMD) {
+        Shakespeare::log(Shakespeare::NOTICE, cs1_systems[CS1_COMMANDER],
+                                        "DeleteLog failure: Can't parse result");
         return (void*)0;
     }
 
-    static struct InfoBytesDeleteLog info_bytes;
     int size = strlen(result) - 1;
-    info_bytes.delete_status = result[1];
+    info_bytes.delete_status = result[CMD_STS];
     info_bytes.filename = result + CMD_HEAD_SIZE;
-    char buffer[100 + size];
 
     
     if(info_bytes.delete_status == CS1_SUCCESS)
-        snprintf(buffer,100 + size,"DeleteLog success: File %s deleted",info_bytes.filename);
+    {
+        snprintf(this->log_buffer, CS1_MAX_LOG_ENTRY, 
+                                "DeleteLog success: File %s deleted",
+                                info_bytes.filename);
+    }
     else
-        snprintf(buffer,100 + size,"DeleteLog failure: File %s not deleted",info_bytes.filename);
+    {
+        snprintf(this->log_buffer, CS1_MAX_LOG_ENTRY, 
+                                "DeleteLog failure: File %s not deleted",
+                                info_bytes.filename);
+    }
 
-    Shakespeare::log(Shakespeare::NOTICE,cs1_systems[CS1_COMMANDER], buffer);
+    Shakespeare::log(Shakespeare::NOTICE, cs1_systems[CS1_COMMANDER], this->log_buffer);
 
     return (void*)&info_bytes;
- 
 }
