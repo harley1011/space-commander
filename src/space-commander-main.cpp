@@ -159,13 +159,21 @@ int perform(int bytes)
                                                                     LOGNAME, 
                                                                             "Executing command");
 
-                                    char* result  = (char* )command->Execute();
-                                    if (result != NULL) {
+                                    size_t size = 0;
+                                    char* result  = (char* )command->Execute(&size);
+                                    if (result != NULL) 
+                                    {
                                         memset(log_buffer,0,MAX_BUFFER_SIZE);
                                         snprintf(log_buffer, MAX_BUFFER_SIZE, "Command output = %s\n", result);
                                         Shakespeare::log(Shakespeare::NOTICE,LOGNAME,log_buffer);
 
-                                        commander->WriteToDataPipe(result);
+                                        if (size > 0) {
+                                            commander->WriteToDataPipe(result, size);
+                                        } else { // this branch will be remove as soon as ALL commands returns the SIZE ! TODO
+                                                 // Because it is not safe to rely on a NULL terminator in the result buffer.
+                                            commander->WriteToDataPipe(result);
+                                        }
+
                                         free(result); // TODO allocate result buffer with new in all icommand subclasses and use delete
                                         result = NULL;
                                     } else {
