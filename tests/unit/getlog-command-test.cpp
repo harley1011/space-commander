@@ -70,9 +70,9 @@ TEST(GetLogTestGroup, Execute_OPT_NOOPT_NOFILES)
     char* result = (char*)command->Execute();
 
     CHECK(result[1] == CS1_FAILURE);
-    InfoBytes* getlog_info = (InfoBytes*)GetLogCommand::ParseResult(result);
+    InfoBytes getlog_info = *(InfoBytes*)((GetLogCommand*)command)->ParseResult(result);
 
-    CHECK(getlog_info->getlog_status == CS1_FAILURE);
+    CHECK(getlog_info.getlog_status == CS1_FAILURE);
     // Cleanup
     if (command){
         delete command;
@@ -148,6 +148,12 @@ TEST(GetLogTestGroup, Execute_OPT_DATE_OPT_SUB_getTgz_returnsCorrectFile)
     CHECK(*(result + CMD_HEAD_SIZE + GETLOG_INFO_SIZE + UTEST_SIZE_OF_TEST_FILES) == EOF);
     CHECK(*(result + CMD_HEAD_SIZE + GETLOG_INFO_SIZE + UTEST_SIZE_OF_TEST_FILES + 1) == EOF);
     CHECK(diff(dest, path));     
+
+    // Check inode
+    struct stat attr;
+    stat(path, &attr);
+    CHECK_EQUAL(attr.st_ino, getlog_info.inode);
+
 
     // Cleanup
     if (command){

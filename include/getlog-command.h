@@ -84,8 +84,8 @@ class GetLogCommand : public ICommand
         void* Execute();
         
         char* GetCmdStr(char* cmd_buf);
-        void* ParseResult(const char *result, const char *filename);
-        static void* ParseResult(const char *result); 
+        void* ParseResult(const char *result, const char *filename); // This function SHOULD be private!!!
+        void* ParseResult(const char *result); 
 
         char* GetNextFile(void);
         size_t ReadFile(char *buffer, const char *filename);
