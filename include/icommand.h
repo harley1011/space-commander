@@ -34,7 +34,7 @@ class ICommand
 
         virtual void* Execute(size_t* size){ return this->Execute(); } // The other Execute will be removed as soon as ALL commands 
                                                                        // comply to the new signature Execute(size_t* size) TODO
-        virtual void* Execute() = 0;
+        virtual void* Execute() { return 0; }
 
         // Intended to the GroundCommander
         // The GroundCommander can use the Command's contructor to build a Command and then
