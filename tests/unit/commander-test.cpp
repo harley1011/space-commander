@@ -210,10 +210,12 @@ TEST(CommanderTestGroup, DeleteLog_Success)
  *-----------------------------------------------------------------------------*/
 TEST(CommanderTestGroup, SetTime_Success) 
 {
-    char result[RESULT_BUF_SIZE] = {0};
+    char result[SETTIME_RTN_SIZE + CMD_HEAD_SIZE] = {0};
     time_t rawtime;
+    
     time(&rawtime);
     command_buf[0] = SETTIME_CMD;
+    command_buf[SETTIME_CMD_SIZE - 1] = 0xFF;// turn rtc set-time off
     SpaceString::getTimetInChar(command_buf+1,rawtime);
 
     // use Netman Net2Com to send data to space-commander Net2Com
@@ -229,6 +231,12 @@ TEST(CommanderTestGroup, SetTime_Success)
         // Give enough time to the commander to proceed!
         usleep(1000);
     }
+    
+    InfoBytesSetTime settime_info = *(InfoBytesSetTime*)SetTimeCommand::ParseResult(result);
 
+    CHECK(result[0]==SETTIME_CMD);
+    if ( getuid() == 0 ) //Some systems might need to be root user to set time succesfully
+        CHECK(settime_info.time_status == CS1_SUCCESS); 
+    CHECK(settime_info.time_set == rawtime);
 }
 

@@ -197,10 +197,8 @@ void* DeleteLogCommand::ParseResult(const char *result)
         return (void*)0;
     }
 
-    int size = strlen(result) - 1;
     info_bytes.delete_status = result[CMD_STS];
     info_bytes.filename = result + CMD_HEAD_SIZE;
-
     
     if(info_bytes.delete_status == CS1_SUCCESS)
     {
