@@ -36,7 +36,6 @@ class DeleteLogCommand : public ICommand
         DeleteLogCommand(const char* filename);
         DeleteLogCommand(ino_t inode);
         virtual ~DeleteLogCommand();
-        virtual void* Execute();
         virtual void* Execute(size_t* size);
         char FindType();
         void SaveFilename(ino_t inode);
