@@ -71,8 +71,8 @@ void* DeleteLogCommand::Execute()
     char buffer[CS1_PATH_MAX] = {'\0'};
     const char* folder = 0;
 
-    int size =  strlen(this->filename) + CMD_HEAD_SIZE + 1; // 1 for NULL terminator
-
+    int size = strlen(this->filename) + CMD_HEAD_SIZE + 1; // 1 for NULL terminator
+    
     switch(this->type){
         case LOG : folder = CS1_LOGS;
             break;
@@ -95,7 +95,44 @@ void* DeleteLogCommand::Execute()
 
     return (void*)result;
 }
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*
+* NAME : Execute
+* 
+* PURPOSE : Deletes 'filename', check in /home/logs and /home/tgz
+*
+* RETURNS : a newly allocated buffer, free it!
+*           
+*-----------------------------------------------------------------------------*/
+void* DeleteLogCommand::Execute(size_t* size) 
+{
+    char buffer[CS1_PATH_MAX] = {'\0'};
+    const char* folder = 0;
 
+    *size = strlen(this->filename) + CMD_HEAD_SIZE + 1; // 1 for NULL terminator
+    
+    switch(this->type){
+        case LOG : folder = CS1_LOGS;
+            break;
+        case TGZ : folder = CS1_TGZ;
+            break;
+    }
+
+    snprintf(buffer, CS1_PATH_MAX, "%s/%s", folder, this->filename);
+
+    #ifdef CS1_DEBUG
+        fprintf(stderr, "[DEBUG] %s():%d - %s/%s\n", __func__, __LINE__, folder, this->filename);
+    #endif
+
+    char* result = (char*)malloc(sizeof(char) * *size);
+    if (remove(buffer) == 0) {
+        snprintf(result, *size, "%c%c%s", DELETELOG_CMD, CS1_SUCCESS, this->filename);
+    } else {   
+        snprintf(result, *size, "%c%c%s", DELETELOG_CMD, CS1_FAILURE, this->filename);
+    }
+
+    return (void*)result;
+}
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 *
 * NAME : FindType
