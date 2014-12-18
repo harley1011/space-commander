@@ -59,12 +59,15 @@ TEST(SetTimeTestGroup, Check_Settime)
     if (getuid() == 0)
     {
         time_t rawtime;
+        size_t result_size;
         time(&rawtime);
 
         SpaceString::getTimetInChar(command_buf+1,rawtime);
         command_buf[SETTIME_CMD_SIZE - 1] = 0xFF;   
         ICommand* command = CommandFactory::CreateCommand(command_buf);
-        char* result = (char*)command->Execute();
+        char* result = (char*)command->Execute(&result_size);
+        
+        CHECK(result_size == SETTIME_RTN_SIZE + CMD_HEAD_SIZE);
 
         InfoBytesSetTime* getsettime_info = (InfoBytesSetTime*)SetTimeCommand::ParseResult(result);
 
@@ -150,14 +153,15 @@ TEST(SetTimeTestGroup, Check_Settime_Rtc)
     {
         ifs.close();
         time_t rawtime;
+        size_t result_buffer;
         time(&rawtime);
         
         SpaceString::getTimetInChar(command_buf+1,rawtime);
         command_buf[SETTIME_CMD_SIZE + CMD_HEAD_SIZE - 1] = 0x01;
         
         ICommand* command = CommandFactory::CreateCommand(command_buf);
-        char* result = (char*)command->Execute();
-   
+        char* result = (char*)command->Execute(&result_buffer);
+        CHECK(result_buffer == SETTIME_RTN_SIZE + CMD_HEAD_SIZE);
         InfoBytesSetTime* getsettime_info = (InfoBytesSetTime*)SetTimeCommand::ParseResult(result);
 
         CHECK(getsettime_info->time_status == CS1_SUCCESS);
@@ -194,18 +198,18 @@ TEST(SetTimeTestGroup, Check_Settime_Fail)
     if (getuid() == 0)
     {
         time_t rawtime = -1;
-        //time(&rawtime);
-
+        size_t result_size; 
+        
         SpaceString::getTimetInChar(command_buf+1,rawtime);
         command_buf[SETTIME_CMD_SIZE - 1] = 0xFF;   
         ICommand* command = CommandFactory::CreateCommand(command_buf);
-        char* result = (char*)command->Execute();
-
+        char* result = (char*)command->Execute(&result_size);
+        
+        CHECK(result_size == SETTIME_RTN_SIZE + CMD_HEAD_SIZE);    
+    
         InfoBytesSetTime* getsettime_info = (InfoBytesSetTime*)SetTimeCommand::ParseResult(result);
 
         CHECK(getsettime_info->time_status == CS1_FAILURE);
-    
-        //CHECK(getsettime_info->time_set == rawtime);
 
         if ( command != NULL)
         {
