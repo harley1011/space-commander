@@ -58,7 +58,6 @@ GetLogCommand::~GetLogCommand()
 {
 
 }
-
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 *
 * NAME : Execute 
@@ -68,7 +67,7 @@ GetLogCommand::~GetLogCommand()
 *           - if OPT_SIZE is specified, retreives floor(SIZE / CS1_MAX_FRAME_SIZE) tgzs
 *
 *-----------------------------------------------------------------------------*/
-void* GetLogCommand::Execute()
+void* GetLogCommand::Execute(size_t *pSize)
 {
     /* TODO IN PROGRESS : add [INFO] and [END] bytes before and after EACH file read into result buffer.
     * result : [INFO] + [TGZ DATA] + [END]
@@ -133,10 +132,9 @@ void* GetLogCommand::Execute()
         memcpy(result+CMD_HEAD_SIZE, buffer, bytes);
     }
 
-
+    *pSize = bytes + CMD_HEAD_SIZE;
     return (void*)result;
 }
-
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 *
 * NAME : ReadFile
@@ -503,103 +501,74 @@ char* GetLogCommand::GetCmdStr(char* cmd_buf)
 *   
 * RETURN : struct InfoBytes* to STATIC memory (Make a COPY!)
 *
-* DESCRIPTION :
-*
 *-----------------------------------------------------------------------------*/
 void* GetLogCommand::ParseResult(const char *result, const char *filename)
 {
-    if (!result || result[0] != GETLOG_CMD) {
+    static struct InfoBytes info_bytes = {0};
+    FILE* pFile = 0;
+
+    if (!result || result[CMD_ID] != GETLOG_CMD) {
         Shakespeare::log(Shakespeare::ERROR,cs1_systems[CS1_COMMANDER],"GetLog failure: Can't parse result");
         return 0;
     }
 
-    static struct InfoBytes info_bytes = {0};
-
-    info_bytes.getlog_status = result[1];
-    if ( info_bytes.getlog_status == CS1_SUCCESS)
+    info_bytes.getlog_status = result[CMD_STS];
+    if (info_bytes.getlog_status == CS1_SUCCESS)
     {
         result += CMD_HEAD_SIZE;
+
         // 1. Get InfoBytes
-        this->BuildInfoBytesStruct(&info_bytes, result + CMD_HEAD_SIZE);
+        this->BuildInfoBytesStruct(&info_bytes, result);
         result += GETLOG_INFO_SIZE; 
+
         // 2. Save data as a file
         info_bytes.getlog_message = result; 
-        FILE *pFile = fopen(filename, "wb");
 
-        if (!pFile) {
-            fprintf(stderr, "[ERROR] %s:%s:%d cannot create the file %s\n", __FILE__, __func__, __LINE__, filename);
+        if (filename) 
+        {
+            pFile = fopen(filename, "wb");
+
+            if (!pFile) {
+                fprintf(stderr, "[ERROR] %s:%s:%d cannot create the file %s\n", 
+                                                __FILE__, __func__, __LINE__, filename);
+            }
         }
+
         int bytes = 0;
-        while (*result != EOF) {
-            fwrite(result , 1, 1, pFile);       
+        while (*result != EOF) 
+        {
+            if (pFile) {
+                fwrite(result , 1, 1, pFile);        // why one byte at a time ??? QUESTION 
+            }
+
             result++;
             bytes++;
         }
-        char success_msg[] = "GetLog success with inode %u and with message(%i bytes): %s";
-        char getlog_message[bytes];
-        memcpy(getlog_message,info_bytes.getlog_message,bytes);
+
+        snprintf(this->log_buffer, CS1_MAX_LOG_ENTRY, 
+                    "GetLog success with inode %u and with message(%i bytes)", info_bytes.inode, bytes);
+        Shakespeare::log(Shakespeare::NOTICE, cs1_systems[CS1_COMMANDER], this->log_buffer);
+
         info_bytes.message_bytes_size = bytes;
-        char buffer[strlen(success_msg) + bytes];
-        snprintf(buffer,strlen(success_msg) + bytes, success_msg,(unsigned int)info_bytes.getlog_status,bytes,getlog_message);
-        Shakespeare::log(Shakespeare::NOTICE,cs1_systems[CS1_COMMANDER], buffer);
         info_bytes.next_file_in_result_buffer = this->HasNextFile(result);
-        fclose(pFile);
+
+        if (pFile) {
+            fclose(pFile);
+        }
     }
     else
+    {
        Shakespeare::log(Shakespeare::ERROR,cs1_systems[CS1_COMMANDER], "GetLog failure: No files may exist");
+    }
+
     return (void*)&info_bytes;    
 }
-/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-*
-* NAME : ParseResult                                                        TODO UnitTest me
-* 
-* PURPOSE : Parses the result buffer returned by the execute function.
-*
-* ARGUMENTS : result    : pointer to the result buffer
-*             filepath  : string of the form "path/file.log" (if the file exists,
-*                         it will be overwritten)
-*   
-* RETURN : struct InfoBytes* to STATIC memory (Make a COPY!)
-*
-* DESCRIPTION :
-*
-*-----------------------------------------------------------------------------*/
+
 void* GetLogCommand::ParseResult(const char* result)
 {
-    if (!result || result[0] != GETLOG_CMD) {
-        Shakespeare::log(Shakespeare::ERROR,cs1_systems[CS1_COMMANDER],"GetLog failure: Can't parse result");
-        return 0;
-    }
-
-    static struct InfoBytes info_bytes = {0};
-
-    info_bytes.getlog_status = result[1];
-    // 1. Get InfoBytes
-    if ( info_bytes.getlog_status == CS1_SUCCESS)
-    {
-        result += CMD_HEAD_SIZE;
-        this->BuildInfoBytesStruct(&info_bytes, result + CMD_HEAD_SIZE);
-        result += GETLOG_INFO_SIZE; 
-        info_bytes.getlog_message = result;
-        int bytes = 0;
-        while (*result != EOF) {
-            result++;
-            bytes++;
-            }
-         char success_msg[] = "GetLog success with inode %u and with message(%i bytes): %s";
-        char getlog_message[bytes];
-        memcpy(getlog_message,info_bytes.getlog_message,bytes);
-        info_bytes.message_bytes_size = bytes;
-        char buffer[strlen(success_msg) + bytes];
-        snprintf(buffer,strlen(success_msg) + bytes, success_msg,(unsigned int)info_bytes.getlog_status,bytes,getlog_message);
-        Shakespeare::log(Shakespeare::NOTICE,cs1_systems[CS1_COMMANDER], buffer);
-        info_bytes.next_file_in_result_buffer = this->HasNextFile(result);
-    }
-    else
-        Shakespeare::log(Shakespeare::ERROR,cs1_systems[CS1_COMMANDER], "GetLog failure: No files may exist");
-    
-    return (void*)&info_bytes; 
+    return this->ParseResult(result, 0);
 }
+
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 *
 * NAME : HasNextFile 

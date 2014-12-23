@@ -44,11 +44,11 @@ SetTimeCommand::SetTimeCommand(time_t time, char rtc_bus_number) {
 * RETURNS : A buffer contaning the cmd number, cmd status, and time set
 * 
 *-----------------------------------------------------------------------------*/
-void* SetTimeCommand::Execute(){
+void* SetTimeCommand::Execute(size_t* pSize){
     struct timeval tv;
     char *result;
     result = (char*)malloc(sizeof(char) * (SETTIME_RTN_SIZE + CMD_HEAD_SIZE) );
-    
+    *pSize = SETTIME_RTN_SIZE + CMD_HEAD_SIZE;
     result[0] = SETTIME_CMD;
     result[1] = CS1_SUCCESS;
     tv.tv_sec = GetSeconds();   

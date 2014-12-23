@@ -20,7 +20,6 @@
 #include "SpaceDecl.h"
 #include "SpaceString.h"
 #include "command-factory.h"
-#include "getlog-command.h"
 #include "icommand.h"
 #include "settime-command.h"
 #include "fileIO.h"
@@ -60,14 +59,17 @@ TEST(SetTimeTestGroup, Check_Settime)
     if (getuid() == 0)
     {
         time_t rawtime;
+        size_t result_size;
         time(&rawtime);
 
         SpaceString::getTimetInChar(command_buf+1,rawtime);
         command_buf[SETTIME_CMD_SIZE - 1] = 0xFF;   
         ICommand* command = CommandFactory::CreateCommand(command_buf);
-        char* result = (char*)command->Execute();
+        char* result = (char*)command->Execute(&result_size);
+        
+        CHECK(result_size == SETTIME_RTN_SIZE + CMD_HEAD_SIZE);
 
-        InfoBytesSetTime* getsettime_info = (InfoBytesSetTime*)command->ParseResult(result);
+        InfoBytesSetTime* getsettime_info = (InfoBytesSetTime*)SetTimeCommand::ParseResult(result);
 
         CHECK(getsettime_info->time_status == CS1_SUCCESS);
     
@@ -89,17 +91,6 @@ TEST(SetTimeTestGroup, Check_Settime)
             result = 0;
         }
     }
-}
-/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-*
-* GROUP : SetTimeTestGroup
-*
-* NAME : Check_Bytes_Of_Timet_On_System
-* 
-*-----------------------------------------------------------------------------*/
-TEST(SetTimeTestGroup, Check_Bytes_Of_Timet_On_System)
-{
-    CHECK(sizeof(time_t) ==  8 );
 }
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 *
@@ -133,7 +124,7 @@ TEST(SetTimeTestGroup,SetTime_ParseResult)
     result[0] = SETTIME_CMD;
     result[1] = CS1_SUCCESS;
     memcpy(result+2,&rawtime, sizeof(time_t));
-    InfoBytesSetTime* getsettime_info = (InfoBytesSetTime*)command->ParseResult(result);
+    InfoBytesSetTime* getsettime_info = (InfoBytesSetTime*)SetTimeCommand::ParseResult(result);
     CHECK(getsettime_info->time_set == rawtime);
     CHECK(getsettime_info->time_status == CS1_SUCCESS);
     if (result) {
@@ -162,15 +153,16 @@ TEST(SetTimeTestGroup, Check_Settime_Rtc)
     {
         ifs.close();
         time_t rawtime;
+        size_t result_buffer;
         time(&rawtime);
         
         SpaceString::getTimetInChar(command_buf+1,rawtime);
         command_buf[SETTIME_CMD_SIZE + CMD_HEAD_SIZE - 1] = 0x01;
         
         ICommand* command = CommandFactory::CreateCommand(command_buf);
-        char* result = (char*)command->Execute();
-   
-        InfoBytesSetTime* getsettime_info = (InfoBytesSetTime*)command->ParseResult(result);
+        char* result = (char*)command->Execute(&result_buffer);
+        CHECK(result_buffer == SETTIME_RTN_SIZE + CMD_HEAD_SIZE);
+        InfoBytesSetTime* getsettime_info = (InfoBytesSetTime*)SetTimeCommand::ParseResult(result);
 
         CHECK(getsettime_info->time_status == CS1_SUCCESS);
     
@@ -206,18 +198,18 @@ TEST(SetTimeTestGroup, Check_Settime_Fail)
     if (getuid() == 0)
     {
         time_t rawtime = -1;
-        //time(&rawtime);
-
+        size_t result_size; 
+        
         SpaceString::getTimetInChar(command_buf+1,rawtime);
         command_buf[SETTIME_CMD_SIZE - 1] = 0xFF;   
         ICommand* command = CommandFactory::CreateCommand(command_buf);
-        char* result = (char*)command->Execute();
-
-        InfoBytesSetTime* getsettime_info = (InfoBytesSetTime*)command->ParseResult(result);
+        char* result = (char*)command->Execute(&result_size);
+        
+        CHECK(result_size == SETTIME_RTN_SIZE + CMD_HEAD_SIZE);    
+    
+        InfoBytesSetTime* getsettime_info = (InfoBytesSetTime*)SetTimeCommand::ParseResult(result);
 
         CHECK(getsettime_info->time_status == CS1_FAILURE);
-    
-        //CHECK(getsettime_info->time_set == rawtime);
 
         if ( command != NULL)
         {

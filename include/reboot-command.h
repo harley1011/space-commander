@@ -12,6 +12,6 @@ class RebootCommand : public ICommand {
 public:
     RebootCommand() {};
     void* Execute();
-    void* ParseResult(const char * result);        
+    static void* ParseResult(const char * result);        
 };
 #endif

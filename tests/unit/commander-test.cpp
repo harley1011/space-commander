@@ -98,6 +98,7 @@ TEST_GROUP(CommanderTestGroup)
 TEST(CommanderTestGroup, GetLog_Oldest_Success) 
 {
     const char* path = CS1_TGZ"/Watch-Puppy20140101.txt";  
+    size_t result_size;
     UTestUtls::CreateFile(CS1_TGZ"/Watch-Puppy20140101.txt", "file a");
     usleep(1000000);
     UTestUtls::CreateFile(CS1_TGZ"/Updater20140102.txt", "file b");
@@ -114,7 +115,7 @@ TEST(CommanderTestGroup, GetLog_Oldest_Success)
     ground_cmd.GetCmdStr(command_buf);
 
     ICommand *command = CommandFactory::CreateCommand(command_buf);
-    result = (char*)command->Execute();
+    result = (char*)command->Execute(&result_size);
 
     InfoBytes getlog_info = *static_cast<InfoBytes*>(dynamic_cast<GetLogCommand*>(command)->ParseResult(result, dest));
 
@@ -201,5 +202,42 @@ TEST(CommanderTestGroup, DeleteLog_Success)
     strncpy(status, result + 1, 1);
     CHECK_EQUAL(0, atoi(status));
 }
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ *
+ * GROUP : CommanderTestGroup
+ *
+ * NAME : SetTime_Success 
+ *
+ *-----------------------------------------------------------------------------*/
+TEST(CommanderTestGroup, SetTime_Success) 
+{
+    char result[SETTIME_RTN_SIZE + CMD_HEAD_SIZE] = {0};
+    time_t rawtime;
+    
+    time(&rawtime);
+    command_buf[0] = SETTIME_CMD;
+    command_buf[SETTIME_CMD_SIZE - 1] = 0xFF;// turn rtc set-time off
+    SpaceString::getTimetInChar(command_buf+1,rawtime);
 
+    // use Netman Net2Com to send data to space-commander Net2Com
+    netman->WriteToInfoPipe((unsigned char)SETTIME_CMD_SIZE);
+    netman->WriteToDataPipe(command_buf, SETTIME_CMD_SIZE);
+    netman->WriteToInfoPipe((unsigned char)0xFF);
+    netman->WriteToInfoPipe((unsigned char)0x01);
+    netman->WriteToDataPipe((unsigned char)0x21);
+    netman->WriteToInfoPipe((unsigned char)0xFF);
+
+
+    while (netman->ReadFromDataPipe(result, RESULT_BUF_SIZE) == 0) {
+        // Give enough time to the commander to proceed!
+        usleep(1000);
+    }
+    
+    InfoBytesSetTime settime_info = *(InfoBytesSetTime*)SetTimeCommand::ParseResult(result);
+
+    CHECK(result[0]==SETTIME_CMD);
+    if ( getuid() == 0 ) //Some systems might need to be root user to set time succesfully
+        CHECK(settime_info.time_status == CS1_SUCCESS); 
+    CHECK(settime_info.time_set == rawtime);
+}
 
