@@ -58,7 +58,6 @@ GetLogCommand::~GetLogCommand()
 {
 
 }
-
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 *
 * NAME : Execute 
@@ -68,7 +67,7 @@ GetLogCommand::~GetLogCommand()
 *           - if OPT_SIZE is specified, retreives floor(SIZE / CS1_MAX_FRAME_SIZE) tgzs
 *
 *-----------------------------------------------------------------------------*/
-void* GetLogCommand::Execute()
+void* GetLogCommand::Execute(size_t *pSize)
 {
     /* TODO IN PROGRESS : add [INFO] and [END] bytes before and after EACH file read into result buffer.
     * result : [INFO] + [TGZ DATA] + [END]
@@ -133,10 +132,9 @@ void* GetLogCommand::Execute()
         memcpy(result+CMD_HEAD_SIZE, buffer, bytes);
     }
 
-
+    *pSize = bytes + CMD_HEAD_SIZE;
     return (void*)result;
 }
-
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 *
 * NAME : ReadFile

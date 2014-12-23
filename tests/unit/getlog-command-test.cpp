@@ -1,4 +1,4 @@
-/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 *
 * AUTHORS : Space Concordia 2014, Joseph
 *
@@ -63,12 +63,14 @@ void create_file(const char* path, const char* msg)
 TEST(GetLogTestGroup, Execute_OPT_NOOPT_NOFILES)
 {
     // This is the Command to create on the ground.
+    size_t result_size;
     GetLogCommand ground_cmd(OPT_NOOPT, 0, 0, 0);
     ground_cmd.GetCmdStr(command_buf);
 
     ICommand *command = CommandFactory::CreateCommand(command_buf);
-    char* result = (char*)command->Execute();
+    char* result = (char*)command->Execute(&result_size);
 
+    CHECK(result_size == 4 );
     CHECK(result[1] == CS1_FAILURE);
     InfoBytes getlog_info = *(InfoBytes*)((GetLogCommand*)command)->ParseResult(result);
 
@@ -117,6 +119,7 @@ TEST(GetLogTestGroup, GetInfoBytes_returnsCorrectInfoBytes)
 TEST(GetLogTestGroup, Execute_OPT_DATE_OPT_SUB_getTgz_returnsCorrectFile)
 {
     const char* path = CS1_TGZ"/Updater20140102.txt";  
+    size_t result_size;
 
     create_file(CS1_TGZ"/Watch-Puppy20140101.txt", "file a");
     usleep(1000000);
@@ -136,7 +139,9 @@ TEST(GetLogTestGroup, Execute_OPT_DATE_OPT_SUB_getTgz_returnsCorrectFile)
 
     // This is the Command that the space-commander will create
     ICommand *command = CommandFactory::CreateCommand(command_buf);
-    result = (char*)command->Execute();
+    result = (char*)command->Execute(&result_size);
+
+    CHECK(result_size == 16);
 
     InfoBytes getlog_info = *static_cast<InfoBytes*>(dynamic_cast<GetLogCommand*>(command)->ParseResult(result, dest));
 
@@ -178,7 +183,8 @@ TEST(GetLogTestGroup, Execute_OPT_NOOPT_get2TGZ_returns2OldestTgz)
 {
     const char* path = CS1_TGZ"/Watch-Puppy20140101.txt";  
     const char* path2 = CS1_TGZ"/Updater20140102.txt";  
-
+    size_t result_size;
+    
     create_file(CS1_TGZ"/Watch-Puppy20140101.txt", "file a");
     usleep(1000000);
     create_file(CS1_TGZ"/Updater20140102.txt", "file b");
@@ -195,7 +201,7 @@ TEST(GetLogTestGroup, Execute_OPT_NOOPT_get2TGZ_returns2OldestTgz)
     ground_cmd.GetCmdStr(command_buf);
 
     ICommand *command = CommandFactory::CreateCommand(command_buf);
-    result = (char*)command->Execute();
+    result = (char*)command->Execute(&result_size);
 
     FILE *pFile = fopen(dest, "wb");
 
@@ -239,6 +245,8 @@ TEST(GetLogTestGroup, Execute_OPT_NOOPT_get2TGZ_returns2OldestTgz)
 TEST(GetLogTestGroup, Execute_OPT_NOOPT_returnsOldestTgz)
 {
     const char* path = CS1_TGZ"/Watch-Puppy20140101.txt";  
+    size_t result_size;
+
     create_file(CS1_TGZ"/Watch-Puppy20140101.txt", "file a");
     usleep(1000000);
     create_file(CS1_TGZ"/Updater20140102.txt", "file b");
@@ -254,7 +262,7 @@ TEST(GetLogTestGroup, Execute_OPT_NOOPT_returnsOldestTgz)
     ground_cmd.GetCmdStr(command_buf);
 
     ICommand *command = CommandFactory::CreateCommand(command_buf);
-    result = (char*)command->Execute();
+    result = (char*)command->Execute(&result_size);
 
     FILE *pFile = fopen(dest, "wb");
 

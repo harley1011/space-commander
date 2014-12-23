@@ -98,6 +98,7 @@ TEST_GROUP(CommanderTestGroup)
 TEST(CommanderTestGroup, GetLog_Oldest_Success) 
 {
     const char* path = CS1_TGZ"/Watch-Puppy20140101.txt";  
+    size_t result_size;
     UTestUtls::CreateFile(CS1_TGZ"/Watch-Puppy20140101.txt", "file a");
     usleep(1000000);
     UTestUtls::CreateFile(CS1_TGZ"/Updater20140102.txt", "file b");
@@ -114,7 +115,7 @@ TEST(CommanderTestGroup, GetLog_Oldest_Success)
     ground_cmd.GetCmdStr(command_buf);
 
     ICommand *command = CommandFactory::CreateCommand(command_buf);
-    result = (char*)command->Execute();
+    result = (char*)command->Execute(&result_size);
 
     InfoBytes getlog_info = *static_cast<InfoBytes*>(dynamic_cast<GetLogCommand*>(command)->ParseResult(result, dest));
 
