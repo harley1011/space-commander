@@ -20,9 +20,9 @@
 
 #include "shakespeare.h"
 #include "SpaceString.h"
-#include "subsystems.h"
-#include "commands.h"
-#include "getlog-command.h"
+#include "space-commander/subsystems.h"
+#include "space-commander/commands.h"
+#include "space-commander/getlog-command.h"
 
 extern const char* s_cs1_subsystems[];  // defined in subsystems.cpp
 

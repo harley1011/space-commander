@@ -19,15 +19,15 @@
 #include "CppUTest/MemoryLeakDetectorMallocMacros.h"
 #include "SpaceDecl.h"
 #include "SpaceString.h"
-#include "command-factory.h"
-#include "icommand.h"
-#include "settime-command.h"
+#include "space-commander/command-factory.h"
+#include "space-commander/icommand.h"
+#include "space-commander/settime-command.h"
 #include "fileIO.h"
-#include "commands.h"
-#include "subsystems.h"
+#include "space-commander/commands.h"
+#include "space-commander/subsystems.h"
 #include "dirUtl.h"
-#include "commands.h"
-#include "subsystems.h"
+#include "space-commander/commands.h"
+
 //constant in command_buf
 static char command_buf[SETTIME_CMD_SIZE] = {'\0'};
 // Test when changing envrionments such as kernel, make sure time_t is either 4 bytes or 8 bytes

@@ -3,8 +3,8 @@
 #include <cstring>
 
 #include "SpaceDecl.h"
-#include "Net2Com.h"
-#include "NamedPipe.h"
+#include "space-commander/Net2Com.h"
+#include "space-commander/NamedPipe.h"
 
 const char* Net2Com::pipe_str[] = { CS1_PIPES"/Dnet-w-com-r", 
                                     CS1_PIPES"/Dcom-w-net-r", 

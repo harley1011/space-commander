@@ -1,13 +1,13 @@
 #include <stdio.h>
-#include "base64.h"
+#include "space-commander/base64.h"
 #include <cstring>
 #include <sys/stat.h>
-#include "decode-command.h"
+#include "space-commander/decode-command.h"
 #include "shakespeare.h"
 #include "SpaceDecl.h"
 #include "SpaceString.h"
-#include "commands.h"
-#include "subsystems.h"
+#include "space-commander/commands.h"
+#include "space-commander/subsystems.h"
 
 
 void* DecodeCommand::Execute() {

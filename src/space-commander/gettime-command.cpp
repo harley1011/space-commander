@@ -5,13 +5,13 @@
 #include <time.h>
 #include <string.h>
 #include <iostream>
-#include <subsystems.h>
+#include "space-commander/subsystems.h"
 
 #include "SpaceDecl.h"
 #include "SpaceString.h"
 #include "shakespeare.h"
-#include "gettime-command.h"
-#include "commands.h"
+#include "space-commander/gettime-command.h"
+#include "space-commander/commands.h"
 
 void* GetTimeCommand::Execute(){
     struct timeval tv;

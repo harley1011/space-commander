@@ -1,4 +1,4 @@
-#include <Net2Com.h>
+#include "space-commander/Net2Com.h"
 #include <cstring>
 #include <cstdio>
 #include <cstdlib>

@@ -1,6 +1,6 @@
 #ifndef _NET2COM_H_
 #define _NET2COM_H_
-#include <NamedPipe.h>
+#include "space-commander/NamedPipe.h"
 
 typedef enum {
     Dnet_w_com_r = 0,

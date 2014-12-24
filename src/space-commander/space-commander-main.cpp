@@ -7,10 +7,10 @@
 #include <unistd.h>
 #include <inttypes.h>
 
-#include "Net2Com.h"
-#include "command-factory.h"
+#include "space-commander/Net2Com.h"
+#include "space-commander/command-factory.h"
 #include "shakespeare.h"
-#include "subsystems.h"
+#include "space-commander/subsystems.h"
 #include "SpaceDecl.h"
 
 const string LAST_COMMAND_FILENAME("last-command");
