@@ -2,11 +2,17 @@
 #include <string.h>
 #include <stdlib.h>
 #include <sys/types.h>
-
+#include "commands.h"
+#include "shakespeare.h"
 #include "SpaceDecl.h"
 #include "deletelog-command.h"
+#include "subsystems.h"
+#define FILENAME_TMP "filename.tmp" 
 
-#define FILENAME_TMP "filename.tmp" /* TODO  issue if you have two instances of space-commander running! (which should not happen)
+extern const char* s_cs1_subsystems[];
+
+/* TODO  issue if you have two instances of space-commander running! (which should not happen)
+
                                     *        add timestamp...?
                                     */
 
@@ -60,15 +66,13 @@ DeleteLogCommand::~DeleteLogCommand()
 * RETURNS : a newly allocated buffer, free it!
 *           
 *-----------------------------------------------------------------------------*/
-void* DeleteLogCommand::Execute() 
+void* DeleteLogCommand::Execute(size_t* pSize) 
 {
     char buffer[CS1_PATH_MAX] = {'\0'};
-    const char* good_str = "0 DeleteLogCommand : removed ";
-    const char* bad_str = "1 DeleteLogCommand : failed "; 
     const char* folder = 0;
 
-    int size =  strlen(this->filename) + 1;
-
+    *pSize = strlen(this->filename) + CMD_HEAD_SIZE + 1; // 1 for NULL terminator
+    
     switch(this->type){
         case LOG : folder = CS1_LOGS;
             break;
@@ -82,24 +86,15 @@ void* DeleteLogCommand::Execute()
         fprintf(stderr, "[DEBUG] %s():%d - %s/%s\n", __func__, __LINE__, folder, this->filename);
     #endif
 
+    char* result = (char*)malloc(sizeof(char) * *pSize);
     if (remove(buffer) == 0) {
-        size += strlen(good_str) + 1;
-        sprintf(buffer, "%s", good_str);
-    } else {
-        size += strlen(bad_str) + 1;
-        sprintf(buffer, "%s",  bad_str);
-    }
-    
-    strncat(buffer, this->filename, CS1_PATH_MAX);
-    char* result = (char*)malloc(sizeof(char) * size);
-    
-    if (result) {
-        snprintf(result, size, "%s", buffer); 
+        snprintf(result, *pSize, "%c%c%s", DELETELOG_CMD, CS1_SUCCESS, this->filename);
+    } else {   
+        snprintf(result, *pSize, "%c%c%s", DELETELOG_CMD, CS1_FAILURE, this->filename);
     }
 
     return (void*)result;
 }
-
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 *
 * NAME : FindType
@@ -180,4 +175,45 @@ char* DeleteLogCommand::ExtractFilenameFromFile()
     strncpy(this->filename, filestr, CS1_PATH_MAX);
 
     return this->filename;
+}
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*
+* NAME : ParseResult 
+*
+* PURPOSE : Parses the result buffer returned by the execute function
+*
+* ARGUMENTS : result    : pointer to the result buffer
+*
+* RETURN : A InfoBytes containing delete_status, and filename
+* 
+*-----------------------------------------------------------------------------*/
+void* DeleteLogCommand::ParseResult(const char *result)
+{
+    static struct InfoBytesDeleteLog info_bytes;
+
+    if (!result || result[CMD_ID] != DELETELOG_CMD) {
+        Shakespeare::log(Shakespeare::NOTICE, cs1_systems[CS1_COMMANDER],
+                                        "DeleteLog failure: Can't parse result");
+        return (void*)0;
+    }
+
+    info_bytes.delete_status = result[CMD_STS];
+    info_bytes.filename = result + CMD_HEAD_SIZE;
+    
+    if(info_bytes.delete_status == CS1_SUCCESS)
+    {
+        snprintf(this->log_buffer, CS1_MAX_LOG_ENTRY, 
+                                "DeleteLog success: File %s deleted",
+                                info_bytes.filename);
+    }
+    else
+    {
+        snprintf(this->log_buffer, CS1_MAX_LOG_ENTRY, 
+                                "DeleteLog failure: File %s not deleted",
+                                info_bytes.filename);
+    }
+
+    Shakespeare::log(Shakespeare::NOTICE, cs1_systems[CS1_COMMANDER], this->log_buffer);
+
+    return (void*)&info_bytes;
 }

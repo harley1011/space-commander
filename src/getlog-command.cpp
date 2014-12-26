@@ -18,6 +18,7 @@
 
 #include <assert.h>
 
+#include "shakespeare.h"
 #include "SpaceString.h"
 #include "subsystems.h"
 #include "commands.h"
@@ -57,7 +58,6 @@ GetLogCommand::~GetLogCommand()
 {
 
 }
-
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 *
 * NAME : Execute 
@@ -67,13 +67,13 @@ GetLogCommand::~GetLogCommand()
 *           - if OPT_SIZE is specified, retreives floor(SIZE / CS1_MAX_FRAME_SIZE) tgzs
 *
 *-----------------------------------------------------------------------------*/
-void* GetLogCommand::Execute()
+void* GetLogCommand::Execute(size_t *pSize)
 {
     /* TODO IN PROGRESS : add [INFO] and [END] bytes before and after EACH file read into result buffer.
     * result : [INFO] + [TGZ DATA] + [END]
     * INFO : use inode instead of filename to limit the size
     */
-    
+    char get_log_status = CS1_SUCCESS; 
     char *result = 0;
 
     char filepath[CS1_PATH_MAX] = {'\0'};
@@ -91,43 +91,50 @@ void* GetLogCommand::Execute()
 #ifdef CS1_DEBUG
         fprintf(stderr, "[DEBUG] %s() - file_to_retreive : %s\n", __func__, file_to_retreive);
 #endif
+        if ( file_to_retreive[0] != '\0' )
+        {
+            SpaceString::BuildPath(filepath, CS1_TGZ, file_to_retreive);
 
-        SpaceString::BuildPath(filepath, CS1_TGZ, file_to_retreive);
+            // Prepares Info bytes 
+            GetLogCommand::GetInfoBytes(buffer, filepath);
+            bytes += GETLOG_INFO_SIZE; 
 
-        // Prepares Info bytes 
-        GetLogCommand::GetInfoBytes(buffer, filepath);
-        bytes += GETLOG_INFO_SIZE; 
+            // Reads the file in 'buffer'
+            bytes += GetLogCommand::ReadFile(buffer + bytes, filepath); 
 
-        // Reads the file in 'buffer'
-        bytes += GetLogCommand::ReadFile(buffer + bytes, filepath); 
+            // add END bytes 
+            bytes += GetLogCommand::GetEndBytes(buffer + bytes);
 
-        // add END bytes 
-        bytes += GetLogCommand::GetEndBytes(buffer + bytes);
-
-        // Track
-        number_of_files_to_retreive--; 
-        this->MarkAsProcessed(filepath); /* 'filepath' is considered as processed for this instance of the GetLogCommand
+            // Track
+            number_of_files_to_retreive--; 
+            this->MarkAsProcessed(filepath); /* 'filepath' is considered as processed for this instance of the GetLogCommand
                                          *  if you send a new GetLogCommand with the same parameters, 'filepath' will not
                                          *  be considered as processed. i.e. the processed_files array belongs to this 
                                          *  instance only
                                          */
+        }
+        else
+        {
+            get_log_status = CS1_FAILURE;
+            number_of_files_to_retreive--;
+        }    
     }
-
     // add END bytes
     bytes += GetLogCommand::GetEndBytes(buffer + bytes);
 
     // allocate the result buffer
-    result = (char*)malloc(sizeof(char) * bytes);
-
+    result = (char*)malloc(sizeof(char) * (bytes + CMD_HEAD_SIZE));
+    
+    result[0] = GETLOG_CMD;
+    result[1] = get_log_status;
     if (result) {
         // Saves the tgz data in th result buffer
-        memcpy(result, buffer, bytes);
+        memcpy(result+CMD_HEAD_SIZE, buffer, bytes);
     }
 
-
+    *pSize = bytes + CMD_HEAD_SIZE;
     return (void*)result;
 }
-
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 *
 * NAME : ReadFile
@@ -494,38 +501,72 @@ char* GetLogCommand::GetCmdStr(char* cmd_buf)
 *   
 * RETURN : struct InfoBytes* to STATIC memory (Make a COPY!)
 *
-* DESCRIPTION :
-*
 *-----------------------------------------------------------------------------*/
 void* GetLogCommand::ParseResult(const char *result, const char *filename)
 {
-    if (!result) {
+    static struct InfoBytes info_bytes = {0};
+    FILE* pFile = 0;
+
+    if (!result || result[CMD_ID] != GETLOG_CMD) {
+        Shakespeare::log(Shakespeare::ERROR,cs1_systems[CS1_COMMANDER],"GetLog failure: Can't parse result");
         return 0;
     }
 
-    static struct InfoBytes info_bytes = {0};
+    info_bytes.getlog_status = result[CMD_STS];
+    if (info_bytes.getlog_status == CS1_SUCCESS)
+    {
+        result += CMD_HEAD_SIZE;
 
-    // 1. Get InfoBytes
-    this->BuildInfoBytesStruct(&info_bytes, result);
-    result += GETLOG_INFO_SIZE; 
+        // 1. Get InfoBytes
+        this->BuildInfoBytesStruct(&info_bytes, result);
+        result += GETLOG_INFO_SIZE; 
 
-    // 2. Save data as a file
-    FILE *pFile = fopen(filename, "wb");
+        // 2. Save data as a file
+        info_bytes.getlog_message = result; 
 
-    if (!pFile) {
-        fprintf(stderr, "[ERROR] %s:%s:%d cannot create the file %s\n", __FILE__, __func__, __LINE__, filename);
+        if (filename) 
+        {
+            pFile = fopen(filename, "wb");
+
+            if (!pFile) {
+                fprintf(stderr, "[ERROR] %s:%s:%d cannot create the file %s\n", 
+                                                __FILE__, __func__, __LINE__, filename);
+            }
+        }
+
+        int bytes = 0;
+        while (*result != EOF) 
+        {
+            if (pFile) {
+                fwrite(result , 1, 1, pFile);        // why one byte at a time ??? QUESTION 
+            }
+
+            result++;
+            bytes++;
+        }
+
+        snprintf(this->log_buffer, CS1_MAX_LOG_ENTRY, 
+                    "GetLog success with inode %u and with message(%i bytes)", info_bytes.inode, bytes);
+        Shakespeare::log(Shakespeare::NOTICE, cs1_systems[CS1_COMMANDER], this->log_buffer);
+
+        info_bytes.message_bytes_size = bytes;
+        info_bytes.next_file_in_result_buffer = this->HasNextFile(result);
+
+        if (pFile) {
+            fclose(pFile);
+        }
+    }
+    else
+    {
+       Shakespeare::log(Shakespeare::ERROR,cs1_systems[CS1_COMMANDER], "GetLog failure: No files may exist");
     }
 
-    while (*result != EOF) {
-        fwrite(result, 1, 1, pFile);       
-        result++;
-    }
+    return (void*)&info_bytes;    
+}
 
-    fclose(pFile);
-
-    info_bytes.next_file_in_result_buffer = this->HasNextFile(result);
-
-    return (void*)&info_bytes; 
+void* GetLogCommand::ParseResult(const char* result)
+{
+    return this->ParseResult(result, 0);
 }
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

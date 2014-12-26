@@ -1,4 +1,4 @@
-/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 *
 * AUTHORS : Space Concordia 2014, Joseph
 *
@@ -53,7 +53,39 @@ void create_file(const char* path, const char* msg)
     fprintf(file, "%s", msg);
     fclose(file);
 }
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*
+* GROUP : GetLogTestGroup
+*
+* NAME : Execute_OPT_NOOPT_NOFILES
+* 
+*-----------------------------------------------------------------------------*/
+TEST(GetLogTestGroup, Execute_OPT_NOOPT_NOFILES)
+{
+    // This is the Command to create on the ground.
+    size_t result_size;
+    GetLogCommand ground_cmd(OPT_NOOPT, 0, 0, 0);
+    ground_cmd.GetCmdStr(command_buf);
 
+    ICommand *command = CommandFactory::CreateCommand(command_buf);
+    char* result = (char*)command->Execute(&result_size);
+
+    CHECK(result_size == 4 );
+    CHECK(result[1] == CS1_FAILURE);
+    InfoBytes getlog_info = *(InfoBytes*)((GetLogCommand*)command)->ParseResult(result);
+
+    CHECK(getlog_info.getlog_status == CS1_FAILURE);
+    // Cleanup
+    if (command){
+        delete command;
+        command = NULL;
+    }
+
+    if (result) {
+        free(result);
+        result = 0;
+    }
+}
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 *
 * GROUP : GetLogTestGroup
@@ -87,6 +119,7 @@ TEST(GetLogTestGroup, GetInfoBytes_returnsCorrectInfoBytes)
 TEST(GetLogTestGroup, Execute_OPT_DATE_OPT_SUB_getTgz_returnsCorrectFile)
 {
     const char* path = CS1_TGZ"/Updater20140102.txt";  
+    size_t result_size;
 
     create_file(CS1_TGZ"/Watch-Puppy20140101.txt", "file a");
     usleep(1000000);
@@ -106,7 +139,9 @@ TEST(GetLogTestGroup, Execute_OPT_DATE_OPT_SUB_getTgz_returnsCorrectFile)
 
     // This is the Command that the space-commander will create
     ICommand *command = CommandFactory::CreateCommand(command_buf);
-    result = (char*)command->Execute();
+    result = (char*)command->Execute(&result_size);
+
+    CHECK(result_size == 16);
 
     InfoBytes getlog_info = *static_cast<InfoBytes*>(dynamic_cast<GetLogCommand*>(command)->ParseResult(result, dest));
 
@@ -115,9 +150,15 @@ TEST(GetLogTestGroup, Execute_OPT_DATE_OPT_SUB_getTgz_returnsCorrectFile)
     #endif
 
     CHECK_EQUAL(0, getlog_info.next_file_in_result_buffer);
-    CHECK(*(result + GETLOG_INFO_SIZE + UTEST_SIZE_OF_TEST_FILES) == EOF);
-    CHECK(*(result + GETLOG_INFO_SIZE + UTEST_SIZE_OF_TEST_FILES + 1) == EOF);
+    CHECK(*(result + CMD_HEAD_SIZE + GETLOG_INFO_SIZE + UTEST_SIZE_OF_TEST_FILES) == EOF);
+    CHECK(*(result + CMD_HEAD_SIZE + GETLOG_INFO_SIZE + UTEST_SIZE_OF_TEST_FILES + 1) == EOF);
     CHECK(diff(dest, path));     
+
+    // Check inode
+    struct stat attr;
+    stat(path, &attr);
+    CHECK_EQUAL(attr.st_ino, getlog_info.inode);
+
 
     // Cleanup
     if (command){
@@ -142,7 +183,8 @@ TEST(GetLogTestGroup, Execute_OPT_NOOPT_get2TGZ_returns2OldestTgz)
 {
     const char* path = CS1_TGZ"/Watch-Puppy20140101.txt";  
     const char* path2 = CS1_TGZ"/Updater20140102.txt";  
-
+    size_t result_size;
+    
     create_file(CS1_TGZ"/Watch-Puppy20140101.txt", "file a");
     usleep(1000000);
     create_file(CS1_TGZ"/Updater20140102.txt", "file b");
@@ -159,24 +201,24 @@ TEST(GetLogTestGroup, Execute_OPT_NOOPT_get2TGZ_returns2OldestTgz)
     ground_cmd.GetCmdStr(command_buf);
 
     ICommand *command = CommandFactory::CreateCommand(command_buf);
-    result = (char*)command->Execute();
+    result = (char*)command->Execute(&result_size);
 
     FILE *pFile = fopen(dest, "wb");
 
     if (pFile) {
-        fwrite(result + GETLOG_INFO_SIZE, 1, 6, pFile);        // TODO fix this to read until EOF, or add the size to the result buffer
+        fwrite(result + CMD_HEAD_SIZE + GETLOG_INFO_SIZE, 1, 6, pFile);        // TODO fix this to read until EOF, or add the size to the result buffer
         fclose(pFile);
     }
 
     pFile = fopen(dest2, "wb");
 
     if (pFile) {
-        fwrite(result + 6 + 2 * GETLOG_INFO_SIZE + GETLOG_ENDBYTES_SIZE, 1, 6, pFile); // TODO fix this to read until EOF, or add the size to the result buffer
+        fwrite(result + CMD_HEAD_SIZE + 6 + 2 * GETLOG_INFO_SIZE + GETLOG_ENDBYTES_SIZE, 1, 6, pFile); // TODO fix this to read until EOF, or add the size to the result buffer
         fclose(pFile);
     }
 
-    CHECK(*(result + GETLOG_INFO_SIZE + 6) == EOF);
-    CHECK(*(result + GETLOG_INFO_SIZE + 7) == EOF);
+    CHECK(*(result + GETLOG_INFO_SIZE + CMD_HEAD_SIZE + 6) == EOF);
+    CHECK(*(result + GETLOG_INFO_SIZE + CMD_HEAD_SIZE + 7) == EOF);
     CHECK(diff(dest, path));     
     CHECK(diff(dest2, path2));     
 
@@ -203,6 +245,8 @@ TEST(GetLogTestGroup, Execute_OPT_NOOPT_get2TGZ_returns2OldestTgz)
 TEST(GetLogTestGroup, Execute_OPT_NOOPT_returnsOldestTgz)
 {
     const char* path = CS1_TGZ"/Watch-Puppy20140101.txt";  
+    size_t result_size;
+
     create_file(CS1_TGZ"/Watch-Puppy20140101.txt", "file a");
     usleep(1000000);
     create_file(CS1_TGZ"/Updater20140102.txt", "file b");
@@ -218,12 +262,12 @@ TEST(GetLogTestGroup, Execute_OPT_NOOPT_returnsOldestTgz)
     ground_cmd.GetCmdStr(command_buf);
 
     ICommand *command = CommandFactory::CreateCommand(command_buf);
-    result = (char*)command->Execute();
+    result = (char*)command->Execute(&result_size);
 
     FILE *pFile = fopen(dest, "wb");
 
     if (pFile) {
-        fwrite(result + GETLOG_INFO_SIZE, 1, 6, pFile);        // TODO fix this to read until EOF, or add the size to the result buffer
+        fwrite(result + CMD_HEAD_SIZE + GETLOG_INFO_SIZE, 1, 6, pFile);        // TODO fix this to read until EOF, or add the size to the result buffer
         fclose(pFile);
     }
 

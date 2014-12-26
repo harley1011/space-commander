@@ -7,6 +7,11 @@
 
 using namespace std;
 
+struct InfoBytesDecode
+{
+    char decode_status;
+
+};
 class DecodeCommand : public ICommand {
 public:
     DecodeCommand(char* destPath, char* srcPath, int isExecutable, int totalSize) {
@@ -21,7 +26,8 @@ public:
         if (destPath != NULL) { delete destPath; }
     }
 
-    void* Execute();
+    void* Execute();       
+    static void* ParseResult(const char *result);
     char* GetDestPath() { return destPath; }
     char* GetSrcPath()  { return srcPath; }
     int IsExecutable()  { return isExecutable; }

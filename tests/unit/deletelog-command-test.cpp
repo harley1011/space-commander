@@ -50,6 +50,7 @@ TEST(DeleteLogTestGroup, DeleteLog_UsingInode_fileIsDeleted)
     char inode_str[5] = {'\0'};
     const char* filetest_path = CS1_TGZ"/filetest.tgz";
     FILE* filetest = fopen(filetest_path, "w+");
+    size_t result_size;
     fprintf(filetest, "some text to test");
     fclose(filetest);
 
@@ -69,19 +70,23 @@ TEST(DeleteLogTestGroup, DeleteLog_UsingInode_fileIsDeleted)
     #endif
 
     ICommand* command = CommandFactory::CreateCommand(command_buf);
-    char* result = (char*)command->Execute();
+    char* result = (char*)command->Execute(&result_size);
+
+    CHECK(15 == result_size);    
+
+    InfoBytesDeleteLog* deletelog_info = (InfoBytesDeleteLog*)((DeleteLogCommand*)command)->ParseResult(result);
 
     CHECK_EQUAL(-1, access(filetest_path, F_OK));
-
+    
     char status[2] = {'\0'};
-    strncpy(status, result, 1);
+    strncpy(status, result + 1, 1);
     CHECK_EQUAL(0, atoi(status));
-
+    CHECK(deletelog_info->delete_status == CS1_SUCCESS);
     if (result) {
         free(result);
         result = 0;
     }
-
+    
     if (command != NULL){
         delete command;
         command = NULL;
@@ -99,16 +104,19 @@ TEST(DeleteLogTestGroup, Execute_FileIsDeleted)
 {
     const char* filetest_path = CS1_LOGS"/filetest.log";
     FILE* filetest = fopen(filetest_path, "w+");
+    size_t result_size;
     fprintf(filetest, "some text to test");
     fclose(filetest);
 
     char data[] = "7_filetest.log";
     
     ICommand* command = CommandFactory::CreateCommand(data);
-    char* result = (char*)command->Execute();
+    char* result = (char*)command->Execute(&result_size);
+    
+    CHECK(15==result_size);
 
     char status[2] = {'\0'};
-    strncpy(status, result, 1);
+    strncpy(status, result + 1, 1);
 
     CHECK_EQUAL(-1, access(filetest_path, F_OK));
     CHECK_EQUAL(0, atoi(status));
@@ -163,6 +171,35 @@ TEST(DeleteLogTestGroup, FindType_ReturnsLOG)
 
     CHECK_EQUAL(0, result);
 
+    if (command != NULL){
+        delete command;
+        command = NULL;
+    }
+}
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*
+* GROUP : DeleteLogTestGroup  
+*
+* PURPOSE : Attempt to delete a file that doesn't exist
+* 
+*-----------------------------------------------------------------------------*/
+TEST(DeleteLogTestGroup, DeleteLog_NonExistent_File)
+{
+    char data[] = "7_filetest.log";
+    size_t result_size;
+    ICommand* command = CommandFactory::CreateCommand(data);
+    char* result = (char*)command->Execute(&result_size);
+
+    CHECK(15==result_size);    
+
+    InfoBytesDeleteLog* deletelog_info = (InfoBytesDeleteLog*)((DeleteLogCommand*)command)->ParseResult(result);
+
+    CHECK(deletelog_info->delete_status == CS1_FAILURE);
+    if (result) {
+        free(result);
+        result = 0;
+    }
+    
     if (command != NULL){
         delete command;
         command = NULL;

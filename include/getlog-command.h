@@ -59,8 +59,11 @@ using namespace std;
                              */
 struct InfoBytes
 {
+    char getlog_status;
     ino_t inode;
+    const char *getlog_message;
     const char *next_file_in_result_buffer;
+    int message_bytes_size;
 };
 
 class GetLogCommand : public ICommand 
@@ -78,11 +81,11 @@ class GetLogCommand : public ICommand
         GetLogCommand();
         GetLogCommand(char opt_byte, char subsystem, size_t size, time_t time);
         ~GetLogCommand();
-        void* Execute();
+        void* Execute(size_t *pSize);
         
         char* GetCmdStr(char* cmd_buf);
-        void* ParseResult(const char *result, const char *filename);
-        //void* ParseResult(const char *result); TODO
+        void* ParseResult(const char *result, const char *filename); // This function SHOULD be private!!!
+        void* ParseResult(const char *result); 
 
         char* GetNextFile(void);
         size_t ReadFile(char *buffer, const char *filename);

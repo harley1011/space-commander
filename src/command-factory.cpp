@@ -96,9 +96,9 @@ ICommand* CommandFactory::CreateUpdate(char* data) {
 
 ICommand* CommandFactory::CreateSetTime(char* data) {
     time_t timeRecieved;
-    memcpy(&timeRecieved, data + 1, 8);
-
-    SetTimeCommand* result = new SetTimeCommand(timeRecieved);
+    memcpy(&timeRecieved, data + 1, sizeof(time_t));
+    
+    SetTimeCommand* result = new SetTimeCommand(timeRecieved,data[SETTIME_CMD_SIZE - 1] );
     return result;
 }
 

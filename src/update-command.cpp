@@ -2,6 +2,11 @@
 #include <stdio.h>
 #include "base64.h"
 #include <cstring>
+#include "commands.h"
+#include "subsystems.h"
+#include "SpaceString.h"
+#include "SpaceDecl.h"
+#include "shakespeare.h"
 
 void* UpdateCommand::Execute() {
     FILE* fp_update_file = NULL;
@@ -27,11 +32,39 @@ void* UpdateCommand::Execute() {
 
         fclose(fp_update_file); 
 
-        result = (char* )malloc(sizeof(char) * 50);
-        memset(result, '\0', sizeof(char) * 50);
+        result = (char* )malloc(sizeof(char) * (50 + CMD_HEAD_SIZE) );
+        memset(result + CMD_HEAD_SIZE, '\0', sizeof(char) * 50);
         sprintf(result, "%lld", (long long)bytes_written);
+        result[0] = UPDATE_CMD;
+        result[1] = CS1_SUCCESS;
     }
 
     return result;         
 }
+void* UpdateCommand::ParseResult(const char *result)
+{
+    if(!result || result[0] != SETTIME_CMD) {
+        Shakespeare::log(Shakespeare::ERROR,cs1_systems[CS1_COMMANDER],"Possible update failure: Can't parse result");
+        return (void*)0;
+    }
 
+    static struct InfoBytesUpdate info_bytes;
+    info_bytes.update_status = result[1];
+    info_bytes.bytes_written = result + CMD_HEAD_SIZE; 
+
+
+    char buffer[100];
+    if(info_bytes.update_status == CS1_SUCCESS)
+    {
+        snprintf(buffer,100,"Update success: Bytes written %s ",info_bytes.bytes_written);
+        Shakespeare::log(Shakespeare::NOTICE, cs1_systems[CS1_COMMANDER], buffer);
+    }
+    else
+    {
+        snprintf(buffer,100,"Update failure: Unknown"); 
+        Shakespeare::log(Shakespeare::ERROR,cs1_systems[COMMANDER], buffer);
+    }
+    return (void*)&info_bytes;
+
+
+}

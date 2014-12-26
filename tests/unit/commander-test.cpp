@@ -51,15 +51,14 @@ TEST_GROUP(CommanderTestGroup)
 
         if (pid == 0) {
             if(execl("./"SPACE_COMMANDER_BIN, SPACE_COMMANDER_BIN, NULL) == -1){
-                fprintf(stderr, "[ERROR] %s:%s:%d \n", __FILE__, __func__, __LINE__);
+                fprintf(stderr, "[ERROR] %s:%s:%d ", __FILE__, __func__, __LINE__);
                 exit(EXIT_FAILURE);
             }
         }
 
         // Make sure the commander is running
         while (system("ps aux | grep bin/space-commander 1>/dev/null") != 0){
-            fprintf(stderr, "[INFO] waiting for the commander to start\n");
-            usleep(1000); 
+           usleep(1000); 
         }
 
         netman = Net2Com::create_netman();
@@ -99,6 +98,7 @@ TEST_GROUP(CommanderTestGroup)
 TEST(CommanderTestGroup, GetLog_Oldest_Success) 
 {
     const char* path = CS1_TGZ"/Watch-Puppy20140101.txt";  
+    size_t result_size;
     UTestUtls::CreateFile(CS1_TGZ"/Watch-Puppy20140101.txt", "file a");
     usleep(1000000);
     UTestUtls::CreateFile(CS1_TGZ"/Updater20140102.txt", "file b");
@@ -115,7 +115,7 @@ TEST(CommanderTestGroup, GetLog_Oldest_Success)
     ground_cmd.GetCmdStr(command_buf);
 
     ICommand *command = CommandFactory::CreateCommand(command_buf);
-    result = (char*)command->Execute();
+    result = (char*)command->Execute(&result_size);
 
     InfoBytes getlog_info = *static_cast<InfoBytes*>(dynamic_cast<GetLogCommand*>(command)->ParseResult(result, dest));
 
@@ -124,8 +124,8 @@ TEST(CommanderTestGroup, GetLog_Oldest_Success)
     #endif
 
     CHECK_EQUAL(0, getlog_info.next_file_in_result_buffer);
-    CHECK(*(result + GETLOG_INFO_SIZE + UTEST_SIZE_OF_TEST_FILES) == EOF);
-    CHECK(*(result + GETLOG_INFO_SIZE + UTEST_SIZE_OF_TEST_FILES + 1) == EOF);
+    CHECK(*(result + 2 + GETLOG_INFO_SIZE + UTEST_SIZE_OF_TEST_FILES) == EOF);
+    CHECK(*(result + GETLOG_INFO_SIZE + UTEST_SIZE_OF_TEST_FILES + 3) == EOF);
     CHECK(diff(dest, path));     
 
     // Cleanup
@@ -199,8 +199,45 @@ TEST(CommanderTestGroup, DeleteLog_Success)
     CHECK_EQUAL(-1, access(filetest_path, F_OK));
 
     char status[2] = {'\0'};
-    strncpy(status, result, 1);
+    strncpy(status, result + 1, 1);
     CHECK_EQUAL(0, atoi(status));
 }
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ *
+ * GROUP : CommanderTestGroup
+ *
+ * NAME : SetTime_Success 
+ *
+ *-----------------------------------------------------------------------------*/
+TEST(CommanderTestGroup, SetTime_Success) 
+{
+    char result[SETTIME_RTN_SIZE + CMD_HEAD_SIZE] = {0};
+    time_t rawtime;
+    
+    time(&rawtime);
+    command_buf[0] = SETTIME_CMD;
+    command_buf[SETTIME_CMD_SIZE - 1] = 0xFF;// turn rtc set-time off
+    SpaceString::getTimetInChar(command_buf+1,rawtime);
 
+    // use Netman Net2Com to send data to space-commander Net2Com
+    netman->WriteToInfoPipe((unsigned char)SETTIME_CMD_SIZE);
+    netman->WriteToDataPipe(command_buf, SETTIME_CMD_SIZE);
+    netman->WriteToInfoPipe((unsigned char)0xFF);
+    netman->WriteToInfoPipe((unsigned char)0x01);
+    netman->WriteToDataPipe((unsigned char)0x21);
+    netman->WriteToInfoPipe((unsigned char)0xFF);
+
+
+    while (netman->ReadFromDataPipe(result, RESULT_BUF_SIZE) == 0) {
+        // Give enough time to the commander to proceed!
+        usleep(1000);
+    }
+    
+    InfoBytesSetTime settime_info = *(InfoBytesSetTime*)SetTimeCommand::ParseResult(result);
+
+    CHECK(result[0]==SETTIME_CMD);
+    if ( getuid() == 0 ) //Some systems might need to be root user to set time succesfully
+        CHECK(settime_info.time_status == CS1_SUCCESS); 
+    CHECK(settime_info.time_set == rawtime);
+}
 
