@@ -109,11 +109,9 @@ TEST(TimetagTestGroup, FullExecution)
   memcpy(command_buf+9,task,48); 
 
   ICommand* command = CommandFactory::CreateCommand(command_buf);
-  char * execute_result = (char *)command->Execute();
+  unsigned char* execute_result = (unsigned char*)command->Execute();
 
-  command->ParseResult(execute_result); 
-  static struct TimetagBytes result_struct = {0};
-  memcpy (&result_struct,execute_result,TIMETAG_CMD_SIZE); 
+  TimetagBytes result_struct = *(TimetagBytes*)((TimetagCommand*)command)->ParseResult(execute_result);
   
   if (command != NULL ) {
     delete command;
