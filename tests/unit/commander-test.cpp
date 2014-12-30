@@ -33,7 +33,7 @@
 #define RESULT_BUF_SIZE 50
 #define CMD_BUF_SIZE 25
 static char command_buf[CMD_BUF_SIZE] = {'\0'};
-#define SPACE_COMMANDER_BIN  "bin/space-commander" // use local bin, not the one unser CS1_APPS
+#define SPACE_COMMANDER_BIN  "bin/space-commander/space-commander" // use local bin, not the one unser CS1_APPS
 
 #define UTEST_SIZE_OF_TEST_FILES 6
 
@@ -57,7 +57,7 @@ TEST_GROUP(CommanderTestGroup)
         }
 
         // Make sure the commander is running
-        while (system("ps aux | grep bin/space-commander 1>/dev/null") != 0){
+        while (system("ps aux | grep bin/space-commander/space-commander 1>/dev/null") != 0){
            usleep(1000); 
         }
 
