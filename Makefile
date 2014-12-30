@@ -40,7 +40,7 @@ INCTESTPATH = -I./tests/unit/stubs/ -I./tests/helpers/include/
 LIBPATH=-L./lib/ -L$(SPACE_LIB)/shakespeare/lib -L$(CPPUTEST_HOME)/lib -L$(SPACE_UTLS)/lib
 
 make_dir:
-	mkdir -p bin && mkdir -p $(SPACE_COMMANDER_BIN) && mkdir -p $(GROUND_COMMANDER_BIN) && mkdir -p lib
+	mkdir -p bin && mkdir -p $(SPACE_COMMANDER_BIN) && mkdir -p $(GROUND_COMMANDER_BIN) && mkdir -p $(SPACE_COMMANDER_Q6_BIN) && mkdir -p lib
 
 
 #
@@ -79,7 +79,7 @@ bin/common:
 #++++++++++++++++++++
 # CppUTest / PC Rules
 #--------------------
-buildBin: make_dir bin/common $(SPACE_COMMANDER_BIN) $(SPACE_COMMANDER_Q6_BIN) staticlibs.tar
+buildBin: make_dir bin/common $(SPACE_COMMANDER_BIN) staticlibs.tar
 
 $(SPACE_COMMANDER_BIN)/%.o: src/space-commander/%.cpp include/space-commander/%.h
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCLUDES) -c $< -o $@ $(ENV) 
