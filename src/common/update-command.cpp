@@ -1,9 +1,9 @@
-#include "space-commander/update-command.h"
+#include "common/update-command.h"
 #include <stdio.h>
 #include "space-commander/base64.h"
 #include <cstring>
-#include "space-commander/commands.h"
-#include "space-commander/subsystems.h"
+#include "common/commands.h"
+#include "common/subsystems.h"
 #include "SpaceString.h"
 #include "SpaceDecl.h"
 #include "shakespeare.h"

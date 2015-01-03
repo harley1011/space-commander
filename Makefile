@@ -12,6 +12,7 @@ SPACE_UTLS = $(SPACE_LIB)/utls
 SPACE_UPTDATER = ../space-updater
 SPACE_SCRIPT = ../space-script
 
+COMMON_BIN = bin/common
 SPACE_COMMANDER_BIN = bin/space-commander
 SPACE_COMMANDER_Q6_BIN = bin/space-commanderQ6
 GROUND_COMMANDER_BIN = bin/ground-commander
@@ -40,8 +41,7 @@ INCTESTPATH = -I./tests/unit/stubs/ -I./tests/helpers/include/
 LIBPATH=-L./lib/ -L$(SPACE_LIB)/shakespeare/lib -L$(CPPUTEST_HOME)/lib -L$(SPACE_UTLS)/lib
 
 make_dir:
-	mkdir -p bin && mkdir -p $(SPACE_COMMANDER_BIN) && mkdir -p $(GROUND_COMMANDER_BIN) && mkdir -p $(SPACE_COMMANDER_Q6_BIN) && mkdir -p lib
-
+	mkdir -p bin && mkdir -p $(COMMON_BIN) && mkdir -p $(SPACE_COMMANDER_BIN) && mkdir -p $(GROUND_COMMANDER_BIN) && mkdir -p $(SPACE_COMMANDER_Q6_BIN) && mkdir -p lib
 
 #
 #++++++++++++++++++++
@@ -53,7 +53,9 @@ CPPUTEST_LIBS=-lCppUTest -lCppUTestExt
 #
 # All Object files, do not use wildcard, add the ones you need explicitly!
 #
-OBJECTS = $(SPACE_COMMANDER_BIN)/subsystems.o $(SPACE_COMMANDER_BIN)/Net2Com.o $(SPACE_COMMANDER_BIN)/NamedPipe.o $(SPACE_COMMANDER_BIN)/command-factory.o $(SPACE_COMMANDER_BIN)/deletelog-command.o  $(SPACE_COMMANDER_BIN)/decode-command.o $(SPACE_COMMANDER_BIN)/getlog-command.o $(SPACE_COMMANDER_BIN)/gettime-command.o $(SPACE_COMMANDER_BIN)/reboot-command.o $(SPACE_COMMANDER_BIN)/settime-command.o $(SPACE_COMMANDER_BIN)/update-command.o $(SPACE_COMMANDER_BIN)/base64.o
+COMMON_OBJECTS = $(COMMON_BIN)/subsystems.o $(COMMON_BIN)/command-factory.o $(COMMON_BIN)/deletelog-command.o  $(COMMON_BIN)/decode-command.o $(COMMON_BIN)/getlog-command.o $(COMMON_BIN)/gettime-command.o $(COMMON_BIN)/reboot-command.o $(COMMON_BIN)/settime-command.o $(COMMON_BIN)/update-command.o 
+
+OBJECTS = $(SPACE_COMMANDER_BIN)/Net2Com.o $(SPACE_COMMANDER_BIN)/NamedPipe.o $(SPACE_COMMANDER_BIN)/base64.o
 
 #
 # CppUTest files, no wildcard, add files explicitly!
@@ -72,26 +74,37 @@ ENV = -DCS1_DEBUG  $(UTEST_ENV)  -DPRESERVE
 #++++++++++++++++++++
 # Common
 #--------------------
+bin/common/%.o: src/common/%.cpp include/common/%.h
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCLUDES) -c $< -o $@ $(ENV) 
 
-bin/common: 
-    # nothing for now
 #
 #++++++++++++++++++++
 # CppUTest / PC Rules
 #--------------------
-buildBin: make_dir bin/common $(SPACE_COMMANDER_BIN) staticlibs.tar
+buildBin: make_dir $(SPACE_COMMANDER_BIN) staticlibs.tar
 
 $(SPACE_COMMANDER_BIN)/%.o: src/space-commander/%.cpp include/space-commander/%.h
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCLUDES) -c $< -o $@ $(ENV) 
 
-$(SPACE_COMMANDER_BIN): src/space-commander/space-commander-main.cpp $(OBJECTS)
+$(SPACE_COMMANDER_BIN): src/space-commander/space-commander-main.cpp $(COMMON_OBJECTS) $(OBJECTS)
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCLUDES) $(LIBPATH) -o $@/space-commander $^ $(LIBS) $(ENV)
 
 test: make_dir bin/AllTests $(SPACE_COMMANDER_BIN)
 	mkdir -p $(CS1_UTEST_DIR)
 
-bin/AllTests: tests/unit/AllTests.cpp  $(UNIT_TEST) $(OBJECTS) 
+bin/AllTests: tests/unit/AllTests.cpp  $(UNIT_TEST) $(COMMON_OBJECTS) $(OBJECTS) 
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCLUDES) $(LIBPATH) -o $@ $^ $(LIBS) $(ENV)
+	
+#
+#++++++++++++++++++++
+# Ground Commander
+#--------------------
+
+buildGroundCommander: make_dir $(GROUND_COMMANDER_BIN) staticlibs.tar
+
+$(GROUND_COMMANDER_BIN): src/ground-commander/ground-commander-main.cpp $(COMMON_OBJECTS) $(OBJECTS)
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCLUDES) $(LIBPATH) -o $@/ground-commander $^ $(LIBS) $(ENV)
+
 #
 #++++++++++++++++++++
 #  MicroBlaze 

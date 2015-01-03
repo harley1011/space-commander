@@ -19,14 +19,14 @@
 #include "CppUTest/MemoryLeakDetectorMallocMacros.h"
 #include "SpaceDecl.h"
 #include "SpaceString.h"
-#include "space-commander/command-factory.h"
-#include "space-commander/icommand.h"
-#include "space-commander/settime-command.h"
+#include "common/command-factory.h"
+#include "common/icommand.h"
+#include "common/settime-command.h"
 #include "fileIO.h"
-#include "space-commander/commands.h"
-#include "space-commander/subsystems.h"
+#include "common/commands.h"
+#include "common/subsystems.h"
 #include "dirUtl.h"
-#include "space-commander/commands.h"
+#include "common/commands.h"
 
 //constant in command_buf
 static char command_buf[SETTIME_CMD_SIZE] = {'\0'};

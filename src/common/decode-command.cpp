@@ -2,12 +2,12 @@
 #include "space-commander/base64.h"
 #include <cstring>
 #include <sys/stat.h>
-#include "space-commander/decode-command.h"
+#include "common/decode-command.h"
 #include "shakespeare.h"
 #include "SpaceDecl.h"
 #include "SpaceString.h"
-#include "space-commander/commands.h"
-#include "space-commander/subsystems.h"
+#include "common/commands.h"
+#include "common/subsystems.h"
 
 
 void* DecodeCommand::Execute() {

@@ -1,9 +1,9 @@
-#include "space-commander/reboot-command.h"
+#include "common/reboot-command.h"
 #include <sys/reboot.h>
 #include <linux/reboot.h>
 #include <unistd.h>
-#include "space-commander/subsystems.h"
-#include "space-commander/commands.h"
+#include "common/subsystems.h"
+#include "common/commands.h"
 #include "shakespeare.h"
 #include <stdio.h>
 extern const char* s_cs1_subsystems[];

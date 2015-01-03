@@ -7,8 +7,8 @@
 #include "CppUTest/MemoryLeakDetectorMallocMacros.h"
 
 #include "SpaceDecl.h"
-#include "space-commander/command-factory.h"
-#include "space-commander/icommand.h"
+#include "common/command-factory.h"
+#include "common/icommand.h"
 #include "fileIO.h"
 #include "SpaceString.h"
 

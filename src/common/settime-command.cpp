@@ -1,4 +1,4 @@
-#include "space-commander/settime-command.h"
+#include "common/settime-command.h"
 #include <string.h>
 #include <cerrno>
 #include <sys/time.h>
@@ -9,9 +9,9 @@
 #include <SpaceString.h>
 #include <shakespeare.h>
 #include "i2c-device.h"
-#include "space-commander/commands.h"
+#include "common/commands.h"
 #include "SpaceDecl.h"
-#include "space-commander/subsystems.h"
+#include "common/subsystems.h"
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 *
