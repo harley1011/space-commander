@@ -1,7 +1,7 @@
 #ifndef GETTIME_COMMAND_H
 #define GETTIME_COMMAND_H
 
-#define GETTIME_CMD_SIZE 2 + sizeof(time_t)
+#define GETTIME_CMD_SIZE 1
 #define GETTIME_RTN_SIZE sizeof(time_t)
 
 #include "icommand.h"
