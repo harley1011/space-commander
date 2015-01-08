@@ -60,7 +60,7 @@ TEST(GetTimeTestGroup, Check_Gettime)
    
     ICommand* command = CommandFactory::CreateCommand(command_buf);
     char* result = (char*)command->Execute();
-    InfoBytesGetTime* gettime_info = (InfoBytesGetTime*)command->ParseResult(result);
+    InfoBytesGetTime* gettime_info = (InfoBytesGetTime*)GetTimeCommand::ParseResult(result);
 
     CHECK(gettime_info->time_status == CS1_SUCCESS);
     
