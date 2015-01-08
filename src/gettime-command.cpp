@@ -13,10 +13,12 @@
 #include "gettime-command.h"
 #include "commands.h"
 
-void* GetTimeCommand::Execute(){
+void* GetTimeCommand::Execute(size_t * pSize){
     struct timeval tv;
-
-    char* result = (char*)malloc(sizeof(char) * GETTIME_RTN_SIZE + CMD_HEAD_SIZE);
+    char* result; 
+    result = (char*)malloc(sizeof(char) * GETTIME_RTN_SIZE + CMD_HEAD_SIZE);
+    *pSize = GETTIME_RTN_SIZE + CMD_HEAD_SIZE;
+    
     result[0] = GETTIME_CMD;
     result[1] = CS1_SUCCESS;
     if(gettimeofday(&tv, 0) == -1){
