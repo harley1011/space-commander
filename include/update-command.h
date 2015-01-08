@@ -31,7 +31,7 @@ public:
         }
     }
 
-    void* Execute();
+    void* Execute(size_t* pSize);
     static void* ParseResult(const char* result);
     char* GetPath()       { return path; }
     int   GetDataLength() { return data_length; }
