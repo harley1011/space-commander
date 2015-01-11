@@ -3,15 +3,25 @@
 
 #include <string>
 #include "icommand.h"
+#include "iinfobytes.h"
 #include <cstdlib>
 
 using namespace std;
-struct InfoBytesUpdate{
+
+struct InfoBytesUpdate : public IInfoBytes {
     const char* bytes_written; 
     char update_status;
+
+    string * ToString() {
+        string* infoStatus = new string (1, *bytes_written);
+        return infoStatus;
+    }
 };
+
 class UpdateCommand : public ICommand {
 public:
+    UpdateCommand() {}
+
     UpdateCommand(char* path, int data_length, char* file_data) {
         this->path = path;
         this->data_length = data_length;

@@ -5,15 +5,26 @@
 #define GETTIME_RTN_SIZE sizeof(time_t)
 
 #include "icommand.h"
+#include "iinfobytes.h"
 #include <time.h>
 #include <iostream>
+#include <sstream>
 
 using namespace std;
 
-struct InfoBytesGetTime
+
+
+struct InfoBytesGetTime : public IInfoBytes
 {
     char time_status;
     time_t time_set;
+
+    string * ToString() {
+        stringstream ss;
+        ss << time_set;
+        string* infoStatus = new string(ss.str());
+        return infoStatus;
+    }
 
 };
 class GetTimeCommand : public ICommand {

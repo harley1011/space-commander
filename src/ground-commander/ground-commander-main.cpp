@@ -6,12 +6,15 @@
 #include <sstream>
 #include <unistd.h>
 #include <inttypes.h>
+#include <fstream>
 
 #include "space-commander/Net2Com.h"
 #include "common/command-factory.h"
 #include "shakespeare.h"
 #include "common/subsystems.h"
 #include "SpaceDecl.h"
+
+const char MAGIC_BYTE = 0;
 
 const string LAST_COMMAND_FILENAME("last-command");
 const int COMMAND_RESEND_INDEX = 0;
@@ -23,14 +26,14 @@ const char ERROR_CREATING_COMMAND  = '1';
 const char ERROR_EXECUTING_COMMAND = '2';
 
 // Declarations
-static void out_of_memory_handler();
-static int perform(int bytes);
-
 static char log_buffer[255] = {0};
 static char info_buffer[255] = {'\0'};
 static Net2Com* commander = 0; 
 
 const char* LOGNAME = cs1_systems[CS1_COMMANDER];
+string* GetGarbage(char* result_buffer);
+void perform(int bytes);
+void read_command();
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  *
  * NAME : main 
@@ -40,37 +43,51 @@ const char* LOGNAME = cs1_systems[CS1_COMMANDER];
  *-----------------------------------------------------------------------------*/
 int main() 
 {
-    cout << "Hello Space!";
+    commander = new Net2Com(Dcom_w_net_r, Dnet_w_com_r, Icom_w_net_r, Inet_w_com_r);
+
+    while (true)
+    {
+        memset(info_buffer, 0, sizeof(char) * 255);
+        
+        //int bytes = commander->ReadFromInfoPipe(info_buffer, 255);
+        int bytes = 1;
+        if (bytes > 0) {
+            //get result
+            perform(bytes);
+        }
+
+        read_command();
+
+        sleep(COMMANER_SLEEP_TIME);
+    }        
+    
+    if (commander) {
+        delete commander;
+        commander = 0;
+    }
     return 0;
 }
 
-/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- *
- * NAME : perform 
- *
- * DESCRIPTION : reads from the pipes and execute the command.
- *
- *-----------------------------------------------------------------------------*/
-int perform(int bytes)
-{
-#ifdef CS1_DEBUG
-    char debug_buffer[255] = {0};
-#endif
-    char* buffer = NULL;    // TODO  This buffer scared me ! 
+void read_command(){
+    ifstream infile("/home/todo");
+
+    if(infile.good()){
+        string sLine;
+        getline(infile, sLine);
+        cout << sLine << endl;
+    }
+
+    //TODO: write to pipes
+    infile.close();
+}
+
+void perform(int bytes){
+    char* buffer = NULL; //TODO This buffer does not scare me !
     int read_total = 0;
-    ICommand* command  = NULL;
-    char previous_command_buffer[MAX_COMMAND_SIZE] = {'\0'};
     unsigned char read = 0;
 
-    for(int i = 0; i != bytes; i++) {
+    for(int i = 0; i != bytes; i++){
         read = (unsigned char)info_buffer[i];
-
-#ifdef CS1_DEBUG
-        std::ostringstream msg;
-        msg << "Read from info pipe = " << (unsigned int)read << " bytes";
-        Shakespeare::log(Shakespeare::NOTICE, LOGNAME, msg.str());
-#endif
-
         switch (read) 
         {
             case 252: 
@@ -84,122 +101,88 @@ int perform(int bytes)
                     data_bytes = commander->ReadFromDataPipe(buffer, read_total);
 
                     if (data_bytes > 0) {
-#ifdef CS1_DEBUG
-                          std::ostringstream msg;
-                          msg << "Read " << data_bytes << " bytes from ground station: ";
-                          memset (debug_buffer,0,255);
-                          for(uint8_t z = 0; z < data_bytes; ++z){
-                              uint8_t c = buffer[z];
-                              snprintf(debug_buffer,5, "0x%02X ", c);
-                              msg << debug_buffer;
-                          }
-                          Shakespeare::log(Shakespeare::NOTICE, LOGNAME, msg.str());
-#endif
-
                         if (data_bytes != read_total) {
                             Shakespeare::log(Shakespeare::ERROR, LOGNAME, "Something went wrong !!");
                             read_total = 0;
                             break;
                         }
 
-                        FILE *fp_last_command = NULL;
-                        unsigned int retry = 10000;
-
-                        if (buffer[COMMAND_RESEND_INDEX] == COMMAND_RESEND_CHAR) 
-                        {
-                            while(retry > 0 && fp_last_command == NULL){
-                                fp_last_command = fopen(LAST_COMMAND_FILENAME.c_str(), "r");
-                                retry -=1;
+                        string* obtainedSpaceGarbage = GetGarbage(buffer);
+                        if (obtainedSpaceGarbage != NULL) { // success
+                            if (buffer[MAGIC_BYTE] == GETLOG_CMD) {
+                                // TODO: log to proper system (get log)
+                            } else {
+                                Shakespeare::log(Shakespeare::NOTICE, "GROUND_COMMANDER", obtainedSpaceGarbage->c_str());
                             }
 
-                            if (fp_last_command != NULL) 
-                            {
-                                fread(previous_command_buffer, sizeof(char), MAX_COMMAND_SIZE, fp_last_command);
-                                fclose(fp_last_command);
-
-                                command = CommandFactory::CreateCommand(previous_command_buffer);
-
-                                if (command != NULL) 
-                                {
-                                    Shakespeare::log(Shakespeare::NOTICE, 
-                                                                    LOGNAME, 
-                                                                            "Executing command");
-
-                                    size_t size = 0;
-                                    char* result  = (char* )command->Execute(&size);
-                                    if (result != NULL) 
-                                    {
-                                        memset(log_buffer,0,MAX_BUFFER_SIZE);
-                                        snprintf(log_buffer, MAX_BUFFER_SIZE, "Command output = %s\n", result);
-                                        Shakespeare::log(Shakespeare::NOTICE,LOGNAME,log_buffer);
-
-                                        if (size > 0) {
-                                            commander->WriteToDataPipe(result, size);
-                                        } else { // this branch will be remove as soon as ALL commands returns the SIZE ! TODO
-                                                 // Because it is not safe to rely on a NULL terminator in the result buffer.
-                                            commander->WriteToDataPipe(result);
-                                        }
-
-                                        free(result); // TODO allocate result buffer with new in all icommand subclasses and use delete
-                                        result = NULL;
-                                    } else {
-                                        commander->WriteToInfoPipe(ERROR_EXECUTING_COMMAND);
-                                    }
-
-                                    if (command) {
-                                        delete command;
-                                        command = NULL;
-                                    }
-                                } else {
-                                    commander->WriteToInfoPipe(ERROR_CREATING_COMMAND);
-                                }
-
-                                memset(previous_command_buffer, '\0', MAX_COMMAND_SIZE);
-                            }
+                            delete obtainedSpaceGarbage;
+                            obtainedSpaceGarbage = NULL;
                         } else {
-
-                            while (retry > 0 && fp_last_command == NULL) {
-                                fp_last_command = fopen(LAST_COMMAND_FILENAME.c_str(), "w");
-                                retry -= 1;
-                            }
-
-                            if (fp_last_command != NULL) {
-                                fwrite(buffer, sizeof(char), data_bytes, fp_last_command);
-                                fclose(fp_last_command);
-                            }
+                            // TODO: resend command, failure, resend command
                         }
 
                         free(buffer);
                         buffer = NULL;
                     }
-
-                    sleep(COMMANER_SLEEP_TIME);
-                } //end while
+                    
+                    sleep(COMMANER_SLEEP_TIME); //We have to sleep because we got data from the info pipe. Wait for the data pipe to be ready
+                    
+                }
 
                 read_total = 0;
                 break;
+
             }
             default:
-                    read_total += read;
-                    buffer = (char* )realloc(buffer, read_total * sizeof(char)); // todo get rid of this realloc! use new instead
-                    memset(buffer, 0, sizeof(char) * read_total);
-                break;
-        } // end switch
-    } // end for
+                read_total += read;
+                buffer = (char* )realloc(buffer, read_total * sizeof(char));
+                memset(buffer, 0, sizeof(char) * read_total);
+            break;
+        }
+    }
+    
 
-    return 0;
+    
+    return; 
 }
 
-/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- *
- * NAME : out_of_memory_handler 
- *
- * DESCRIPTION : This function is called when memory allocation with new fails.
- *
- *-----------------------------------------------------------------------------*/
-void out_of_memory_handler()
-{
-    std::cerr << "[ERROR] new failed\n";
-    throw bad_alloc();
-}
+string* GetGarbage(char* result_buffer){
 
+            IInfoBytes* result2;
+            switch(result_buffer[MAGIC_BYTE]){
+                
+                case UPDATE_CMD: 
+                    result2 = (IInfoBytes* )UpdateCommand::ParseResult(result_buffer);
+                    break;
+                case GETTIME_CMD: 
+                    result2 = (IInfoBytes* )GetTimeCommand::ParseResult(result_buffer);
+                    break;
+                case SETTIME_CMD:
+                    result2 = (IInfoBytes* )SetTimeCommand::ParseResult(result_buffer);
+                    break;
+//                case GETLOG_CMD:
+//                    result2 = (IInfoBytes* )GetLogCommand::ParseResult(result_buffer);
+//                    break;
+//                case DELETELOG_CMD:
+//                    result2 = (IInfoBytes* )DeleteLogCommand::ParseResult(result_buffer);
+//                    break;
+                case REBOOT_CMD:
+                    result2 = (IInfoBytes* )RebootCommand::ParseResult(result_buffer);
+                    break;
+                case DECODE_CMD:
+                    result2 = (IInfoBytes* )DecodeCommand::ParseResult(result_buffer);
+                    break;
+                default:
+                    cout << "Goodbye world!" << endl;
+            }
+
+            string *garbage = result2->ToString();       
+            cout << *garbage << endl;
+            return garbage;
+}
+//TODO:
+//- Receive command
+//- Check if it's OK or failure
+//- If it's OK then life is good
+//- If It's not OK then log the failure
+//- log status of all commands in a file
