@@ -5,6 +5,7 @@
 #include "subsystems.h"
 #include "commands.h"
 #include "shakespeare.h"
+#include <stdlib.h>
 #include <stdio.h>
 extern const char* s_cs1_subsystems[];
 
