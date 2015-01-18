@@ -88,7 +88,7 @@ void* SetTimeCommand::ParseResult(const char *result)
         Shakespeare::log(Shakespeare::ERROR,cs1_systems[CS1_COMMANDER],"Possible SetTime failure: Can't parse result");
         return (void*)0;
     }
-    static struct InfoBytesSetTime info_bytes = {0};
+    static struct InfoBytesSetTime info_bytes;
     info_bytes.time_status = result[1];
     info_bytes.time_set = SpaceString::getTimet(result+CMD_HEAD_SIZE);
 

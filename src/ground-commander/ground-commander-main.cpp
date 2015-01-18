@@ -29,11 +29,15 @@ const char ERROR_EXECUTING_COMMAND = '2';
 static char log_buffer[255] = {0};
 static char info_buffer[255] = {'\0'};
 static Net2Com* commander = 0; 
+static string stored_command;
 
 const char* LOGNAME = cs1_systems[CS1_COMMANDER];
+const char CMD_INPUT_FILE[] = "/home/todo"; 
+const char CMD_TEMP_FILE[] = "/home/groundCommanderTemp"; //###MAKE SURE TO HAVE WRITE PERMISSIONS###
 string* GetGarbage(char* result_buffer);
 void perform(int bytes);
 void read_command();
+void delete_command();
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  *
  * NAME : main 
@@ -53,11 +57,11 @@ int main()
         int bytes = 1;
         if (bytes > 0) {
             //get result
-            perform(bytes);
+ //           perform(bytes);
         }
 
         read_command();
-
+        delete_command();
         sleep(COMMANER_SLEEP_TIME);
     }        
     
@@ -69,17 +73,46 @@ int main()
 }
 
 void read_command(){
-    ifstream infile("/home/todo");
+    ifstream infile(CMD_INPUT_FILE);
 
     if(infile.good()){
-        string sLine;
-        getline(infile, sLine);
-        cout << sLine << endl;
+        getline(infile, stored_command);
+        cout << stored_command << endl;
     }
 
     //TODO: write to pipes
     infile.close();
 }
+
+void delete_command(){
+    string read_command;
+    ifstream in(CMD_INPUT_FILE);
+    int temp;
+    
+    if( !in.is_open()){
+        cout << "Command input file failed to open" << endl;
+        return;
+    }
+    
+    ofstream out(CMD_TEMP_FILE);
+
+    if( !out.is_open()){
+        cout << "Temp file failed to open. Check directory permmissions" << endl;
+        return;
+    }
+
+    while( getline(in,read_command) ){
+        if(read_command.compare(stored_command) != 0){
+            out << read_command << "\n";
+        }
+    }
+
+    in.close();
+    out.close();    
+    remove(CMD_INPUT_FILE);
+    rename(CMD_TEMP_FILE,CMD_INPUT_FILE);
+}
+
 
 void perform(int bytes){
     char* buffer = NULL; //TODO This buffer does not scare me !
@@ -117,8 +150,7 @@ void perform(int bytes){
 
                             delete obtainedSpaceGarbage;
                             obtainedSpaceGarbage = NULL;
-                        } else {
-                            // TODO: resend command, failure, resend command
+                            delete_command();
                         }
 
                         free(buffer);

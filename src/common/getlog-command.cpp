@@ -504,7 +504,7 @@ char* GetLogCommand::GetCmdStr(char* cmd_buf)
 *-----------------------------------------------------------------------------*/
 void* GetLogCommand::ParseResult(const char *result, const char *filename)
 {
-    static struct InfoBytes info_bytes = {0};
+    static struct InfoBytes info_bytes;
     FILE* pFile = 0;
 
     if (!result || result[CMD_ID] != GETLOG_CMD) {

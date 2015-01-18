@@ -41,7 +41,7 @@ void* RebootCommand::ParseResult(const char * result)
         Shakespeare::log(Shakespeare::ERROR,cs1_systems[CS1_COMMANDER],"Reboot failure: Can't parse result");
         return (void*)0;    
 }
-    static struct InfoBytesReboot info_bytes = {0};
+    static struct InfoBytesReboot info_bytes;
     info_bytes.reboot_status = result[1];
     char buffer[60];
     

@@ -36,6 +36,7 @@
 #include "subsystems.h"
 #include "commands.h"
 #include "icommand.h"
+#include "iinfobytes.h"
 
 using namespace std;
 
@@ -57,13 +58,17 @@ using namespace std;
 #define GETLOG_INFO_SIZE 4  /* number of info bytes written before the actual data, 
                              * limit the size of this 
                              */
-struct InfoBytes
+struct InfoBytes : public IInfoBytes
 {
     char getlog_status;
     ino_t inode;
     const char *getlog_message;
     const char *next_file_in_result_buffer;
     int message_bytes_size;
+
+    string* ToString() {
+        return new string (1, getlog_status);
+    }
 };
 
 class GetLogCommand : public ICommand 
