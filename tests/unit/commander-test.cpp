@@ -140,7 +140,58 @@ TEST(CommanderTestGroup, GetLog_Oldest_Success)
     }
 
 }
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ *
+ * GROUP : CommanderTestGroup
+ *
+ * NAME : GetLog_Oldest_Pipe_Success 
+ *
+ *-----------------------------------------------------------------------------*/
+TEST(CommanderTestGroup, GetLog_Oldest_Pipe_Success) 
+{
+    char result[RESULT_BUF_SIZE] = {0};
+ 
+    UTestUtls::CreateFile(CS1_TGZ"/Watch-Puppy20140101.txt", "file a");
+    usleep(1000000);
+    UTestUtls::CreateFile(CS1_TGZ"/Updater20140102.txt", "file b");
+    usleep(1000000);
+    UTestUtls::CreateFile(CS1_TGZ"/Updater20140103.txt", "file c");
+    usleep(5000);
 
+
+    // This is the Command to create on the ground.
+    GetLogCommand ground_cmd(OPT_NOOPT, 0, 0, 0);
+    ground_cmd.GetCmdStr(command_buf);
+    ICommand *command = CommandFactory::CreateCommand(command_buf);
+
+  // use Netman Net2Com to send data to space-commander Net2Com
+    netman->WriteToInfoPipe((unsigned char)CMD_BUF_SIZE);
+    netman->WriteToDataPipe(command_buf, CMD_BUF_SIZE);
+    netman->WriteToInfoPipe((unsigned char)0xFF);
+    netman->WriteToInfoPipe((unsigned char)0x01);
+    netman->WriteToDataPipe((unsigned char)0x21);
+    netman->WriteToInfoPipe((unsigned char)0xFF);
+
+
+    while (netman->ReadFromDataPipe(result, RESULT_BUF_SIZE) == 0) {
+        // Give enough time to the commander to proceed!
+        usleep(1000);
+    }
+
+    InfoBytes getlog_info = *(InfoBytes*)((GetLogCommand*)command)->ParseResult(result);
+    
+    CHECK_EQUAL(0, getlog_info.next_file_in_result_buffer);
+    CHECK(*(result + 2 + GETLOG_INFO_SIZE + UTEST_SIZE_OF_TEST_FILES) == EOF);
+    CHECK(*(result + GETLOG_INFO_SIZE + UTEST_SIZE_OF_TEST_FILES + 3) == EOF);
+    char temp[6];
+    memcpy(temp,getlog_info.getlog_message,6);
+    CHECK(strcmp(temp,"file a"));
+    if (command){
+        delete command;
+        command = NULL;
+    }
+
+}
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  *
  * GROUP : CommanderTestGroup
@@ -240,4 +291,37 @@ TEST(CommanderTestGroup, SetTime_Success)
         CHECK(settime_info.time_status == CS1_SUCCESS); 
     CHECK(settime_info.time_set == rawtime);
 }
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ *
+ * GROUP : CommanderTestGroup
+ *
+ * NAME : GetTime_Success 
+ *
+ *-----------------------------------------------------------------------------*/
+TEST(CommanderTestGroup, GetTime_Success) 
+{
+    char result[GETTIME_RTN_SIZE + CMD_HEAD_SIZE] = {0};
+    time_t rawtime;
+    command_buf[0] = GETTIME_CMD;
 
+    // use Netman Net2Com to send data to space-commander Net2Com
+    netman->WriteToInfoPipe((unsigned char)GETTIME_CMD_SIZE);
+    netman->WriteToDataPipe(command_buf, GETTIME_CMD_SIZE);
+    netman->WriteToInfoPipe((unsigned char)0xFF);
+    netman->WriteToInfoPipe((unsigned char)0x01);
+    netman->WriteToDataPipe((unsigned char)0x21);
+    netman->WriteToInfoPipe((unsigned char)0xFF);
+
+    while (netman->ReadFromDataPipe(result, RESULT_BUF_SIZE) == 0) {
+        // Give enough time to the commander to proceed!
+        usleep(1000);
+    }
+    
+    InfoBytesGetTime gettime_info = *(InfoBytesGetTime*)GetTimeCommand::ParseResult(result);
+    time(&rawtime);
+
+    CHECK(result[0]==GETTIME_CMD);
+    if ( getuid() == 0 ) //Some systems might need to be root user to set time succesfully
+        CHECK(gettime_info.time_status == CS1_SUCCESS); 
+    CHECK(gettime_info.time_set == rawtime);
+}
