@@ -1,6 +1,6 @@
 #ifndef IINFOBYTES_H 
 #define IINFOBYTES_H
-#include <string.h>
+#include <string>
 
 struct IInfoBytes{
     public:

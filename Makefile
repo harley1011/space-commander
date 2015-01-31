@@ -13,6 +13,7 @@ SPACE_UPTDATER = ../space-updater
 SPACE_SCRIPT = ../space-script
 
 COMMON_BIN = bin/common
+COMMON_Q6_BIN = bin/commonQ6
 SPACE_COMMANDER_BIN = bin/space-commander
 SPACE_COMMANDER_Q6_BIN = bin/space-commanderQ6
 GROUND_COMMANDER_BIN = bin/ground-commander
@@ -41,7 +42,7 @@ INCTESTPATH = -I./tests/unit/stubs/ -I./tests/helpers/include/
 LIBPATH=-L./lib/ -L$(SPACE_LIB)/shakespeare/lib -L$(CPPUTEST_HOME)/lib -L$(SPACE_UTLS)/lib
 
 make_dir:
-	mkdir -p bin && mkdir -p $(COMMON_BIN) && mkdir -p $(SPACE_COMMANDER_BIN) && mkdir -p $(GROUND_COMMANDER_BIN) && mkdir -p $(SPACE_COMMANDER_Q6_BIN) && mkdir -p lib
+	mkdir -p bin && mkdir -p $(COMMON_BIN) && mkdir -p $(SPACE_COMMANDER_BIN) && mkdir -p $(GROUND_COMMANDER_BIN) && mkdir -p $(SPACE_COMMANDER_Q6_BIN) && mkdir -p $(COMMON_Q6_BIN) && mkdir -p lib
 
 #
 #++++++++++++++++++++
@@ -111,8 +112,19 @@ $(GROUND_COMMANDER_BIN): src/ground-commander/ground-commander-main.cpp $(COMMON
 #--------------------
 LIBS_Q6= -lshakespeare-mbcc -lcs1_utlsQ6
 
-OBJECTS_Q6 = $(SPACE_COMMANDER_Q6_BIN)/Net2ComQ6.o $(SPACE_COMMANDER_Q6_BIN)/NamedPipeQ6.o $(SPACE_COMMANDER_Q6_BIN)/command-factoryQ6.o $(SPACE_COMMANDER_Q6_BIN)/deletelog-commandQ6.o $(SPACE_COMMANDER_Q6_BIN)/decode-commandQ6.o $(SPACE_COMMANDER_Q6_BIN)/getlog-commandQ6.o $(SPACE_COMMANDER_Q6_BIN)/gettime-commandQ6.o $(SPACE_COMMANDER_Q6_BIN)/reboot-commandQ6.o $(SPACE_COMMANDER_Q6_BIN)/settime-commandQ6.o $(SPACE_COMMANDER_Q6_BIN)/update-commandQ6.o $(SPACE_COMMANDER_Q6_BIN)/base64Q6.o $(SPACE_COMMANDER_Q6_BIN)/subsystemsQ6.o
+COMMON_Q6_OBJECTS = $(COMMON_Q6_BIN)/command-factoryQ6.o $(COMMON_Q6_BIN)/deletelog-commandQ6.o $(COMMON_Q6_BIN)/decode-commandQ6.o $(COMMON_Q6_BIN)/getlog-commandQ6.o $(COMMON_Q6_BIN)/gettime-commandQ6.o $(COMMON_Q6_BIN)/reboot-commandQ6.o $(COMMON_Q6_BIN)/settime-commandQ6.o $(COMMON_Q6_BIN)/update-commandQ6.o $(COMMON_Q6_BIN)/subsystemsQ6.o
 
+ 
+
+OBJECTS_Q6 = $(SPACE_COMMANDER_Q6_BIN)/Net2ComQ6.o $(SPACE_COMMANDER_Q6_BIN)/NamedPipeQ6.o $(SPACE_COMMANDER_Q6_BIN)/base64Q6.o 
+
+#
+#++++++++++++++++++++
+# Common Q6
+#--------------------
+bin/commonQ6/%Q6.o: src/common/%.cpp include/common/%.h
+	$(MBCC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCLUDES) -c $< -o $@ 
+	
 #
 #++++++++++++++++++++
 # MicroBlaze Rules 
@@ -122,7 +134,7 @@ buildQ6:  make_dir $(SPACE_COMMANDER_Q6_BIN) staticlibsQ6.tar
 $(SPACE_COMMANDER_Q6_BIN)/%Q6.o: src/space-commander/%.cpp include/space-commander/%.h
 	$(MBCC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCLUDES) -c $< -o $@
 
-$(SPACE_COMMANDER_Q6_BIN): src/space-commander/space-commander-main.cpp $(OBJECTS_Q6)
+$(SPACE_COMMANDER_Q6_BIN): src/space-commander/space-commander-main.cpp $(COMMON_Q6_OBJECTS) $(OBJECTS_Q6)
 	$(MBCC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCLUDES) $(LIBPATH) -o $@/space-commanderQ6 $^ $(LIBS_Q6)
 
 
