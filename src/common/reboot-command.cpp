@@ -5,6 +5,7 @@
 #include "common/subsystems.h"
 #include "common/commands.h"
 #include "shakespeare.h"
+#include <stdlib.h>
 #include <stdio.h>
 extern const char* s_cs1_subsystems[];
 
@@ -17,8 +18,9 @@ extern const char* s_cs1_subsystems[];
 * RETURNS : A buffer contaning the cmd number and cmd status
 * 
 *-----------------------------------------------------------------------------*/
-void* RebootCommand::Execute(){
-    char* result = (char*)malloc(sizeof(char) * CMD_HEAD_SIZE); 
+void* RebootCommand::Execute(size_t* pSize){
+    char* result = (char*)malloc(sizeof(char) * CMD_HEAD_SIZE);
+    *pSize = CMD_HEAD_SIZE; 
     reboot(CMD_HEAD_SIZE);
     result[0] = REBOOT_CMD;
     result[1] = CS1_SUCCESS;

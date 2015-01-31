@@ -1,7 +1,7 @@
 #ifndef GETTIME_COMMAND_H
 #define GETTIME_COMMAND_H
 
-#define GETTIME_CMD_SIZE 2 + sizeof(time_t)
+#define GETTIME_CMD_SIZE 1
 #define GETTIME_RTN_SIZE sizeof(time_t)
 
 #include "icommand.h"
@@ -30,7 +30,7 @@ struct InfoBytesGetTime : public IInfoBytes
 class GetTimeCommand : public ICommand {
 public:
     GetTimeCommand() {};
-    void* Execute();    // Don't forget to free me. - Willy
+    void* Execute(size_t* pSize);    
     static void* ParseResult(const char *result);
 };
 #endif

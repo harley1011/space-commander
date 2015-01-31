@@ -60,7 +60,7 @@ OBJECTS = $(SPACE_COMMANDER_BIN)/Net2Com.o $(SPACE_COMMANDER_BIN)/NamedPipe.o $(
 #
 # CppUTest files, no wildcard, add files explicitly!
 #
-UNIT_TEST = tests/unit/Net2Com-test.cpp  tests/unit/deletelog-command-test.cpp  tests/unit/getlog-command-test.cpp tests/unit/commander-test.cpp tests/unit/settime-command-test.cpp
+UNIT_TEST = tests/unit/Net2Com-test.cpp  tests/unit/deletelog-command-test.cpp  tests/unit/getlog-command-test.cpp tests/unit/commander-test.cpp tests/unit/settime-command-test.cpp  tests/unit/gettime-command-test.cpp
 CS1_UTEST_DIR="cs1_utest" # as defined in SpaceDecl.h
 
 #

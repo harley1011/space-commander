@@ -17,7 +17,7 @@ struct InfoBytesReboot : public IInfoBytes
 class RebootCommand : public ICommand {
 public:
     RebootCommand() {};
-    void* Execute();
+    void* Execute(size_t* pSize);
     static void* ParseResult(const char * result);        
 };
 #endif
