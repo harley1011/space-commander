@@ -12,6 +12,12 @@ SPACE_UTLS = $(SPACE_LIB)/utls
 SPACE_UPTDATER = ../space-updater
 SPACE_SCRIPT = ../space-script
 
+COMMON_BIN = bin/common
+COMMON_Q6_BIN = bin/commonQ6
+SPACE_COMMANDER_BIN = bin/space-commander
+SPACE_COMMANDER_Q6_BIN = bin/space-commanderQ6
+GROUND_COMMANDER_BIN = bin/ground-commander
+
 #
 #++++++++++++++++++++
 # Flags
@@ -36,7 +42,7 @@ INCTESTPATH = -I./tests/unit/stubs/ -I./tests/helpers/include/
 LIBPATH=-L./lib/ -L$(SPACE_LIB)/shakespeare/lib -L$(CPPUTEST_HOME)/lib -L$(SPACE_UTLS)/lib
 
 make_dir:
-	mkdir -p bin && mkdir -p lib
+	mkdir -p bin && mkdir -p $(COMMON_BIN) && mkdir -p $(SPACE_COMMANDER_BIN) && mkdir -p $(GROUND_COMMANDER_BIN) && mkdir -p $(SPACE_COMMANDER_Q6_BIN) && mkdir -p $(COMMON_Q6_BIN) && mkdir -p lib
 
 #
 #++++++++++++++++++++
@@ -48,11 +54,14 @@ CPPUTEST_LIBS=-lCppUTest -lCppUTestExt
 #
 # All Object files, do not use wildcard, add the ones you need explicitly!
 #
-OBJECTS = bin/Net2Com.o bin/NamedPipe.o bin/command-factory.o bin/deletelog-command.o  bin/decode-command.o bin/getlog-command.o bin/gettime-command.o bin/reboot-command.o bin/settime-command.o bin/update-command.o bin/base64.o bin/subsystems.o bin/timetag-command.o
+COMMON_OBJECTS = $(COMMON_BIN)/subsystems.o $(COMMON_BIN)/command-factory.o $(COMMON_BIN)/deletelog-command.o  $(COMMON_BIN)/decode-command.o $(COMMON_BIN)/getlog-command.o $(COMMON_BIN)/gettime-command.o $(COMMON_BIN)/reboot-command.o $(COMMON_BIN)/settime-command.o $(COMMON_BIN)/update-command.o 
+
+OBJECTS = $(SPACE_COMMANDER_BIN)/Net2Com.o $(SPACE_COMMANDER_BIN)/NamedPipe.o $(SPACE_COMMANDER_BIN)/base64.o
+
 #
 # CppUTest files, no wildcard, add files explicitly!
 #
-UNIT_TEST = tests/unit/Net2Com-test.cpp  tests/unit/deletelog-command-test.cpp  tests/unit/getlog-command-test.cpp tests/unit/commander-test.cpp tests/unit/settime-command-test.cpp tests/unit/timetag-test.cpp
+UNIT_TEST = tests/unit/Net2Com-test.cpp  tests/unit/deletelog-command-test.cpp  tests/unit/getlog-command-test.cpp tests/unit/commander-test.cpp tests/unit/settime-command-test.cpp  tests/unit/gettime-command-test.cpp
 CS1_UTEST_DIR="cs1_utest" # as defined in SpaceDecl.h
 
 #
@@ -61,42 +70,72 @@ CS1_UTEST_DIR="cs1_utest" # as defined in SpaceDecl.h
 UTEST_ENV=-DCS1_UTEST $(MEM_LEAK_MACRO) $(CPPUTEST_LIBS) 
 ENV = -DCS1_DEBUG  $(UTEST_ENV)  -DPRESERVE
 
+
+#
+#++++++++++++++++++++
+# Common
+#--------------------
+bin/common/%.o: src/common/%.cpp include/common/%.h
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCLUDES) -c $< -o $@ $(ENV) 
+
 #
 #++++++++++++++++++++
 # CppUTest / PC Rules
 #--------------------
-buildBin: make_dir bin/space-commander staticlibs.tar
+buildBin: make_dir $(SPACE_COMMANDER_BIN) staticlibs.tar
 
-bin/%.o: src/%.cpp include/%.h 
+$(SPACE_COMMANDER_BIN)/%.o: src/space-commander/%.cpp include/space-commander/%.h
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCLUDES) -c $< -o $@ $(ENV) 
 
-bin/space-commander: src/space-commander-main.cpp $(OBJECTS)
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCLUDES) $(LIBPATH) -o $@ $^ $(LIBS) $(ENV)
+$(SPACE_COMMANDER_BIN): src/space-commander/space-commander-main.cpp $(COMMON_OBJECTS) $(OBJECTS)
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCLUDES) $(LIBPATH) -o $@/space-commander $^ $(LIBS) $(ENV)
 
-test: make_dir bin/AllTests bin/space-commander
+test: make_dir bin/AllTests $(SPACE_COMMANDER_BIN)
 	mkdir -p $(CS1_UTEST_DIR)
 
-bin/AllTests: tests/unit/AllTests.cpp  $(UNIT_TEST) $(OBJECTS) 
+bin/AllTests: tests/unit/AllTests.cpp  $(UNIT_TEST) $(COMMON_OBJECTS) $(OBJECTS) 
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCLUDES) $(LIBPATH) -o $@ $^ $(LIBS) $(ENV)
+	
+#
+#++++++++++++++++++++
+# Ground Commander
+#--------------------
+
+buildGroundCommander: make_dir $(GROUND_COMMANDER_BIN) staticlibs.tar
+
+$(GROUND_COMMANDER_BIN): src/ground-commander/ground-commander-main.cpp $(COMMON_OBJECTS) $(OBJECTS)
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCLUDES) $(LIBPATH) -o $@/ground-commander $^ $(LIBS) $(ENV)
+
 #
 #++++++++++++++++++++
 #  MicroBlaze 
 #--------------------
 LIBS_Q6= -lshakespeare-mbcc -lcs1_utlsQ6
 
-OBJECTS_Q6 = bin/Net2ComQ6.o bin/NamedPipeQ6.o bin/command-factoryQ6.o bin/deletelog-commandQ6.o bin/decode-commandQ6.o bin/getlog-commandQ6.o bin/gettime-commandQ6.o bin/reboot-commandQ6.o bin/settime-commandQ6.o bin/update-commandQ6.o bin/base64Q6.o bin/subsystemsQ6.o 
+COMMON_Q6_OBJECTS = $(COMMON_Q6_BIN)/command-factoryQ6.o $(COMMON_Q6_BIN)/deletelog-commandQ6.o $(COMMON_Q6_BIN)/decode-commandQ6.o $(COMMON_Q6_BIN)/getlog-commandQ6.o $(COMMON_Q6_BIN)/gettime-commandQ6.o $(COMMON_Q6_BIN)/reboot-commandQ6.o $(COMMON_Q6_BIN)/settime-commandQ6.o $(COMMON_Q6_BIN)/update-commandQ6.o $(COMMON_Q6_BIN)/subsystemsQ6.o
 
+ 
+
+OBJECTS_Q6 = $(SPACE_COMMANDER_Q6_BIN)/Net2ComQ6.o $(SPACE_COMMANDER_Q6_BIN)/NamedPipeQ6.o $(SPACE_COMMANDER_Q6_BIN)/base64Q6.o 
+
+#
+#++++++++++++++++++++
+# Common Q6
+#--------------------
+bin/commonQ6/%Q6.o: src/common/%.cpp include/common/%.h
+	$(MBCC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCLUDES) -c $< -o $@ 
+	
 #
 #++++++++++++++++++++
 # MicroBlaze Rules 
 #--------------------
-buildQ6:  make_dir bin/space-commanderQ6  staticlibsQ6.tar
+buildQ6:  make_dir $(SPACE_COMMANDER_Q6_BIN) staticlibsQ6.tar
 	
-bin/%Q6.o: src/%.cpp include/%.h
+$(SPACE_COMMANDER_Q6_BIN)/%Q6.o: src/space-commander/%.cpp include/space-commander/%.h
 	$(MBCC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCLUDES) -c $< -o $@
 
-bin/space-commanderQ6: src/space-commander-main.cpp $(OBJECTS_Q6)
-	$(MBCC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCLUDES) $(LIBPATH) -o $@ $^ $(LIBS_Q6)
+$(SPACE_COMMANDER_Q6_BIN): src/space-commander/space-commander-main.cpp $(COMMON_Q6_OBJECTS) $(OBJECTS_Q6)
+	$(MBCC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCLUDES) $(LIBPATH) -o $@/space-commanderQ6 $^ $(LIBS_Q6)
 
 
 #
@@ -115,18 +154,18 @@ clean:
 # buildLib 
 #--------------------
 staticlibs.tar: make_dir lib/libNet2Com.a
-	tar -cf $@ include/NamedPipe.h include/Net2Com.h lib/libNet2Com.a
+	tar -cf $@ include/space-commander/NamedPipe.h include/space-commander/Net2Com.h lib/libNet2Com.a
 
 staticlibsQ6.tar: make_dir lib/libNet2Com-mbcc.a
-	tar -cf $@ include/NamedPipe.h include/Net2Com.h lib/libNet2Com-mbcc.a
+	tar -cf $@ include/space-commander/NamedPipe.h include/space-commander/Net2Com.h lib/libNet2Com-mbcc.a
 
-lib/libNamedPipe.a: bin/NamedPipe.o bin/Net2Com.o
+lib/libNamedPipe.a: $(SPACE_COMMANDER_BIN)/NamedPipe.o $(SPACE_COMMANDER_BIN)/Net2Com.o
 	ar -crv $@ $^
 
-lib/libNet2Com.a: bin/NamedPipe.o bin/Net2Com.o
+lib/libNet2Com.a: $(SPACE_COMMANDER_BIN)/NamedPipe.o $(SPACE_COMMANDER_BIN)/Net2Com.o
 	ar -crv $@ $^
 
-lib/libNet2Com-mbcc.a: bin/NamedPipeQ6.o bin/Net2ComQ6.o
+lib/libNet2Com-mbcc.a: $(SPACE_COMMANDER_Q6_BIN)/NamedPipeQ6.o $(SPACE_COMMANDER_Q6_BIN)/Net2ComQ6.o
 	ar -crv $@ $^
 
 

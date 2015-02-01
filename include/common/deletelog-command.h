@@ -14,14 +14,22 @@
 
 #include <sys/types.h>
 #include "icommand.h"
+#include "iinfobytes.h"
 
 #define LOG 0x0
 #define TGZ 0x1
 
-struct InfoBytesDeleteLog 
+using namespace std;
+
+struct InfoBytesDeleteLog : public IInfoBytes
 {
     char delete_status;
     const char* filename;
+
+    string* ToString() {
+        string* infoStatus = new string (1, delete_status);
+        return infoStatus;
+    }
 };
 
 class DeleteLogCommand : public ICommand 

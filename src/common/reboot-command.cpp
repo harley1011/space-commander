@@ -1,10 +1,11 @@
-#include "reboot-command.h"
+#include "common/reboot-command.h"
 #include <sys/reboot.h>
 #include <linux/reboot.h>
 #include <unistd.h>
-#include "subsystems.h"
-#include "commands.h"
+#include "common/subsystems.h"
+#include "common/commands.h"
 #include "shakespeare.h"
+#include <stdlib.h>
 #include <stdio.h>
 extern const char* s_cs1_subsystems[];
 
@@ -17,8 +18,9 @@ extern const char* s_cs1_subsystems[];
 * RETURNS : A buffer contaning the cmd number and cmd status
 * 
 *-----------------------------------------------------------------------------*/
-void* RebootCommand::Execute(){
-    char* result = (char*)malloc(sizeof(char) * CMD_HEAD_SIZE); 
+void* RebootCommand::Execute(size_t* pSize){
+    char* result = (char*)malloc(sizeof(char) * CMD_HEAD_SIZE);
+    *pSize = CMD_HEAD_SIZE; 
     reboot(CMD_HEAD_SIZE);
     result[0] = REBOOT_CMD;
     result[1] = CS1_SUCCESS;
@@ -41,7 +43,7 @@ void* RebootCommand::ParseResult(const char * result)
         Shakespeare::log(Shakespeare::ERROR,cs1_systems[CS1_COMMANDER],"Reboot failure: Can't parse result");
         return (void*)0;    
 }
-    static struct InfoBytesReboot info_bytes = {0};
+    static struct InfoBytesReboot info_bytes;
     info_bytes.reboot_status = result[1];
     char buffer[60];
     

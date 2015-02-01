@@ -17,7 +17,7 @@
 #define UPDATER      0x07
 #define WATCH_PUPPY  0x08
 #define COMMANDER    0x09 
-
+#define GROUND_COMMANDER 0x0A
 #define UNDEF_SUB    0xFF
 
 #endif

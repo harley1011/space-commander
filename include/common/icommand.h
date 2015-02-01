@@ -32,9 +32,7 @@ class ICommand
             }
         };
 
-        virtual void* Execute(size_t* size){ return this->Execute(); } // The other Execute will be removed as soon as ALL commands 
-                                                                       // comply to the new signature Execute(size_t* size) TODO
-        virtual void* Execute() { return 0; }
+        virtual void* Execute(size_t* size){return 0;} 
 
         // Intended to the GroundCommander
         // The GroundCommander can use the Command's contructor to build a Command and then
@@ -42,7 +40,7 @@ class ICommand
         // the Commands themselve should have the knowledge of how to build the command buffer.
         // Also, they allow to have a queue of ICommand waiting to be sent and to parse the result buffer returned.
         virtual char* GetCmdStr(char *cmd_buf) { return 0; } // will be set to pure virtual when implemented in all cmds TODO
-     //   virtual void* ParseResult(const char *result) { return 0; } // Idem
+        //virtual void* ParseResult(const char *result) { return 0; } // Idem
 };
 
 #endif

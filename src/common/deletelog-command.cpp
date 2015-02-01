@@ -2,11 +2,11 @@
 #include <string.h>
 #include <stdlib.h>
 #include <sys/types.h>
-#include "commands.h"
+#include "common/commands.h"
 #include "shakespeare.h"
 #include "SpaceDecl.h"
-#include "deletelog-command.h"
-#include "subsystems.h"
+#include "common/deletelog-command.h"
+#include "common/subsystems.h"
 #define FILENAME_TMP "filename.tmp" 
 
 extern const char* s_cs1_subsystems[];

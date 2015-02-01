@@ -16,7 +16,7 @@
 
 #include "SpaceDecl.h"
 #include "fileIO.h"
-#include "Net2Com.h"
+#include "space-commander/Net2Com.h"
 
 
 //************************************************************

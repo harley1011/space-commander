@@ -5,7 +5,7 @@
 
 #include "SpaceDecl.h"
 #include "SpaceString.h"
-#include "command-factory.h"
+#include "common/command-factory.h"
 
 ICommand* CommandFactory::CreateCommand(char * data) {
     if (data == NULL) { 

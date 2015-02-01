@@ -1,14 +1,14 @@
-#include "update-command.h"
+#include "common/update-command.h"
 #include <stdio.h>
-#include "base64.h"
+#include "space-commander/base64.h"
 #include <cstring>
-#include "commands.h"
-#include "subsystems.h"
+#include "common/commands.h"
+#include "common/subsystems.h"
 #include "SpaceString.h"
 #include "SpaceDecl.h"
 #include "shakespeare.h"
 
-void* UpdateCommand::Execute() {
+void* UpdateCommand::Execute(size_t* pSize) {
     FILE* fp_update_file = NULL;
     char* result = NULL;
     int retry = 10000;
@@ -33,6 +33,7 @@ void* UpdateCommand::Execute() {
         fclose(fp_update_file); 
 
         result = (char* )malloc(sizeof(char) * (50 + CMD_HEAD_SIZE) );
+        *pSize = 50 + CMD_HEAD_SIZE;
         memset(result + CMD_HEAD_SIZE, '\0', sizeof(char) * 50);
         sprintf(result, "%lld", (long long)bytes_written);
         result[0] = UPDATE_CMD;

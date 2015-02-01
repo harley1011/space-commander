@@ -11,7 +11,8 @@ const char* s_cs1_subsystems[] = {
     "Software",
     "Updater",
     "Watch-Puppy",
-    "Commander"
+    "Commander",
+    "GroundCommander"
 };
 
 

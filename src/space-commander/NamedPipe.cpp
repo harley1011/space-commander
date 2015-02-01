@@ -1,4 +1,4 @@
-#include <NamedPipe.h>
+#include "space-commander/NamedPipe.h"
 #include <cstdio>
 #include <cstring>
 #include <sys/types.h>

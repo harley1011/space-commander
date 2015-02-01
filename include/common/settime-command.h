@@ -5,17 +5,22 @@
 #define SETTIME_RTN_SIZE sizeof(time_t)
 
 #include "icommand.h"
+#include "iinfobytes.h"
 #include <time.h>
 #include <iostream>
 #include <cstdio>
 
 using namespace std;
 
-struct InfoBytesSetTime
+struct InfoBytesSetTime : public IInfoBytes
 {
     char time_status;
     time_t time_set;
 
+    string* ToString() {
+        string* infoStatus = new string(1, time_status);
+        return infoStatus;
+    }
 };
 class SetTimeCommand : public ICommand {
 public:

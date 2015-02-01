@@ -19,12 +19,12 @@
 #include "SpaceDecl.h"
 
 #include "SpaceString.h"
-#include "command-factory.h"
-#include "getlog-command.h"
-#include "icommand.h"
+#include "common/command-factory.h"
+#include "common/getlog-command.h"
+#include "common/icommand.h"
 #include "fileIO.h"
-#include "commands.h"
-#include "subsystems.h"
+#include "common/commands.h"
+#include "common/subsystems.h"
 #include "dirUtl.h"
 
 static char command_buf[GETLOG_CMD_SIZE] = {'\0'};

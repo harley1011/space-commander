@@ -1,4 +1,4 @@
-#include "settime-command.h"
+#include "common/settime-command.h"
 #include <string.h>
 #include <cerrno>
 #include <sys/time.h>
@@ -9,9 +9,9 @@
 #include <SpaceString.h>
 #include <shakespeare.h>
 #include "i2c-device.h"
-#include "commands.h"
+#include "common/commands.h"
 #include "SpaceDecl.h"
-#include "subsystems.h"
+#include "common/subsystems.h"
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 *
@@ -88,7 +88,7 @@ void* SetTimeCommand::ParseResult(const char *result)
         Shakespeare::log(Shakespeare::ERROR,cs1_systems[CS1_COMMANDER],"Possible SetTime failure: Can't parse result");
         return (void*)0;
     }
-    static struct InfoBytesSetTime info_bytes = {0};
+    static struct InfoBytesSetTime info_bytes;
     info_bytes.time_status = result[1];
     info_bytes.time_set = SpaceString::getTimet(result+CMD_HEAD_SIZE);
 
