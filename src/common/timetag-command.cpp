@@ -5,7 +5,7 @@
 * TITLE : timetag-command.cpp
 *
 *----------------------------------------------------------------------------*/
-#include "timetag-command.h"
+#include "common/timetag-command.h"
 #include <cerrno>
 #include <sys/time.h>
 #include <stdio.h>
