@@ -95,8 +95,9 @@ TEST(TimetagTestGroup, CancelJob)
   CHECK_EQUAL(CS1_SUCCESS, cancel_result);
 }
 
-TEST(TimetagTestGroup, FullExecution)
+TEST(TimetagTestGroup, CommandExecution)
 {
+  size_t result_buffer_size = sizeof(TimetagBytes);
   int test_result = -1;
   
   command_buf[0] = TIMETAG_CMD; 
@@ -108,10 +109,13 @@ TEST(TimetagTestGroup, FullExecution)
   memcpy(command_buf+9,task,48); 
 
   ICommand* command = CommandFactory::CreateCommand(command_buf);
-  unsigned char* execute_result = (unsigned char*)command->Execute();
+  unsigned char* execute_result = (unsigned char*)command->Execute(&result_buffer_size);
 
-  TimetagBytes result_struct = *(TimetagBytes*)((TimetagCommand*)command)->ParseResult(execute_result);
-  
+  TimetagBytes result_struct = {0}; 
+  unsigned char * result_buffer = (unsigned char *)((TimetagCommand*)command)->ParseResult(execute_result);
+
+  result_struct = (TimetagBytes&)result_buffer;
+
   if (command != NULL ) {
     delete command;
     command = NULL;
@@ -124,22 +128,3 @@ TEST(TimetagTestGroup, FullExecution)
   }
   CHECK_EQUAL(CS1_SUCCESS,test_result);
 }
-/* 
-TEST(TimetagTestGroup, EscapeCharacters)
-{
-  char to_escape[3] = {'<','>'}; // TODO NOT COMPHREHENSIVE
-  char * test_string = "This is a << >> test string";
-  char * result = escape_characters (test_string, 28, to_escape, 2);
-  char * expected = "This is a \\<\\< \\>\\> test string";
-  printf("Result: '%s'\r\n",result);
-  printf("Expect: '%s'\r\n",expected);
-
-  size_t limit = 31; 
-  size_t z=0;
-  for (z=0; z<limit; z++) { 
-    CHECK_EQUAL(
-        expected[z], result[z]
-    );
-  }
-}
-*/

@@ -1,8 +1,12 @@
 /*
- * schedule-command.h
- * Copyright (C) 2014 ngc224 <ngc224@Andromeda>
+ * AUTHORS: Space Concordia 2014, Shawn
  *
- * Distributed under terms of the MIT license.
+ * TITLE: timetag-command.h
+ *
+ * DESCRIPTION: Schedule a command to be run on the satellite shell
+ *  providing the command to be run, and a timestamp of the time
+ *  the comannd should be executed
+ *
  */
 
 #ifndef TIMETAG_COMMAND_H
@@ -21,7 +25,7 @@ using namespace std;
 struct TimetagBytes {
     int         job_id;
     time_t      job_timestamp;
-    char *      job_command;
+    char        job_command[TIMETAG_MAX_JOB_COMMAND];
 };
 
 class TimetagCommand : public ICommand 
