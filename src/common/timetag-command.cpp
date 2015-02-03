@@ -17,17 +17,15 @@
 #include <iostream>
 #include <SystemProcess.h>
 #include <shakespeare.h>
-#define LOG_PATH        "/home/logs/commander/"
 #define PROCESS         "TIMETAG"
-#define CMD_BUFFER_LEN  190
 #define AT_RUNNER       "/usr/bin/at-runner.sh"
 #define AT_EXEC         "/usr/bin/at"
 #define AT_FORMAT       "%Y%m%d%H%M"
 
 TimetagCommand::TimetagCommand()
 {
-    this->command = 0x0;
-    this->timestamp = 0x0;
+    this->command = 0;
+    this->timestamp = 0;
 }
 
 TimetagCommand::TimetagCommand(char * command, time_t timestamp)
@@ -43,33 +41,60 @@ TimetagCommand::~TimetagCommand()
         command = NULL;
     }
 }
-
-void* TimetagCommand::Execute()
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ *
+ * NAME : Execute
+ * DESCRIPTION: TODO
+ *
+ *-------------------------------------------------------------------------------*/
+void* TimetagCommand::Execute(size_t *pSize)
 {
-    // TODO, all dynamic memory allocation should be performed with new/delete, not malloc/free
-    unsigned char * execute_result = (unsigned char *) malloc (TIMETAG_CMD_SIZE);
     short int job_id = TimetagCommand::AddJob(this->timestamp,this->command);
-    struct TimetagBytes info_bytes;
-    info_bytes.job_id = job_id;
-    info_bytes.job_timestamp = this->timestamp;
-    info_bytes.job_command = this->command;
-    memcpy (execute_result, &info_bytes, TIMETAG_CMD_SIZE); 
-    return (void*)execute_result;
+    unsigned char * timetag_result;
+    size_t timetag_instance_length = 0;
+
+    // if (! timetag_instance_length <= TIMETAG_CMD_SIZE) // TODO {}
+    
+    // TODO, all dynamic memory allocation should be performed with new/delete, not malloc/free
+    timetag_result = (unsigned char *) malloc (timetag_instance_length);
+
+    timetag_result[0] = job_id;
+    timetag_result[sizeof(int)] = this->timestamp;
+    memcpy (timetag_result+sizeof(int)+sizeof(time_t), this->command, TIMETAG_MAX_JOB_COMMAND); 
+
+    return (void *) timetag_result;
 }
 
-void* TimetagCommand::ParseResult(unsigned char * timetag_result_bytes)
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ *
+ * NAME : ParseResult
+ * DESCRIPTION: TODO
+ *
+ *-------------------------------------------------------------------------------*/
+void* TimetagCommand::ParseResult(const unsigned char * timetag_result_bytes)
 {
   // TODO log results with shakespeare
-  static struct TimetagBytes result_struct = {0};
+  static struct TimetagBytes result_struct;
   memcpy (&result_struct,timetag_result_bytes,TIMETAG_CMD_SIZE); 
   char log_entry[255];
-  sprintf (log_entry,"%d ",result_struct.job_id);
-  sprintf (log_entry,"%ld ",result_struct.job_timestamp);
-  sprintf (log_entry,"%s",result_struct.job_command);
-  Shakespeare::log_shorthand(LOG_PATH, Shakespeare::NOTICE, PROCESS, log_entry);
-  return (void*)&result_struct;
+  snprintf (
+          log_entry,
+          CMD_BUFFER_LEN, 
+          "%d %ld %s",
+          result_struct.job_id,
+          result_struct.job_timestamp,
+          result_struct.job_command
+  );// TODO fix segfault
+  Shakespeare::log(Shakespeare::NOTICE, PROCESS, log_entry);
+  return (void *) &result_struct;
 }
 
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ *
+ * NAME : GetCustomTime
+ * DESCRIPTION: TODO
+ *
+ *-------------------------------------------------------------------------------*/
 // TODO -> mainly for testing purposes but consider replacing or adding to another library instead of here.
 // TODO -> thorough testing
 // http://linux.die.net/man/3/strftime
@@ -80,6 +105,12 @@ int TimetagCommand::GetCustomTime(std::string format, char * output_date, int ou
     return strftime(output_date,output_length,format.c_str(),timeinfo);
 }
 
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ *
+ * NAME : CancelJob
+ * DESCRIPTION: TODO
+ *
+ *-------------------------------------------------------------------------------*/
 int TimetagCommand::CancelJob(const int job_id) 
 {
   char cancel_job_command[CMD_BUFFER_LEN] = {0};
@@ -93,6 +124,12 @@ int TimetagCommand::CancelJob(const int job_id)
   return atoi(output.c_str());
 }
 
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ *
+ * NAME : AddJob
+ * DESCRIPTION: TODO
+ *
+ *-------------------------------------------------------------------------------*/
 int TimetagCommand::AddJob(time_t timestamp, char * executable) 
 {
   if (!IsFileExists(AT_RUNNER) || !IsFileExists(AT_EXEC)){

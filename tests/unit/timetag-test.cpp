@@ -100,7 +100,9 @@ TEST(TimetagTestGroup, CommandExecution)
   size_t result_buffer_size = sizeof(TimetagBytes);
   int test_result = -1;
   
-  command_buf[0] = TIMETAG_CMD; 
+  //command_buf[0] = TIMETAG_CMD; 
+  command_buf[0] = 37; 
+
   Date date(2014, 9, 15, 10, 10, 10);
   time_t rawtime = date.GetTimeT();
   memcpy(command_buf+1,&rawtime,sizeof(time_t)); 
@@ -109,12 +111,11 @@ TEST(TimetagTestGroup, CommandExecution)
   memcpy(command_buf+9,task,48); 
 
   ICommand* command = CommandFactory::CreateCommand(command_buf);
-  unsigned char* execute_result = (unsigned char*)command->Execute(&result_buffer_size);
+  unsigned char* execute_result = (unsigned char*)((TimetagCommand*)command)->Execute(&result_buffer_size);
 
   TimetagBytes result_struct = {0}; 
-  unsigned char * result_buffer = (unsigned char *)((TimetagCommand*)command)->ParseResult(execute_result);
-
-  result_struct = (TimetagBytes&)result_buffer;
+  unsigned char * result_buffer = (unsigned char*)((TimetagCommand*)command)->ParseResult(execute_result);
+  result_struct = (TimetagBytes&)result_buffer; // TODO fix segfault
 
   if (command != NULL ) {
     delete command;
@@ -128,3 +129,5 @@ TEST(TimetagTestGroup, CommandExecution)
   }
   CHECK_EQUAL(CS1_SUCCESS,test_result);
 }
+
+// TODO check the job_command on both ends 
