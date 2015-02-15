@@ -50,12 +50,12 @@ void* RebootCommand::ParseResult(const char * result)
     if(info_bytes.reboot_status == CS1_SUCCESS)
     {
         sprintf(buffer, "Reboot success.");
-        Shakespeare::log(Shakespeare::NOTICE,s_cs1_subsystems[COMMANDER], buffer);
+        Shakespeare::log(Shakespeare::NOTICE,s_cs1_subsystems[CS1_COMMANDER], buffer);
     }
     else
     {
         sprintf(buffer, "Reboot failure.");
-        Shakespeare::log(Shakespeare::ERROR,s_cs1_subsystems[COMMANDER], buffer);
+        Shakespeare::log(Shakespeare::ERROR,s_cs1_subsystems[CS1_COMMANDER], buffer);
     }
     return (void*)&info_bytes;
 

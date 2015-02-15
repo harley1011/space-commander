@@ -63,7 +63,7 @@ void* UpdateCommand::ParseResult(const char *result)
     else
     {
         snprintf(buffer,100,"Update failure: Unknown"); 
-        Shakespeare::log(Shakespeare::ERROR,cs1_systems[COMMANDER], buffer);
+        Shakespeare::log(Shakespeare::ERROR,cs1_systems[CS1_COMMANDER], buffer);
     }
     return (void*)&info_bytes;
 
