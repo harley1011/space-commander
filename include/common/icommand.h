@@ -10,7 +10,7 @@
 
 #include <string.h>
 #include "SpaceDecl.h"
-#include "iinfobytes.h"
+#include "infobytes.h"
 
 class ICommand 
 {
@@ -41,7 +41,7 @@ class ICommand
         // the Commands themselve should have the knowledge of how to build the command buffer.
         // Also, they allow to have a queue of ICommand waiting to be sent and to parse the result buffer returned.
         virtual char* GetCmdStr(char *cmd_buf) { return 0; } // will be set to pure virtual when implemented in all cmds TODO
-        virtual IInfoBytes* ParseResult(char *result) { return 0; } // Idem
+        virtual InfoBytes* ParseResult(char *result) { return 0; } // Idem
 };
 
 #endif

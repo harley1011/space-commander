@@ -5,15 +5,16 @@
 #define SETTIME_RTN_SIZE sizeof(time_t)
 
 #include "icommand.h"
-#include "iinfobytes.h"
+#include "infobytes.h"
 #include <time.h>
 #include <iostream>
 #include <cstdio>
 
 using namespace std;
 
-struct InfoBytesSetTime : public IInfoBytes
+class InfoBytesSetTime : public InfoBytes
 {
+    public:
     char time_status;
     time_t time_set;
 
@@ -28,7 +29,7 @@ public:
     SetTimeCommand(time_t time, char rtc_bus_number);   
     time_t GetSeconds() { return seconds; };
     void* Execute(size_t* pSize);
-    IInfoBytes* ParseResult(char* result);
+    InfoBytes* ParseResult(char* result);
 
     char rtc_bus_number;        
 private:

@@ -81,7 +81,7 @@ void* SetTimeCommand::Execute(size_t* pSize){
 * 
 *-----------------------------------------------------------------------------*/
 
-IInfoBytes* SetTimeCommand::ParseResult(char *result)
+InfoBytes* SetTimeCommand::ParseResult(char *result)
 {
 
     static struct InfoBytesSetTime info_bytes;
