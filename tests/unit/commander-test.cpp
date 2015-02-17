@@ -283,13 +283,13 @@ TEST(CommanderTestGroup, SetTime_Success)
         // Give enough time to the commander to proceed!
         usleep(1000);
     }
-    
-    InfoBytesSetTime settime_info = *(InfoBytesSetTime*)SetTimeCommand::ParseResult(result);
+    SetTimeCommand command(1000);
+    InfoBytesSetTime* settime_info = (InfoBytesSetTime*)command.ParseResult(result);
 
     CHECK(result[0]==SETTIME_CMD);
     if ( getuid() == 0 ) //Some systems might need to be root user to set time succesfully
-        CHECK(settime_info.time_status == CS1_SUCCESS); 
-    CHECK(settime_info.time_set == rawtime);
+        CHECK(settime_info->time_status == CS1_SUCCESS); 
+    CHECK(settime_info->time_set == rawtime);
 }
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  *

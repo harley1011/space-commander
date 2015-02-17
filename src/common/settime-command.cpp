@@ -12,7 +12,6 @@
 #include "common/commands.h"
 #include "SpaceDecl.h"
 #include "common/subsystems.h"
-
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 *
 * NAME : SetTimeCommand
@@ -82,13 +81,15 @@ void* SetTimeCommand::Execute(size_t* pSize){
 * 
 *-----------------------------------------------------------------------------*/
 
-void* SetTimeCommand::ParseResult(const char *result)
+IInfoBytes* SetTimeCommand::ParseResult(char *result)
 {
+
+    static struct InfoBytesSetTime info_bytes;
     if(!result || result[0] != SETTIME_CMD) {
         Shakespeare::log(Shakespeare::ERROR,cs1_systems[CS1_COMMANDER],"Possible SetTime failure: Can't parse result");
-        return (void*)0;
+        info_bytes.time_status = CS1_FAILURE;
+        return &info_bytes;
     }
-    static struct InfoBytesSetTime info_bytes;
     info_bytes.time_status = result[1];
     info_bytes.time_set = SpaceString::getTimet(result+CMD_HEAD_SIZE);
 
@@ -104,5 +105,5 @@ void* SetTimeCommand::ParseResult(const char *result)
        snprintf(buffer,100,"SetTime failure: Time failed to set %u seconds since epoch",(unsigned)info_bytes.time_set);
        Shakespeare::log(Shakespeare::ERROR, cs1_systems[CS1_COMMANDER], buffer);
    }
-    return (void*)&info_bytes;
+    return &info_bytes;
 }
