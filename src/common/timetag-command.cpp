@@ -22,6 +22,10 @@
 #define AT_EXEC         "/usr/bin/at"
 #define AT_FORMAT       "%Y%m%d%H%M"
 
+#define TIMETAG_JOB_ID_INDEX        0
+#define TIMETAG_JOB_TIMESTAMP_INDEX sizeof(int)
+#define TIMETAG_JOB_COMMAND_INDEX   sizeof(int)+sizeof(time_t)
+
 TimetagCommand::TimetagCommand()
 {
     this->command = 0;
@@ -41,6 +45,7 @@ TimetagCommand::~TimetagCommand()
         command = NULL;
     }
 }
+
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  *
  * NAME : Execute
@@ -59,34 +64,40 @@ void* TimetagCommand::Execute(size_t *pSize)
     timetag_result = (unsigned char *) malloc (timetag_instance_length);
 
     timetag_result[0] = job_id;
-    timetag_result[sizeof(int)] = this->timestamp;
-    memcpy (timetag_result+sizeof(int)+sizeof(time_t), this->command, TIMETAG_MAX_JOB_COMMAND); 
+    timetag_result[TIMETAG_JOB_TIMESTAMP_INDEX] = this->timestamp;
+    memcpy (timetag_result+TIMETAG_JOB_COMMAND_INDEX, this->command, TIMETAG_MAX_JOB_COMMAND); 
 
     return (void *) timetag_result;
 }
 
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  *
- * NAME : ParseResult
- * DESCRIPTION: TODO
+ * NAME : ParseResult  
+ * DESCRIPTION: Parses the result beffer returned from Execute into the InfoBytes
+ * format
  *
  *-------------------------------------------------------------------------------*/
-void* TimetagCommand::ParseResult(const unsigned char * timetag_result_bytes)
+InfoBytes* TimetagCommand::ParseResult(const unsigned char * timetag_result_bytes)
 {
-  // TODO log results with shakespeare
-  static struct TimetagBytes result_struct;
-  memcpy (&result_struct,timetag_result_bytes,TIMETAG_CMD_SIZE); 
+  InfoBytesTimetag * timetag_infobytes;
+  timetag_infobytes->job_id = timetag_result_bytes[0];
+  timetag_infobytes->job_timestamp = timetag_result_bytes[0];
+  memcpy (&timetag_infobytes->job_command,
+          (char *)timetag_result_bytes[TIMETAG_JOB_COMMAND_INDEX],
+          TIMETAG_MAX_JOB_COMMAND); 
+#if CS1_DEBUG
   char log_entry[255];
   snprintf (
           log_entry,
           CMD_BUFFER_LEN, 
           "%d %ld %s",
-          result_struct.job_id,
-          result_struct.job_timestamp,
-          result_struct.job_command
-  );// TODO fix segfault
+          timetag_infobytes->job_id,
+          timetag_infobytes->job_timestamp,
+          timetag_infobytes->job_command
+  );
   Shakespeare::log(Shakespeare::NOTICE, PROCESS, log_entry);
-  return (void *) &result_struct;
+#endif 
+  return (InfoBytes *) timetag_infobytes;
 }
 
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

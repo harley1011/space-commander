@@ -1,5 +1,6 @@
-/*
- * AUTHORS: Space Concordia 2014, Shawn
+/* Space Concordia 
+ *
+ * NAME: Shawn
  *
  * TITLE: timetag-command.h
  *
@@ -14,6 +15,7 @@
 
 #include <string>
 #include "icommand.h"
+#include "infobytes.h"
 #include <cstdlib>
 
 #define CMD_BUFFER_LEN          CS1_MAX_FRAME_SIZE // TODOtwhat is this?
@@ -23,10 +25,16 @@
 
 using namespace std;
 
-struct TimetagBytes {
-    int         job_id;
-    time_t      job_timestamp;
-    char *      job_command;
+class InfoBytesTimetag : public InfoBytes {
+    public:
+        int         job_id;
+        time_t      job_timestamp;
+        char *      job_command;
+
+        string * ToString() {
+            string* infoStatus = new string (1, *job_command);
+            return infoStatus;
+        }
 };
 
 class TimetagCommand : public ICommand 
@@ -42,7 +50,7 @@ class TimetagCommand : public ICommand
       int GetCustomTime(std::string format, char * output_date, int output_length, time_t);
       int AddJob(time_t timestamp, char * executable);
       int CancelJob(const int job_id);
-      void* ParseResult(const unsigned char * timetag_result_bytes);
+      InfoBytes* ParseResult(const unsigned char * timetag_result_bytes);
       char* GetCommand();
       char* GetDateTime();
 };
