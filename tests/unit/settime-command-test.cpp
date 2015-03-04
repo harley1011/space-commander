@@ -69,11 +69,11 @@ TEST(SetTimeTestGroup, Check_Settime)
         
         CHECK(result_size == SETTIME_RTN_SIZE + CMD_HEAD_SIZE);
 
-        InfoBytesSetTime* getsettime_info = (InfoBytesSetTime*)SetTimeCommand::ParseResult(result);
+        InfoBytesSetTime* settime_info = (InfoBytesSetTime*)command->ParseResult(result);
 
-        CHECK(getsettime_info->time_status == CS1_SUCCESS);
+        CHECK(settime_info->time_status == CS1_SUCCESS);
     
-        CHECK(getsettime_info->time_set == rawtime);
+        CHECK(settime_info->time_set == rawtime);
         time_t newtime;
         time(&newtime);
         CHECK(newtime-rawtime < 1);        
@@ -124,9 +124,10 @@ TEST(SetTimeTestGroup,SetTime_ParseResult)
     result[0] = SETTIME_CMD;
     result[1] = CS1_SUCCESS;
     memcpy(result+2,&rawtime, sizeof(time_t));
-    InfoBytesSetTime* getsettime_info = (InfoBytesSetTime*)SetTimeCommand::ParseResult(result);
-    CHECK(getsettime_info->time_set == rawtime);
-    CHECK(getsettime_info->time_status == CS1_SUCCESS);
+    InfoBytesSetTime* settime_info = (InfoBytesSetTime*)command->ParseResult(result);
+
+    CHECK(settime_info->time_set == rawtime);
+    CHECK(settime_info->time_status == CS1_SUCCESS);
     if (result) {
         free(result);
         result = 0;
@@ -162,11 +163,12 @@ TEST(SetTimeTestGroup, Check_Settime_Rtc)
         ICommand* command = CommandFactory::CreateCommand(command_buf);
         char* result = (char*)command->Execute(&result_buffer);
         CHECK(result_buffer == SETTIME_RTN_SIZE + CMD_HEAD_SIZE);
-        InfoBytesSetTime* getsettime_info = (InfoBytesSetTime*)SetTimeCommand::ParseResult(result);
+        InfoBytesSetTime* settime_info = (InfoBytesSetTime*)command->ParseResult(result);
 
-        CHECK(getsettime_info->time_status == CS1_SUCCESS);
+
+        CHECK(settime_info->time_status == CS1_SUCCESS);
     
-        CHECK(getsettime_info->time_set == rawtime);
+        CHECK(settime_info->time_set == rawtime);
         time_t newtime;
         time(&newtime);
         CHECK(newtime-rawtime < 1);        
@@ -207,9 +209,9 @@ TEST(SetTimeTestGroup, Check_Settime_Fail)
         
         CHECK(result_size == SETTIME_RTN_SIZE + CMD_HEAD_SIZE);    
     
-        InfoBytesSetTime* getsettime_info = (InfoBytesSetTime*)SetTimeCommand::ParseResult(result);
+        InfoBytesSetTime* settime_info = (InfoBytesSetTime*)command->ParseResult(result);
 
-        CHECK(getsettime_info->time_status == CS1_FAILURE);
+        CHECK(settime_info->time_status == CS1_FAILURE);
 
         if ( command != NULL)
         {

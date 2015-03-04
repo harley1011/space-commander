@@ -78,13 +78,15 @@ void* DecodeCommand::Execute() {
 
     return result;         
 }
-void* DecodeCommand::ParseResult(const char *result)
+InfoBytes* DecodeCommand::ParseResult(char *result)
 {
+    static struct InfoBytesDecode info_bytes;
     if (!result || result[0] != DECODE_CMD){
         Shakespeare::log(Shakespeare::ERROR,cs1_systems[CS1_COMMANDER],"Decode failure: Can't parse result");
-        return (void*)0;
+        info_bytes.decode_status = CS1_FAILURE;
+        return &info_bytes;
     }
-    static struct InfoBytesDecode info_bytes = {0};
+
     info_bytes.decode_status = result[1];
 
     char buffer[100];
@@ -98,7 +100,7 @@ void* DecodeCommand::ParseResult(const char *result)
         snprintf(buffer,100,"Decode failure: Unknown");
         Shakespeare::log(Shakespeare::ERROR,cs1_systems[CS1_COMMANDER], buffer);
     }
-    return (void*)&info_bytes;
+    return &info_bytes;
 
 }
 

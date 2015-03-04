@@ -36,7 +36,7 @@
 #include "subsystems.h"
 #include "commands.h"
 #include "icommand.h"
-#include "iinfobytes.h"
+#include "infobytes.h"
 
 using namespace std;
 
@@ -58,8 +58,9 @@ using namespace std;
 #define GETLOG_INFO_SIZE 4  /* number of info bytes written before the actual data, 
                              * limit the size of this 
                              */
-struct InfoBytes : public IInfoBytes
+class GetLogInfoBytes : public InfoBytes
 {
+    public:
     char getlog_status;
     ino_t inode;
     const char *getlog_message;
@@ -89,8 +90,8 @@ class GetLogCommand : public ICommand
         void* Execute(size_t *pSize);
         
         char* GetCmdStr(char* cmd_buf);
-        void* ParseResult(const char *result, const char *filename); // This function SHOULD be private!!!
-        void* ParseResult(const char *result); 
+        InfoBytes* ParseResult(char *result, const char *filename); // This function SHOULD be private!!!
+        InfoBytes* ParseResult(char *result); 
 
         char* GetNextFile(void);
         size_t ReadFile(char *buffer, const char *filename);
@@ -98,7 +99,7 @@ class GetLogCommand : public ICommand
         bool isFileProcessed(const char *filepath);
         bool isFileProcessed(unsigned long inode);
         char* FindOldestFile(const char* directory_path, const char* pattern);
-        InfoBytes* BuildInfoBytesStruct(InfoBytes* pInfo, const char *buffer);
+        InfoBytes* BuildInfoBytesStruct(GetLogInfoBytes* pInfo, const char *buffer);
 
 
         static const char* HasNextFile(const char* result);

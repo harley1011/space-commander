@@ -446,7 +446,7 @@ int GetLogCommand::GetEndBytes(char *buffer)
 *           the InfoBytes struct at *pInfo with those data.
 *
 *-----------------------------------------------------------------------------*/
-InfoBytes* GetLogCommand::BuildInfoBytesStruct(InfoBytes* pInfo, const char *buffer)
+InfoBytes* GetLogCommand::BuildInfoBytesStruct(GetLogInfoBytes* pInfo, const char *buffer)
 {
     if (pInfo) {
         pInfo->inode = SpaceString::getUInt(buffer); 
@@ -502,14 +502,15 @@ char* GetLogCommand::GetCmdStr(char* cmd_buf)
 * RETURN : struct InfoBytes* to STATIC memory (Make a COPY!)
 *
 *-----------------------------------------------------------------------------*/
-void* GetLogCommand::ParseResult(const char *result, const char *filename)
+InfoBytes* GetLogCommand::ParseResult(char *result, const char *filename)
 {
-    static struct InfoBytes info_bytes;
+    static struct GetLogInfoBytes info_bytes;
     FILE* pFile = 0;
 
     if (!result || result[CMD_ID] != GETLOG_CMD) {
         Shakespeare::log(Shakespeare::ERROR,cs1_systems[CS1_COMMANDER],"GetLog failure: Can't parse result");
-        return 0;
+        info_bytes.getlog_status = CS1_FAILURE;
+        return &info_bytes;
     }
 
     info_bytes.getlog_status = result[CMD_STS];
@@ -561,10 +562,10 @@ void* GetLogCommand::ParseResult(const char *result, const char *filename)
        Shakespeare::log(Shakespeare::ERROR,cs1_systems[CS1_COMMANDER], "GetLog failure: No files may exist");
     }
 
-    return (void*)&info_bytes;    
+    return &info_bytes;    
 }
 
-void* GetLogCommand::ParseResult(const char* result)
+InfoBytes* GetLogCommand::ParseResult(char* result)
 {
     return this->ParseResult(result, 0);
 }

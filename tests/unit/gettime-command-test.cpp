@@ -58,7 +58,7 @@ TEST(GetTimeTestGroup, Check_Gettime)
     ICommand* command = CommandFactory::CreateCommand(command_buf);
     size_t size;
     char* result = (char*)command->Execute(&size);
-    InfoBytesGetTime* gettime_info = (InfoBytesGetTime*)GetTimeCommand::ParseResult(result);
+    InfoBytesGetTime* gettime_info = (InfoBytesGetTime*)command->ParseResult(result);
 
     CHECK(gettime_info->time_status == CS1_SUCCESS);
     CHECK(size == (sizeof(time_t) + CMD_HEAD_SIZE));

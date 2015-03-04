@@ -3,14 +3,19 @@
 
 #include <string>
 #include "icommand.h"
+#include "infobytes.h"
 #include <cstdlib>
 
 using namespace std;
 
-struct InfoBytesDecode
+class InfoBytesDecode : public InfoBytes
 {
-    char decode_status;
-
+    public:
+        char decode_status;
+        string* ToString() {
+        string* infoStatus = new string (1, decode_status);
+        return infoStatus;
+    };
 };
 class DecodeCommand : public ICommand {
 public:
@@ -27,7 +32,7 @@ public:
     }
 
     void* Execute();       
-    static void* ParseResult(const char *result);
+    InfoBytes* ParseResult(char *result);
     char* GetDestPath() { return destPath; }
     char* GetSrcPath()  { return srcPath; }
     int IsExecutable()  { return isExecutable; }

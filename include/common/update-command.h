@@ -3,12 +3,13 @@
 
 #include <string>
 #include "icommand.h"
-#include "iinfobytes.h"
+#include "infobytes.h"
 #include <cstdlib>
 
 using namespace std;
 
-struct InfoBytesUpdate : public IInfoBytes {
+class InfoBytesUpdate : public InfoBytes {
+    public:
     const char* bytes_written; 
     char update_status;
 
@@ -42,7 +43,7 @@ public:
     }
 
     void* Execute(size_t* pSize);
-    static void* ParseResult(const char* result);
+    InfoBytes* ParseResult(char* result);
     char* GetPath()       { return path; }
     int   GetDataLength() { return data_length; }
 private:
