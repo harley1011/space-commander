@@ -72,7 +72,7 @@ TEST(TimetagTestGroup, CancelJob)
 
   char task[48] = "grep -HinT --color=auto canceljob /tmp/test.log";
   command_buf[0] = TIMETAG_CMD; 
-  memcpy(command_buf+1,task,48); 
+  memcpy(command_buf+1,task,48); // TODO isn't copying the task here redundant?
 
   TimetagCommand *command = (TimetagCommand*)CommandFactory::CreateCommand(command_buf);
 
@@ -110,7 +110,7 @@ TEST(TimetagTestGroup, CommandExecution)
   memcpy(command_buf+9,task,48); 
 
   ICommand* command = CommandFactory::CreateCommand(command_buf);
-  unsigned char* execute_result = (unsigned char*)((TimetagCommand*)command)->Execute(&result_buffer_size);
+  unsigned char * execute_result = (unsigned char*)((TimetagCommand*)command)->Execute(&result_buffer_size);
 
   InfoBytesTimetag timetag_infobytes; 
   unsigned char * result_buffer = (unsigned char*)((TimetagCommand*)command)->ParseResult(execute_result);

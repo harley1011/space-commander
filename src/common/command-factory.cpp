@@ -5,6 +5,7 @@
 
 #include "SpaceDecl.h"
 #include "SpaceString.h"
+
 #include "common/command-factory.h"
 
 ICommand* CommandFactory::CreateCommand(char * data) {
@@ -14,16 +15,16 @@ ICommand* CommandFactory::CreateCommand(char * data) {
     }
 
     switch(data[0]) {
-        case '0': {
+        case SETTIME_CMD : {
             return CommandFactory::CreateSetTime(data);
         }
-        case '1': {
+        case GETTIME_CMD : {
             return CommandFactory::CreateGetTime(data);
         }
-        case '2': {
+        case UPDATE_CMD : {
             return CommandFactory::CreateUpdate(data);
         }
-        case '3': {
+        case GETLOG_CMD : {
             /*
             * data[0]   :   Command number
             * data[1]   :   Option      - specifies if options are present or not
@@ -33,14 +34,17 @@ ICommand* CommandFactory::CreateCommand(char * data) {
             */
             return CommandFactory::CreateGetLog(data);
         }
-        case '4': {
+        case REBOOT_CMD : {
             return CommandFactory::CreateReboot(data);
         }
-        case '6': {
+        case DECODE_CMD : {
             return CommandFactory::CreateDecode(data);
         }
-        case '7': {
+        case DELETELOG_CMD : {
             return CommandFactory::CreateDeleteLog(data);
+        }
+        case TIMETAG_CMD : {
+            return CommandFactory::CreateTimetag(data);
         }
     }
 
@@ -110,6 +114,14 @@ ICommand* CommandFactory::CreateGetTime(char* data) {
 
 ICommand* CommandFactory::CreateReboot(char* data){
     RebootCommand* result = new RebootCommand();
+    return result;
+}
+
+ICommand* CommandFactory::CreateTimetag(char* data){
+    char * command = {0};
+    time_t timestamp = data[TIMETAG_JOB_TIMESTAMP_INDEX];
+    memcpy( command, data+TIMETAG_CMD_SIZE, TIMETAG_MAX_JOB_COMMAND );
+    TimetagCommand* result = new TimetagCommand(command, timestamp);
     return result;
 }
 

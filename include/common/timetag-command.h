@@ -18,18 +18,22 @@
 #include "infobytes.h"
 #include <cstdlib>
 
-#define CMD_BUFFER_LEN          CS1_MAX_FRAME_SIZE // TODOtwhat is this?
+#define CMD_BUFFER_LEN          CS1_MAX_FRAME_SIZE // TODO what is this?
 #define TIMETAG_CMD_SIZE        CS1_MAX_FRAME_SIZE-1
-#define TIMETAG_CMD_JOB_ID_SIZE 2
+#define TIMETAG_CMD_JOB_ID_SIZE sizeof(short int)
 #define TIMETAG_MAX_JOB_COMMAND ( CS1_MAX_FRAME_SIZE - sizeof(time_t) - TIMETAG_CMD_JOB_ID_SIZE )
+
+#define TIMETAG_JOB_ID_INDEX        0
+#define TIMETAG_JOB_TIMESTAMP_INDEX sizeof(int)
+#define TIMETAG_JOB_COMMAND_INDEX   sizeof(int)+sizeof(time_t)
 
 using namespace std;
 
 class InfoBytesTimetag : public InfoBytes {
     public:
-        int         job_id;
+        short int   job_id;
         time_t      job_timestamp;
-        char *      job_command;
+        char        job_command[CS1_MAX_FRAME_SIZE];
 
         string * ToString() {
             string* infoStatus = new string (1, *job_command);

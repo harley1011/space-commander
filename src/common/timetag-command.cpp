@@ -22,9 +22,6 @@
 #define AT_EXEC         "/usr/bin/at"
 #define AT_FORMAT       "%Y%m%d%H%M"
 
-#define TIMETAG_JOB_ID_INDEX        0
-#define TIMETAG_JOB_TIMESTAMP_INDEX sizeof(int)
-#define TIMETAG_JOB_COMMAND_INDEX   sizeof(int)+sizeof(time_t)
 
 TimetagCommand::TimetagCommand()
 {
@@ -79,25 +76,27 @@ void* TimetagCommand::Execute(size_t *pSize)
  *-------------------------------------------------------------------------------*/
 InfoBytes* TimetagCommand::ParseResult(const unsigned char * timetag_result_bytes)
 {
-  InfoBytesTimetag * timetag_infobytes;
-  timetag_infobytes->job_id = timetag_result_bytes[0];
-  timetag_infobytes->job_timestamp = timetag_result_bytes[0];
-  memcpy (&timetag_infobytes->job_command,
-          (char *)timetag_result_bytes[TIMETAG_JOB_COMMAND_INDEX],
-          TIMETAG_MAX_JOB_COMMAND); 
+  InfoBytesTimetag timetag_infobytes;
+  timetag_infobytes.job_id = timetag_result_bytes[0];
+  timetag_infobytes.job_timestamp = timetag_result_bytes[1];
+  memcpy (
+          timetag_infobytes.job_command,
+          timetag_result_bytes+TIMETAG_JOB_COMMAND_INDEX,
+          TIMETAG_MAX_JOB_COMMAND
+  );
 #if CS1_DEBUG
   char log_entry[255];
   snprintf (
           log_entry,
           CMD_BUFFER_LEN, 
           "%d %ld %s",
-          timetag_infobytes->job_id,
-          timetag_infobytes->job_timestamp,
-          timetag_infobytes->job_command
+          timetag_infobytes.job_id,
+          timetag_infobytes.job_timestamp,
+          timetag_infobytes.job_command
   );
   Shakespeare::log(Shakespeare::NOTICE, PROCESS, log_entry);
 #endif 
-  return (InfoBytes *) timetag_infobytes;
+  return (InfoBytes *) &timetag_infobytes;
 }
 
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
