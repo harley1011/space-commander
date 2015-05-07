@@ -180,29 +180,29 @@ void perform(int bytes){
 
 string* GetGarbage(char* result_buffer){
 
-            IInfoBytes* result2;
+            InfoBytes* result2;
             switch(result_buffer[MAGIC_BYTE]){
                 
                 case UPDATE_CMD: 
-                    result2 = (IInfoBytes* )UpdateCommand::ParseResult(result_buffer);
+                    result2 = (InfoBytes* )UpdateCommand::ParseResult(result_buffer);
                     break;
                 case GETTIME_CMD: 
-                    result2 = (IInfoBytes* )GetTimeCommand::ParseResult(result_buffer);
+                    result2 = (InfoBytes* )GetTimeCommand::ParseResult(result_buffer);
                     break;
                 case SETTIME_CMD:
-                    result2 = (IInfoBytes* )SetTimeCommand::ParseResult(result_buffer);
+                    result2 = (InfoBytes* )SetTimeCommand::ParseResult(result_buffer);
                     break;
 //                case GETLOG_CMD:
-//                    result2 = (IInfoBytes* )GetLogCommand::ParseResult(result_buffer);
+//                    result2 = (InfoBytes* )GetLogCommand::ParseResult(result_buffer);
 //                    break;
 //                case DELETELOG_CMD:
-//                    result2 = (IInfoBytes* )DeleteLogCommand::ParseResult(result_buffer);
+//                    result2 = (InfoBytes* )DeleteLogCommand::ParseResult(result_buffer);
 //                    break;
                 case REBOOT_CMD:
-                    result2 = (IInfoBytes* )RebootCommand::ParseResult(result_buffer);
+                    result2 = (InfoBytes* )RebootCommand::ParseResult(result_buffer);
                     break;
                 case DECODE_CMD:
-                    result2 = (IInfoBytes* )DecodeCommand::ParseResult(result_buffer);
+                    result2 = (InfoBytes* )DecodeCommand::ParseResult(result_buffer);
                     break;
                 default:
                     cout << "Goodbye world!" << endl;

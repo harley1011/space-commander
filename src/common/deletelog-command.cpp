@@ -187,14 +187,15 @@ char* DeleteLogCommand::ExtractFilenameFromFile()
 * RETURN : A InfoBytes containing delete_status, and filename
 * 
 *-----------------------------------------------------------------------------*/
-void* DeleteLogCommand::ParseResult(const char *result)
+InfoBytes* DeleteLogCommand::ParseResult(char *result)
 {
     static struct InfoBytesDeleteLog info_bytes;
 
     if (!result || result[CMD_ID] != DELETELOG_CMD) {
         Shakespeare::log(Shakespeare::NOTICE, cs1_systems[CS1_COMMANDER],
                                         "DeleteLog failure: Can't parse result");
-        return (void*)0;
+        info_bytes.delete_status = CS1_FAILURE;
+        return &info_bytes;
     }
 
     info_bytes.delete_status = result[CMD_STS];
@@ -215,5 +216,5 @@ void* DeleteLogCommand::ParseResult(const char *result)
 
     Shakespeare::log(Shakespeare::NOTICE, cs1_systems[CS1_COMMANDER], this->log_buffer);
 
-    return (void*)&info_bytes;
+    return &info_bytes;
 }

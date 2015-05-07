@@ -40,13 +40,14 @@ void* GetTimeCommand::Execute(size_t * pSize){
 * 
 *-----------------------------------------------------------------------------*/
 
-void* GetTimeCommand::ParseResult(const char *result)
+InfoBytes* GetTimeCommand::ParseResult(char *result)
 {
+    static struct InfoBytesGetTime info_bytes;
     if(!result || result[0] != GETTIME_CMD) {
         Shakespeare::log(Shakespeare::ERROR,cs1_systems[CS1_COMMANDER],"GetTime failure: Can't parse result");
-        return (void*)0;
+        info_bytes.time_status = CS1_FAILURE;
+        return &info_bytes;
     }
-    static struct InfoBytesGetTime info_bytes;
     info_bytes.time_status = result[1];
     info_bytes.time_set = SpaceString::getTimet(result+CMD_HEAD_SIZE);
 
@@ -62,5 +63,5 @@ void* GetTimeCommand::ParseResult(const char *result)
         snprintf(buffer,100,"GetTime failure: Unknown");
         Shakespeare::log(Shakespeare::ERROR, cs1_systems[CS1_COMMANDER], buffer);
    }
-    return (void*)&info_bytes;
+    return &info_bytes;
 }

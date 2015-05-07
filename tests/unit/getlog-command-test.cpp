@@ -72,9 +72,9 @@ TEST(GetLogTestGroup, Execute_OPT_NOOPT_NOFILES)
 
     CHECK(result_size == 4 );
     CHECK(result[1] == CS1_FAILURE);
-    InfoBytes getlog_info = *(InfoBytes*)((GetLogCommand*)command)->ParseResult(result);
+    GetLogInfoBytes *getlog_info = (GetLogInfoBytes*)command->ParseResult(result);
 
-    CHECK(getlog_info.getlog_status == CS1_FAILURE);
+    CHECK(getlog_info->getlog_status == CS1_FAILURE);
     // Cleanup
     if (command){
         delete command;
@@ -138,18 +138,18 @@ TEST(GetLogTestGroup, Execute_OPT_DATE_OPT_SUB_getTgz_returnsCorrectFile)
     ground_cmd.GetCmdStr(command_buf);
 
     // This is the Command that the space-commander will create
-    ICommand *command = CommandFactory::CreateCommand(command_buf);
+    GetLogCommand *command = (GetLogCommand*)CommandFactory::CreateCommand(command_buf);
     result = (char*)command->Execute(&result_size);
 
     CHECK(result_size == 16);
 
-    InfoBytes getlog_info = *static_cast<InfoBytes*>(dynamic_cast<GetLogCommand*>(command)->ParseResult(result, dest));
+    GetLogInfoBytes *getlog_info = (GetLogInfoBytes*)command->ParseResult(result, dest);
 
     #ifdef CS1_DEBUG
-    std::cerr << "[DEBUG] " << __FILE__ << " indoe is "  << getlog_info.inode << endl;
+    std::cerr << "[DEBUG] " << __FILE__ << " indoe is "  << getlog_info->inode << endl;
     #endif
 
-    CHECK_EQUAL(0, getlog_info.next_file_in_result_buffer);
+    CHECK_EQUAL(0, getlog_info->next_file_in_result_buffer);
     CHECK(*(result + CMD_HEAD_SIZE + GETLOG_INFO_SIZE + UTEST_SIZE_OF_TEST_FILES) == EOF);
     CHECK(*(result + CMD_HEAD_SIZE + GETLOG_INFO_SIZE + UTEST_SIZE_OF_TEST_FILES + 1) == EOF);
     CHECK(diff(dest, path));     
@@ -157,7 +157,7 @@ TEST(GetLogTestGroup, Execute_OPT_DATE_OPT_SUB_getTgz_returnsCorrectFile)
     // Check inode
     struct stat attr;
     stat(path, &attr);
-    CHECK_EQUAL(attr.st_ino, getlog_info.inode);
+    CHECK_EQUAL(attr.st_ino, getlog_info->inode);
 
 
     // Cleanup

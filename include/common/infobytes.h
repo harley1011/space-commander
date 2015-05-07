@@ -2,7 +2,7 @@
 #define IINFOBYTES_H
 #include <string>
 
-struct IInfoBytes{
+class InfoBytes{
     public:
         virtual std::string* ToString() = 0; 
 };

@@ -42,14 +42,15 @@ void* UpdateCommand::Execute(size_t* pSize) {
 
     return result;         
 }
-void* UpdateCommand::ParseResult(const char *result)
-{
+InfoBytes* UpdateCommand::ParseResult(char *result)
+{ 
+    static struct InfoBytesUpdate info_bytes;
     if(!result || result[0] != SETTIME_CMD) {
         Shakespeare::log(Shakespeare::ERROR,cs1_systems[CS1_COMMANDER],"Possible update failure: Can't parse result");
-        return (void*)0;
+        info_bytes.update_status = CS1_FAILURE;
+        return &info_bytes;
     }
 
-    static struct InfoBytesUpdate info_bytes;
     info_bytes.update_status = result[1];
     info_bytes.bytes_written = result + CMD_HEAD_SIZE; 
 
@@ -65,7 +66,7 @@ void* UpdateCommand::ParseResult(const char *result)
         snprintf(buffer,100,"Update failure: Unknown"); 
         Shakespeare::log(Shakespeare::ERROR,cs1_systems[CS1_COMMANDER], buffer);
     }
-    return (void*)&info_bytes;
+    return &info_bytes;
 
 
 }

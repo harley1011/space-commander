@@ -2,11 +2,12 @@
 #define REBOOT_COMMAND_H_
 #define REBOOT_RTN_SIZE 2
 #include "icommand.h"
-#include "iinfobytes.h"
+#include "infobytes.h"
 using namespace std;
 
-struct InfoBytesReboot : public IInfoBytes
+class InfoBytesReboot : public InfoBytes
 {
+    public:
     char reboot_status;
 
     string * ToString() {
@@ -18,6 +19,6 @@ class RebootCommand : public ICommand {
 public:
     RebootCommand() {};
     void* Execute(size_t* pSize);
-    static void* ParseResult(const char * result);        
+    InfoBytes* ParseResult(char* result);        
 };
 #endif
