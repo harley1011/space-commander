@@ -91,7 +91,7 @@ TEST_GROUP(CommanderTestGroup)
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  *
  * GROUP : CommanderTestGroup
- *
+ /*
  * NAME : GetLog_Oldest_Success 
  *
  *-----------------------------------------------------------------------------*/
@@ -114,16 +114,16 @@ TEST(CommanderTestGroup, GetLog_Oldest_Success)
     GetLogCommand ground_cmd(OPT_NOOPT, 0, 0, 0);
     ground_cmd.GetCmdStr(command_buf);
 
-    ICommand *command = CommandFactory::CreateCommand(command_buf);
+    GetLogCommand *command = (GetLogCommand*)CommandFactory::CreateCommand(command_buf);
     result = (char*)command->Execute(&result_size);
 
-    InfoBytes getlog_info = *static_cast<InfoBytes*>(dynamic_cast<GetLogCommand*>(command)->ParseResult(result, dest));
+    GetLogInfoBytes* getlog_info = (GetLogInfoBytes*)command->ParseResult(result, dest);
 
     #ifdef CS1_DEBUG
-    std::cerr << "[DEBUG] " << __FILE__ << " indoe is "  << getlog_info.inode << endl;
+    std::cerr << "[DEBUG] " << __FILE__ << " indoe is "  << getlog_info->inode << endl;
     #endif
 
-    CHECK_EQUAL(0, getlog_info.next_file_in_result_buffer);
+    CHECK_EQUAL(0, getlog_info->next_file_in_result_buffer);
     CHECK(*(result + 2 + GETLOG_INFO_SIZE + UTEST_SIZE_OF_TEST_FILES) == EOF);
     CHECK(*(result + GETLOG_INFO_SIZE + UTEST_SIZE_OF_TEST_FILES + 3) == EOF);
     CHECK(diff(dest, path));     
@@ -178,13 +178,13 @@ TEST(CommanderTestGroup, GetLog_Oldest_Pipe_Success)
         usleep(1000);
     }
 
-    InfoBytes getlog_info = *(InfoBytes*)((GetLogCommand*)command)->ParseResult(result);
+    GetLogInfoBytes *getlog_info = (GetLogInfoBytes*)command->ParseResult(result);
     
-    CHECK_EQUAL(0, getlog_info.next_file_in_result_buffer);
+    CHECK_EQUAL(0, getlog_info->next_file_in_result_buffer);
     CHECK(*(result + 2 + GETLOG_INFO_SIZE + UTEST_SIZE_OF_TEST_FILES) == EOF);
     CHECK(*(result + GETLOG_INFO_SIZE + UTEST_SIZE_OF_TEST_FILES + 3) == EOF);
     char temp[6];
-    memcpy(temp,getlog_info.getlog_message,6);
+    memcpy(temp,getlog_info->getlog_message,6);
     CHECK(strcmp(temp,"file a"));
     if (command){
         delete command;
@@ -283,13 +283,13 @@ TEST(CommanderTestGroup, SetTime_Success)
         // Give enough time to the commander to proceed!
         usleep(1000);
     }
-    
-    InfoBytesSetTime settime_info = *(InfoBytesSetTime*)SetTimeCommand::ParseResult(result);
+    SetTimeCommand command(1000);
+    InfoBytesSetTime* settime_info = (InfoBytesSetTime*)command.ParseResult(result);
 
     CHECK(result[0]==SETTIME_CMD);
     if ( getuid() == 0 ) //Some systems might need to be root user to set time succesfully
-        CHECK(settime_info.time_status == CS1_SUCCESS); 
-    CHECK(settime_info.time_set == rawtime);
+        CHECK(settime_info->time_status == CS1_SUCCESS); 
+    CHECK(settime_info->time_set == rawtime);
 }
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  *
@@ -316,12 +316,12 @@ TEST(CommanderTestGroup, GetTime_Success)
         // Give enough time to the commander to proceed!
         usleep(1000);
     }
-    
-    InfoBytesGetTime gettime_info = *(InfoBytesGetTime*)GetTimeCommand::ParseResult(result);
+    GetTimeCommand command;
+    InfoBytesGetTime *gettime_info = (InfoBytesGetTime*)command.ParseResult(result);
     time(&rawtime);
 
     CHECK(result[0]==GETTIME_CMD);
     if ( getuid() == 0 ) //Some systems might need to be root user to set time succesfully
-        CHECK(gettime_info.time_status == CS1_SUCCESS); 
-    CHECK(gettime_info.time_set == rawtime);
+        CHECK(gettime_info->time_status == CS1_SUCCESS); 
+    CHECK(gettime_info->time_set == rawtime);
 }

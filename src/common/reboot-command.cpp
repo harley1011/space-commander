@@ -37,13 +37,14 @@ void* RebootCommand::Execute(size_t* pSize){
 * RETURNS : struct InfoBytes* to STATIC memory
 * 
 *-----------------------------------------------------------------------------*/
-void* RebootCommand::ParseResult(const char * result)
+InfoBytes* RebootCommand::ParseResult(char* result)
 {
+    static struct InfoBytesReboot info_bytes;
     if (!result || result[0] != REBOOT_CMD ){
         Shakespeare::log(Shakespeare::ERROR,cs1_systems[CS1_COMMANDER],"Reboot failure: Can't parse result");
-        return (void*)0;    
-}
-    static struct InfoBytesReboot info_bytes;
+        info_bytes.reboot_status = CS1_FAILURE;
+        return &info_bytes;
+    }
     info_bytes.reboot_status = result[1];
     char buffer[60];
     
@@ -57,6 +58,6 @@ void* RebootCommand::ParseResult(const char * result)
         sprintf(buffer, "Reboot failure.");
         Shakespeare::log(Shakespeare::ERROR,s_cs1_subsystems[CS1_COMMANDER], buffer);
     }
-    return (void*)&info_bytes;
+    return &info_bytes;
 
 }
