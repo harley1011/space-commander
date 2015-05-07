@@ -185,13 +185,15 @@ TEST(CommanderTestGroup, GetLog_Oldest_Pipe_Success)
     CHECK(*(result + GETLOG_INFO_SIZE + UTEST_SIZE_OF_TEST_FILES + 3) == EOF);
     char temp[6];
     memcpy(temp,getlog_info->getlog_message,6);
-    CHECK(strcmp(temp,"file a"));
-    if (command){
+
+    CHECK(strncmp(temp,"file a", 6) == 0);
+
+    if (command) {
         delete command;
         command = NULL;
     }
-
 }
+
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  *
  * GROUP : CommanderTestGroup
