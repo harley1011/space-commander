@@ -52,13 +52,13 @@ void* SetTimeCommand::Execute(size_t* pSize){
     struct timeval tv = {0};
     char *result = 0;
 
-    result = (char*)malloc(sizeof(char) * (SETTIME_RTN_SIZE + CMD_HEAD_SIZE) );
-    *pSize = SETTIME_RTN_SIZE + CMD_HEAD_SIZE;
+    result = (char*)malloc(sizeof(char) * (SETTIME_RTN_SIZE + CMD_RES_HEAD_SIZE) );
+    *pSize = SETTIME_RTN_SIZE + CMD_RES_HEAD_SIZE;
     result[CMD_ID] = SETTIME_CMD;
     result[CMD_STS] = CS1_SUCCESS;
     tv.tv_sec = this->GetSeconds();   
     tv.tv_usec = 0;
-    memcpy(result + CMD_HEAD_SIZE, &tv.tv_sec, sizeof(time_t)); 
+    memcpy(result + CMD_RES_HEAD_SIZE, &tv.tv_sec, sizeof(time_t)); 
 
     if (settimeofday(&tv, 0) != 0) {
         result[CMD_STS] = CS1_FAILURE;
@@ -108,7 +108,7 @@ InfoBytes* SetTimeCommand::ParseResult(char *result) {
     }
 
     info_bytes.time_status = result[CMD_STS];
-    info_bytes.time_set = SpaceString::getTimet(result+CMD_HEAD_SIZE);
+    info_bytes.time_set = SpaceString::getTimet(result + CMD_RES_HEAD_SIZE);
 
     char buffer[CS1_MAX_LOG_ENTRY];
    

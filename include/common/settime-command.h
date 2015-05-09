@@ -1,7 +1,8 @@
 #ifndef SETTIME_COMMAND_H
 #define SETTIME_COMMAND_H
 
-#define SETTIME_CMD_SIZE CMD_HEAD_SIZE + sizeof(time_t)
+#define RTC_BYTE 1
+#define SETTIME_CMD_SIZE (CMD_HEAD_SIZE + sizeof(time_t) + RTC_BYTE)
 #define SETTIME_RTN_SIZE sizeof(time_t)
 
 #include <cstdio>

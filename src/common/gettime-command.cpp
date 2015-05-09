@@ -16,8 +16,8 @@
 void* GetTimeCommand::Execute(size_t * pSize){
     struct timeval tv;
     char* result; 
-    result = (char*)malloc(sizeof(char) * GETTIME_RTN_SIZE + CMD_HEAD_SIZE);
-    *pSize = GETTIME_RTN_SIZE + CMD_HEAD_SIZE;
+    result = (char*)malloc(sizeof(char) * GETTIME_RTN_SIZE + CMD_RES_HEAD_SIZE);
+    *pSize = GETTIME_RTN_SIZE + CMD_RES_HEAD_SIZE;
     
     result[0] = GETTIME_CMD;
     result[1] = CS1_SUCCESS;
@@ -25,7 +25,7 @@ void* GetTimeCommand::Execute(size_t * pSize){
         result[1] = CS1_FAILURE;
         return (void*)result;
     }
-    memcpy(result+CMD_HEAD_SIZE, &tv.tv_sec, sizeof(time_t));
+    memcpy(result+CMD_RES_HEAD_SIZE, &tv.tv_sec, sizeof(time_t));
     return (void*)result;
 }
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -49,7 +49,7 @@ InfoBytes* GetTimeCommand::ParseResult(char *result)
         return &info_bytes;
     }
     info_bytes.time_status = result[1];
-    info_bytes.time_set = SpaceString::getTimet(result+CMD_HEAD_SIZE);
+    info_bytes.time_set = SpaceString::getTimet(result+CMD_RES_HEAD_SIZE);
 
     char buffer[100];
     struct tm *time_info = localtime(&info_bytes.time_set); 

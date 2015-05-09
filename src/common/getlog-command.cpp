@@ -123,16 +123,16 @@ void* GetLogCommand::Execute(size_t *pSize)
     bytes += GetLogCommand::GetEndBytes(buffer + bytes);
 
     // allocate the result buffer
-    result = (char*)malloc(sizeof(char) * (bytes + CMD_HEAD_SIZE));
+    result = (char*)malloc(sizeof(char) * (bytes + CMD_RES_HEAD_SIZE));
     
     result[0] = GETLOG_CMD;
     result[1] = get_log_status;
     if (result) {
         // Saves the tgz data in th result buffer
-        memcpy(result+CMD_HEAD_SIZE, buffer, bytes);
+        memcpy(result + CMD_RES_HEAD_SIZE, buffer, bytes);
     }
 
-    *pSize = bytes + CMD_HEAD_SIZE;
+    *pSize = bytes + CMD_RES_HEAD_SIZE;
     return (void*)result;
 }
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -516,7 +516,7 @@ InfoBytes* GetLogCommand::ParseResult(char *result, const char *filename)
     info_bytes.getlog_status = result[CMD_STS];
     if (info_bytes.getlog_status == CS1_SUCCESS)
     {
-        result += CMD_HEAD_SIZE;
+        result += CMD_RES_HEAD_SIZE;
 
         // 1. Get InfoBytes
         this->BuildInfoBytesStruct(&info_bytes, result);

@@ -62,12 +62,12 @@ TEST(SetTimeTestGroup, Check_Settime)
         size_t result_size;
         time(&rawtime);
 
-        SpaceString::getTimetInChar(command_buf+1,rawtime);
+        SpaceString::getTimetInChar(command_buf + CMD_HEAD_SIZE, rawtime);
         command_buf[SETTIME_CMD_SIZE - 1] = 0xFF;   
         ICommand* command = CommandFactory::CreateCommand(command_buf);
         char* result = (char*)command->Execute(&result_size);
         
-        CHECK(result_size == SETTIME_RTN_SIZE + CMD_HEAD_SIZE);
+        CHECK(result_size == SETTIME_RTN_SIZE + CMD_RES_HEAD_SIZE);
 
         InfoBytesSetTime* settime_info = (InfoBytesSetTime*)command->ParseResult(result);
 
@@ -116,22 +116,24 @@ TEST(SetTimeTestGroup, Endian_Checker)
 TEST(SetTimeTestGroup,SetTime_ParseResult)
 {    
     time_t rawtime = 100;
-    memcpy(command_buf+1,&rawtime,sizeof(time_t));
+    memcpy(command_buf + 1, &rawtime,sizeof(time_t));
     
     ICommand* command = CommandFactory::CreateCommand(command_buf);
  
     char* result = (char*)malloc(sizeof(char) * 10);
     result[0] = SETTIME_CMD;
     result[1] = CS1_SUCCESS;
-    memcpy(result+2,&rawtime, sizeof(time_t));
+    memcpy(result + 2,&rawtime, sizeof(time_t));
     InfoBytesSetTime* settime_info = (InfoBytesSetTime*)command->ParseResult(result);
 
     CHECK(settime_info->time_set == rawtime);
     CHECK(settime_info->time_status == CS1_SUCCESS);
+
     if (result) {
         free(result);
         result = 0;
     }
+
     if ( command != NULL)
     {
         delete command;
@@ -207,7 +209,7 @@ TEST(SetTimeTestGroup, Check_Settime_Fail)
         ICommand* command = CommandFactory::CreateCommand(command_buf);
         char* result = (char*)command->Execute(&result_size);
         
-        CHECK(result_size == SETTIME_RTN_SIZE + CMD_HEAD_SIZE);    
+        CHECK(result_size == SETTIME_RTN_SIZE + CMD_RES_HEAD_SIZE);    
     
         InfoBytesSetTime* settime_info = (InfoBytesSetTime*)command->ParseResult(result);
 
