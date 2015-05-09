@@ -158,7 +158,7 @@ TEST(SetTimeTestGroup, Check_Settime_Rtc)
         time(&rawtime);
         
         SpaceString::getTimetInChar(command_buf+1,rawtime);
-        command_buf[SETTIME_CMD_SIZE + CMD_HEAD_SIZE - 1] = 0x01;
+        command_buf[SETTIME_CMD_SIZE - 1] = 0x01;
         
         ICommand* command = CommandFactory::CreateCommand(command_buf);
         char* result = (char*)command->Execute(&result_buffer);
