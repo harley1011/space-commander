@@ -2,8 +2,11 @@
 #define ICOMMAND_H
 
 
+// CMD_HEAD_SIZE => size of the common header for sent commands
+// CMD_RES_SIZE  => size of the common header for result buffers
 // [0] - CMD_ID
-// [1] - STATUS
+// [1] - CMD_STS (for result buffer only only)
+// [?] - CMD_CID TODO
 #define CMD_HEAD_SIZE 2
 #define CMD_ID 0
 #define CMD_STS 1
