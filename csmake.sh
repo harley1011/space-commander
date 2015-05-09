@@ -27,7 +27,7 @@ MBCC=0
 MULTIPLE_RUN=1
 CLEAN=0
 SKIP_TEST=0
-GROUP_LIST=(getlog deletelog net2com commander) # insert the group of the test here.
+GROUP_LIST=(getlog deletelog net2com commander settime) # insert the group of the test here.
 
 
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -38,12 +38,13 @@ GROUP_LIST=(getlog deletelog net2com commander) # insert the group of the test h
 usage()
 {
     echo "usage : cscomtest.sh  [-u] [-g testGroup] [-n testName] [-m numberOfRuns][-v][-s]"
-    echo "          -c clean before build"
-    echo "          -m numberOfRuns : run the specified tests 'numberOfRuns' times and stop if error" 
-    echo "          -q build for Q6"
-    echo "          -s skip the tests"
-    echo "          -u usage"
-    echo "          -v verbose : to get all DEBUG info (N.B. DEBUG info can be turned on/off in the makefile ... -DDEBUG)"
+    echo "          -c                  clean before build"
+    echo "          -m numberOfRuns     run the specified tests 'numberOfRuns' times and stop if error" 
+    echo "          -n TestName"
+    echo "          -q                  build for Q6"
+    echo "          -s                  skip the tests"
+    echo "          -u                  usage"
+    echo "          -v                  verbose : to get all DEBUG info (N.B. DEBUG info can be turned on/off in the makefile ... -DDEBUG)"
     printf "%s" "          -g group   : one of those -> " 
     for gr in ${GROUP_LIST[@]}; do
         printf "%s " $gr
@@ -91,6 +92,7 @@ if [ "$GROUP" != "" ]; then
         'deletelog')    ARGUMENTS="-g DeleteLogTestGroup" ;;
         'net2com')      ARGUMENTS="-g Net2ComTestGroup" ;;
         'commander')    ARGUMENTS="-g CommanderTestGroup";;
+        'settime')      ARGUMENTS="-g SetTimeTestGroup";;
     esac
 fi
 
