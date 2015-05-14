@@ -61,7 +61,7 @@ TEST(GetTimeTestGroup, Check_Gettime)
     InfoBytesGetTime* gettime_info = (InfoBytesGetTime*)command->ParseResult(result);
 
     CHECK(gettime_info->time_status == CS1_SUCCESS);
-    CHECK(size == (sizeof(time_t) + CMD_HEAD_SIZE));
+    CHECK(size == (sizeof(time_t) + CMD_RES_HEAD_SIZE));
     time_t newtime;
     time(&newtime);
     CHECK(newtime-gettime_info->time_set < 1);        

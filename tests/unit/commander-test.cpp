@@ -264,7 +264,7 @@ TEST(CommanderTestGroup, DeleteLog_Success)
  *-----------------------------------------------------------------------------*/
 TEST(CommanderTestGroup, SetTime_Success) 
 {
-    char result[SETTIME_RTN_SIZE + CMD_HEAD_SIZE] = {0};
+    char result[SETTIME_RTN_SIZE + CMD_RES_HEAD_SIZE] = {0};
     time_t rawtime;
     
     time(&rawtime);
@@ -302,7 +302,7 @@ TEST(CommanderTestGroup, SetTime_Success)
  *-----------------------------------------------------------------------------*/
 TEST(CommanderTestGroup, GetTime_Success) 
 {
-    char result[GETTIME_RTN_SIZE + CMD_HEAD_SIZE] = {0};
+    char result[GETTIME_RTN_SIZE + CMD_RES_HEAD_SIZE] = {0};
     time_t rawtime;
     command_buf[0] = GETTIME_CMD;
 

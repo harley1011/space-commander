@@ -19,9 +19,9 @@ extern const char* s_cs1_subsystems[];
 * 
 *-----------------------------------------------------------------------------*/
 void* RebootCommand::Execute(size_t* pSize){
-    char* result = (char*)malloc(sizeof(char) * CMD_HEAD_SIZE);
-    *pSize = CMD_HEAD_SIZE; 
-    reboot(CMD_HEAD_SIZE);
+    char* result = (char*)malloc(sizeof(char) * CMD_RES_HEAD_SIZE);
+    *pSize = CMD_RES_HEAD_SIZE; 
+    reboot(CMD_RES_HEAD_SIZE);
     result[0] = REBOOT_CMD;
     result[1] = CS1_SUCCESS;
     return result;

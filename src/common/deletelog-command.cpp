@@ -71,7 +71,7 @@ void* DeleteLogCommand::Execute(size_t* pSize)
     char buffer[CS1_PATH_MAX] = {'\0'};
     const char* folder = 0;
 
-    *pSize = strlen(this->filename) + CMD_HEAD_SIZE + 1; // 1 for NULL terminator
+    *pSize = strlen(this->filename) + CMD_RES_HEAD_SIZE + 1; // 1 for NULL terminator
     
     switch(this->type){
         case LOG : folder = CS1_LOGS;
@@ -199,7 +199,7 @@ InfoBytes* DeleteLogCommand::ParseResult(char *result)
     }
 
     info_bytes.delete_status = result[CMD_STS];
-    info_bytes.filename = result + CMD_HEAD_SIZE;
+    info_bytes.filename = result + CMD_RES_HEAD_SIZE;
     
     if(info_bytes.delete_status == CS1_SUCCESS)
     {

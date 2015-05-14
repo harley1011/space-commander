@@ -32,9 +32,9 @@ void* UpdateCommand::Execute(size_t* pSize) {
 
         fclose(fp_update_file); 
 
-        result = (char* )malloc(sizeof(char) * (50 + CMD_HEAD_SIZE) );
-        *pSize = 50 + CMD_HEAD_SIZE;
-        memset(result + CMD_HEAD_SIZE, '\0', sizeof(char) * 50);
+        result = (char* )malloc(sizeof(char) * (50 + CMD_RES_HEAD_SIZE) );
+        *pSize = 50 + CMD_RES_HEAD_SIZE;
+        memset(result + CMD_RES_HEAD_SIZE, '\0', sizeof(char) * 50);
         sprintf(result, "%lld", (long long)bytes_written);
         result[0] = UPDATE_CMD;
         result[1] = CS1_SUCCESS;
@@ -52,7 +52,7 @@ InfoBytes* UpdateCommand::ParseResult(char *result)
     }
 
     info_bytes.update_status = result[1];
-    info_bytes.bytes_written = result + CMD_HEAD_SIZE; 
+    info_bytes.bytes_written = result + CMD_RES_HEAD_SIZE; 
 
 
     char buffer[100];

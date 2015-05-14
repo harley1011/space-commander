@@ -69,9 +69,9 @@ void* DecodeCommand::Execute() {
             fflush(stdout);
         }
 
-        result = (char* )malloc(sizeof(char) * 50 + CMD_HEAD_SIZE);
-        memset(result + CMD_HEAD_SIZE, '\0', sizeof(char) * 50);
-        sprintf(result + CMD_HEAD_SIZE, "%lld", (long long)bytes_written);
+        result = (char* )malloc(sizeof(char) * 50 + CMD_RES_HEAD_SIZE);
+        memset(result + CMD_RES_HEAD_SIZE, '\0', sizeof(char) * 50);
+        sprintf(result + CMD_RES_HEAD_SIZE, "%lld", (long long)bytes_written);
         result[0] = DECODE_CMD;
         result[1] = CS1_SUCCESS;
     }

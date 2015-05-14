@@ -150,8 +150,8 @@ TEST(GetLogTestGroup, Execute_OPT_DATE_OPT_SUB_getTgz_returnsCorrectFile)
     #endif
 
     CHECK_EQUAL(0, getlog_info->next_file_in_result_buffer);
-    CHECK(*(result + CMD_HEAD_SIZE + GETLOG_INFO_SIZE + UTEST_SIZE_OF_TEST_FILES) == EOF);
-    CHECK(*(result + CMD_HEAD_SIZE + GETLOG_INFO_SIZE + UTEST_SIZE_OF_TEST_FILES + 1) == EOF);
+    CHECK(*(result + CMD_RES_HEAD_SIZE + GETLOG_INFO_SIZE + UTEST_SIZE_OF_TEST_FILES) == EOF);
+    CHECK(*(result + CMD_RES_HEAD_SIZE + GETLOG_INFO_SIZE + UTEST_SIZE_OF_TEST_FILES + 1) == EOF);
     CHECK(diff(dest, path));     
 
     // Check inode
@@ -206,19 +206,19 @@ TEST(GetLogTestGroup, Execute_OPT_NOOPT_get2TGZ_returns2OldestTgz)
     FILE *pFile = fopen(dest, "wb");
 
     if (pFile) {
-        fwrite(result + CMD_HEAD_SIZE + GETLOG_INFO_SIZE, 1, 6, pFile);        // TODO fix this to read until EOF, or add the size to the result buffer
+        fwrite(result + CMD_RES_HEAD_SIZE + GETLOG_INFO_SIZE, 1, 6, pFile);        // TODO fix this to read until EOF, or add the size to the result buffer
         fclose(pFile);
     }
 
     pFile = fopen(dest2, "wb");
 
     if (pFile) {
-        fwrite(result + CMD_HEAD_SIZE + 6 + 2 * GETLOG_INFO_SIZE + GETLOG_ENDBYTES_SIZE, 1, 6, pFile); // TODO fix this to read until EOF, or add the size to the result buffer
+        fwrite(result + CMD_RES_HEAD_SIZE + 6 + 2 * GETLOG_INFO_SIZE + GETLOG_ENDBYTES_SIZE, 1, 6, pFile); // TODO fix this to read until EOF, or add the size to the result buffer
         fclose(pFile);
     }
 
-    CHECK(*(result + GETLOG_INFO_SIZE + CMD_HEAD_SIZE + 6) == EOF);
-    CHECK(*(result + GETLOG_INFO_SIZE + CMD_HEAD_SIZE + 7) == EOF);
+    CHECK(*(result + GETLOG_INFO_SIZE + CMD_RES_HEAD_SIZE + 6) == EOF);
+    CHECK(*(result + GETLOG_INFO_SIZE + CMD_RES_HEAD_SIZE + 7) == EOF);
     CHECK(diff(dest, path));     
     CHECK(diff(dest2, path2));     
 
@@ -267,7 +267,7 @@ TEST(GetLogTestGroup, Execute_OPT_NOOPT_returnsOldestTgz)
     FILE *pFile = fopen(dest, "wb");
 
     if (pFile) {
-        fwrite(result + CMD_HEAD_SIZE + GETLOG_INFO_SIZE, 1, 6, pFile);        // TODO fix this to read until EOF, or add the size to the result buffer
+        fwrite(result + CMD_RES_HEAD_SIZE + GETLOG_INFO_SIZE, 1, 6, pFile);        // TODO fix this to read until EOF, or add the size to the result buffer
         fclose(pFile);
     }
 

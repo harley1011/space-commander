@@ -1,20 +1,21 @@
 #ifndef SETTIME_COMMAND_H
 #define SETTIME_COMMAND_H
 
-#define SETTIME_CMD_SIZE 2 + sizeof(time_t)
+#define RTC_BYTE 1
+#define SETTIME_CMD_SIZE (CMD_HEAD_SIZE + sizeof(time_t) + RTC_BYTE)
 #define SETTIME_RTN_SIZE sizeof(time_t)
+
+#include <cstdio>
+#include <iostream>
+#include <time.h>
 
 #include "icommand.h"
 #include "infobytes.h"
-#include <time.h>
-#include <iostream>
-#include <cstdio>
 
 using namespace std;
 
-class InfoBytesSetTime : public InfoBytes
-{
-    public:
+class InfoBytesSetTime : public InfoBytes {
+public:
     char time_status;
     time_t time_set;
 
@@ -23,6 +24,7 @@ class InfoBytesSetTime : public InfoBytes
         return infoStatus;
     }
 };
+
 class SetTimeCommand : public ICommand {
 public:
     SetTimeCommand(time_t time);  
