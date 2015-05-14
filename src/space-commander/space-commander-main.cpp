@@ -11,6 +11,7 @@
 #include "common/command-factory.h"
 #include "shakespeare.h"
 #include "common/subsystems.h"
+#include "common/commands.h"
 #include "SpaceDecl.h"
 
 const string LAST_COMMAND_FILENAME("last-command");
@@ -127,6 +128,11 @@ int perform(int bytes)
                               snprintf(debug_buffer,5, "0x%02X ", c);
                               msg << debug_buffer;
                           }
+                          
+                          // assuming this is a command byte - TODO verify this is the only possible case
+                          msg << "\nCommand ID:" << (uint8_t)buffer[0];
+                          msg << ", Command:" << commands[(uint8_t)buffer[0]];                           
+
                           Shakespeare::log(Shakespeare::NOTICE, LOGNAME, msg.str());
 #endif
 

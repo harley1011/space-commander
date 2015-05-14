@@ -54,7 +54,7 @@ CPPUTEST_LIBS=-lCppUTest -lCppUTestExt
 #
 # All Object files, do not use wildcard, add the ones you need explicitly!
 #
-COMMON_OBJECTS = $(COMMON_BIN)/subsystems.o $(COMMON_BIN)/command-factory.o $(COMMON_BIN)/deletelog-command.o  $(COMMON_BIN)/decode-command.o $(COMMON_BIN)/getlog-command.o $(COMMON_BIN)/gettime-command.o $(COMMON_BIN)/reboot-command.o $(COMMON_BIN)/settime-command.o $(COMMON_BIN)/update-command.o 
+COMMON_OBJECTS = $(COMMON_BIN)/command-factory.o $(COMMON_BIN)/deletelog-command.o  $(COMMON_BIN)/decode-command.o $(COMMON_BIN)/getlog-command.o $(COMMON_BIN)/gettime-command.o $(COMMON_BIN)/reboot-command.o $(COMMON_BIN)/settime-command.o $(COMMON_BIN)/update-command.o $(COMMON_BIN)/commands.o $(COMMON_BIN)/subsystems.o
 
 OBJECTS = $(SPACE_COMMANDER_BIN)/Net2Com.o $(SPACE_COMMANDER_BIN)/NamedPipe.o $(SPACE_COMMANDER_BIN)/base64.o
 
@@ -69,7 +69,6 @@ CS1_UTEST_DIR="cs1_utest" # as defined in SpaceDecl.h
 #
 UTEST_ENV=-DCS1_UTEST $(MEM_LEAK_MACRO) $(CPPUTEST_LIBS) 
 ENV = -DCS1_DEBUG  $(UTEST_ENV)  -DPRESERVE
-
 
 #
 #++++++++++++++++++++
@@ -96,15 +95,6 @@ test: make_dir bin/AllTests $(SPACE_COMMANDER_BIN)
 bin/AllTests: tests/unit/AllTests.cpp  $(UNIT_TEST) $(COMMON_OBJECTS) $(OBJECTS) 
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCLUDES) $(LIBPATH) -o $@ $^ $(LIBS) $(ENV)
 	
-#
-#++++++++++++++++++++
-# Ground Commander
-#--------------------
-
-buildGroundCommander: make_dir $(GROUND_COMMANDER_BIN) staticlibs.tar
-
-$(GROUND_COMMANDER_BIN): src/ground-commander/ground-commander-main.cpp $(COMMON_OBJECTS) $(OBJECTS)
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCLUDES) $(LIBPATH) -o $@/ground-commander $^ $(LIBS) $(ENV)
 
 #
 #++++++++++++++++++++
@@ -112,8 +102,7 @@ $(GROUND_COMMANDER_BIN): src/ground-commander/ground-commander-main.cpp $(COMMON
 #--------------------
 LIBS_Q6= -lshakespeare-mbcc -lcs1_utlsQ6
 
-COMMON_Q6_OBJECTS = $(COMMON_Q6_BIN)/command-factoryQ6.o $(COMMON_Q6_BIN)/deletelog-commandQ6.o $(COMMON_Q6_BIN)/decode-commandQ6.o $(COMMON_Q6_BIN)/getlog-commandQ6.o $(COMMON_Q6_BIN)/gettime-commandQ6.o $(COMMON_Q6_BIN)/reboot-commandQ6.o $(COMMON_Q6_BIN)/settime-commandQ6.o $(COMMON_Q6_BIN)/update-commandQ6.o $(COMMON_Q6_BIN)/subsystemsQ6.o
-
+COMMON_Q6_OBJECTS = $(COMMON_Q6_BIN)/command-factoryQ6.o $(COMMON_Q6_BIN)/deletelog-commandQ6.o $(COMMON_Q6_BIN)/decode-commandQ6.o $(COMMON_Q6_BIN)/getlog-commandQ6.o $(COMMON_Q6_BIN)/gettime-commandQ6.o $(COMMON_Q6_BIN)/reboot-commandQ6.o $(COMMON_Q6_BIN)/settime-commandQ6.o $(COMMON_Q6_BIN)/update-commandQ6.o $(COMMON_Q6_BIN)/commandsQ6.o $(COMMON_Q6_BIN)/commandsQ6.o
  
 
 OBJECTS_Q6 = $(SPACE_COMMANDER_Q6_BIN)/Net2ComQ6.o $(SPACE_COMMANDER_Q6_BIN)/NamedPipeQ6.o $(SPACE_COMMANDER_Q6_BIN)/base64Q6.o 
@@ -137,6 +126,15 @@ $(SPACE_COMMANDER_Q6_BIN)/%Q6.o: src/space-commander/%.cpp include/space-command
 $(SPACE_COMMANDER_Q6_BIN): src/space-commander/space-commander-main.cpp $(COMMON_Q6_OBJECTS) $(OBJECTS_Q6)
 	$(MBCC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCLUDES) $(LIBPATH) -o $@/space-commanderQ6 $^ $(LIBS_Q6)
 
+#
+#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# Ground Commander
+#------------------------------------------------------------
+
+buildGroundCommander: make_dir $(GROUND_COMMANDER_BIN) staticlibs.tar
+
+$(GROUND_COMMANDER_BIN): src/ground-commander/ground-commander-main.cpp $(COMMON_OBJECTS) $(OBJECTS)
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCLUDES) $(LIBPATH) -o $@/ground-commander $^ $(LIBS) $(ENV)
 
 #
 #
