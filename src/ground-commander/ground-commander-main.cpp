@@ -26,7 +26,6 @@ const char ERROR_CREATING_COMMAND  = '1';
 const char ERROR_EXECUTING_COMMAND = '2';
 
 // Declarations
-static char log_buffer[255] = {0};
 static char info_buffer[255] = {'\0'};
 static Net2Com* commander = 0; 
 static string stored_command;
@@ -34,10 +33,11 @@ static string stored_command;
 const char* LOGNAME = cs1_systems[CS1_COMMANDER];
 const char CMD_INPUT_FILE[] = "/home/todo"; 
 const char CMD_TEMP_FILE[] = "/home/groundCommanderTemp"; //###MAKE SURE TO HAVE WRITE PERMISSIONS###
-string* GetGarbage(char* result_buffer);
+string* GetResultData(char* result_buffer);
 void perform(int bytes);
 void read_command();
 void delete_command();
+
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  *
  * NAME : main 
@@ -87,7 +87,6 @@ void read_command(){
 void delete_command(){
     string read_command;
     ifstream in(CMD_INPUT_FILE);
-    int temp;
     
     if( !in.is_open()){
         cout << "Command input file failed to open" << endl;
@@ -140,9 +139,9 @@ void perform(int bytes){
                             break;
                         }
 
-                        string* obtainedSpaceGarbage = GetGarbage(buffer);
+                        string* obtainedSpaceGarbage = GetResultData(buffer);
                         if (obtainedSpaceGarbage != NULL) { // success
-                            if (buffer[MAGIC_BYTE] == GETLOG_CMD) {
+                            if (buffer[(uint8_t)MAGIC_BYTE] == GETLOG_CMD) {
                                 // TODO: log to proper system (get log)
                             } else {
                                 Shakespeare::log(Shakespeare::NOTICE, "GROUND_COMMANDER", obtainedSpaceGarbage->c_str());
@@ -178,35 +177,11 @@ void perform(int bytes){
     return; 
 }
 
-string* GetGarbage(char* result_buffer){
-
+string* GetResultData(char* result_buffer)
+{
             InfoBytes* result2;
-            switch(result_buffer[MAGIC_BYTE]){
-                
-                case UPDATE_CMD: 
-                    result2 = (InfoBytes* )UpdateCommand::ParseResult(result_buffer);
-                    break;
-                case GETTIME_CMD: 
-                    result2 = (InfoBytes* )GetTimeCommand::ParseResult(result_buffer);
-                    break;
-                case SETTIME_CMD:
-                    result2 = (InfoBytes* )SetTimeCommand::ParseResult(result_buffer);
-                    break;
-//                case GETLOG_CMD:
-//                    result2 = (InfoBytes* )GetLogCommand::ParseResult(result_buffer);
-//                    break;
-//                case DELETELOG_CMD:
-//                    result2 = (InfoBytes* )DeleteLogCommand::ParseResult(result_buffer);
-//                    break;
-                case REBOOT_CMD:
-                    result2 = (InfoBytes* )RebootCommand::ParseResult(result_buffer);
-                    break;
-                case DECODE_CMD:
-                    result2 = (InfoBytes* )DecodeCommand::ParseResult(result_buffer);
-                    break;
-                default:
-                    cout << "Goodbye world!" << endl;
-            }
+            ICommand* command = CommandFactory::CreateCommand(result_buffer);
+            result2 = (InfoBytes* )command->ParseResult(result_buffer);
 
             string *garbage = result2->ToString();       
             cout << *garbage << endl;
