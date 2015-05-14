@@ -13,6 +13,7 @@
 #include "common/subsystems.h"
 #include "SpaceDecl.h"
 
+// TODO these should go in a header file shared by ground and satellite commanders
 const string LAST_COMMAND_FILENAME("last-command");
 const int COMMAND_RESEND_INDEX = 0;
 const char COMMAND_RESEND_CHAR = '!';
@@ -22,15 +23,16 @@ const int MAX_BUFFER_SIZE      = 255;
 const char ERROR_CREATING_COMMAND  = '1';
 const char ERROR_EXECUTING_COMMAND = '2';
 
-// Declarations
-static void out_of_memory_handler();
-static int perform(int bytes);
-
 static char log_buffer[255] = {0};
 static char info_buffer[255] = {'\0'};
 static Net2Com* commander = 0; 
 
 const char* LOGNAME = cs1_systems[CS1_COMMANDER];
+
+// Declarations
+static void out_of_memory_handler();
+static int perform(int bytes);
+
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  *
  * NAME : main 
@@ -42,15 +44,14 @@ int main()
 {
     set_new_handler(&out_of_memory_handler);
 
-
     commander = new Net2Com(Dcom_w_net_r, Dnet_w_com_r, 
                                                     Icom_w_net_r, Inet_w_com_r);
 
     if (!commander) {
         memset(log_buffer,0,MAX_BUFFER_SIZE);
-        snprintf(log_buffer, MAX_BUFFER_SIZE, "[ERROR] %s:%s:%d Failed in Net2Com instanciation\n", 
+        snprintf(log_buffer, MAX_BUFFER_SIZE, "[ERROR] %s:%s:%d Failed in Net2Com instantiation\n", 
                                                 __FILE__, __func__, __LINE__);
-        return EXIT_FAILURE; /* watch-puppy will take care of 
+        return EXIT_FAILURE; /* PCD will take care of 
                               * restarting space-commander
                               */
     }
@@ -177,6 +178,7 @@ int perform(int bytes)
                                         free(result); // TODO allocate result buffer with new in all icommand subclasses and use delete
                                         result = NULL;
                                     } else {
+                                        // ERROR_EXECUTING_COMMAND defined at top of this file
                                         commander->WriteToInfoPipe(ERROR_EXECUTING_COMMAND);
                                     }
 
@@ -185,6 +187,7 @@ int perform(int bytes)
                                         command = NULL;
                                     }
                                 } else {
+                                    // ERROR_CREATING_COMMAND defined at top of this file
                                     commander->WriteToInfoPipe(ERROR_CREATING_COMMAND);
                                 }
 

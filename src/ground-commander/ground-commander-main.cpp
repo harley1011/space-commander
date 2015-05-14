@@ -16,6 +16,7 @@
 
 const char MAGIC_BYTE = 0;
 
+// TODO these should go in a header file shared by ground and satellite commanders
 const string LAST_COMMAND_FILENAME("last-command");
 const int COMMAND_RESEND_INDEX = 0;
 const char COMMAND_RESEND_CHAR = '!';
@@ -29,37 +30,46 @@ const char ERROR_EXECUTING_COMMAND = '2';
 static char info_buffer[255] = {'\0'};
 static Net2Com* commander = 0; 
 static string stored_command;
-
-const char* LOGNAME = cs1_systems[CS1_COMMANDER];
-const char CMD_INPUT_FILE[] = "/home/todo"; 
-const char CMD_TEMP_FILE[] = "/home/groundCommanderTemp"; //###MAKE SURE TO HAVE WRITE PERMISSIONS###
 string* GetResultData(char* result_buffer);
 void perform(int bytes);
-void read_command();
+int read_command();
 void delete_command();
+
+const char* LOGNAME = "GROUND_COMMANDER"; // usually cs1_systems[CS1_COMMANDER];
+
+// TODO
+const char CMD_INPUT_FILE[] = "/home/pipes/command-input"; // ? TODO ostensibly the input pipe
+const char CMD_TEMP_FILE[] = "/home/groundCommanderTemp"; //###MAKE SURE TO HAVE WRITE PERMISSIONS###
+
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  *
  * NAME : main 
  *
- * DESCRIPTION : space-commander main 
+ * DESCRIPTION : ground-commander main 
+ * - the ground-commander main should read Dnet_w_com_r and Inet_w_com_r pipes
+ *   for incoming data (result buffers) from the satellite
+ * - it should also read the Command Input File (CMD_INPUT_FILE) for commands
+ *   to be sent to the satellite (command buffers)
  *
  *-----------------------------------------------------------------------------*/
 int main() 
 {
+    // TODO for mock satellite simulation, the ground and satellite commanders need to be
+    // reading from a different set of named pipes
     commander = new Net2Com(Dcom_w_net_r, Dnet_w_com_r, Icom_w_net_r, Inet_w_com_r);
 
     while (true)
     {
         memset(info_buffer, 0, sizeof(char) * 255);
         
-        //int bytes = commander->ReadFromInfoPipe(info_buffer, 255);
-        int bytes = 1;
+        int bytes = commander->ReadFromInfoPipe(info_buffer, 255);
         if (bytes > 0) {
-            //get result
- //           perform(bytes);
+            //get result buffers
+            perform(bytes);
         }
 
+        // if no result buffers, proceed to check for commands to send
         read_command();
         delete_command();
         sleep(COMMANER_SLEEP_TIME);
@@ -72,18 +82,41 @@ int main()
     return 0;
 }
 
-void read_command(){
+/**
+ * read_command will parse a file containing commands, and write them to the
+ * info and data pipes as necessary to deliver them to the netman, and 
+ * subsequently to the satellite
+ */
+int read_command()
+{
     ifstream infile(CMD_INPUT_FILE);
 
-    if(infile.good()){
+    // the command input file contains command buffers that are ready to be passed
+    // through the pipes to the satellite commander
+    if ( infile.good() )
+    {
         getline(infile, stored_command);
         cout << stored_command << endl;
     }
 
     //TODO: write to pipes
+    
+    //int info_bytes_written = commander->WriteToInfoPipe(ERROR_EXECUTING_COMMAND);
+
+    int data_bytes_written = commander->WriteToDataPipe(stored_command);
+    // TODO implement passing size // int data_bytes_written = commander->WriteToDataPipe(result, size);
+
+    if (info_bytes_written > 0) {
+
+    }
+
     infile.close();
 }
 
+/**
+ * delete_command will remove the command from the command input file
+ * if writing to the pipes was successful
+ */
 void delete_command(){
     string read_command;
     ifstream in(CMD_INPUT_FILE);
@@ -113,12 +146,14 @@ void delete_command(){
 }
 
 
-void perform(int bytes){
+void perform(int bytes)
+{
     char* buffer = NULL; //TODO This buffer does not scare me !
     int read_total = 0;
     unsigned char read = 0;
 
-    for(int i = 0; i != bytes; i++){
+    for(int i = 0; i != bytes; i++)
+    {
         read = (unsigned char)info_buffer[i];
         switch (read) 
         {

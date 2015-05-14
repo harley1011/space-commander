@@ -101,10 +101,14 @@ bin/AllTests: tests/unit/AllTests.cpp  $(UNIT_TEST) $(COMMON_OBJECTS) $(OBJECTS)
 # Ground Commander
 #--------------------
 
+# NOTE, GROUND COMMANDER IS CURRENTLY BUILDING IN DEMO MODE, SO NAMED PIPES ARE PLACED 
+# IN /home/pipes/ground/ RATHER THAN /home/pipes, SO THAT BOTH THE GROUND AND SATELLITE
+# COMMANDERS CAN RUN SIMULTANEOUSLY
+
 buildGroundCommander: make_dir $(GROUND_COMMANDER_BIN) staticlibs.tar
 
 $(GROUND_COMMANDER_BIN): src/ground-commander/ground-commander-main.cpp $(COMMON_OBJECTS) $(OBJECTS)
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCLUDES) $(LIBPATH) -o $@/ground-commander $^ $(LIBS) $(ENV)
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCLUDES) $(LIBPATH) -o $@/ground-commander $^ $(LIBS) $(ENV) -DCS1_DEBUG 
 
 #
 #++++++++++++++++++++
