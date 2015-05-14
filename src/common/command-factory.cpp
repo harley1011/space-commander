@@ -3,27 +3,29 @@
 #include <cstring>
 #include <time.h>
 
+#include "common/command-factory.h"
 #include "SpaceDecl.h"
 #include "SpaceString.h"
-#include "common/command-factory.h"
 
-ICommand* CommandFactory::CreateCommand(char * data) {
-    if (data == NULL) { 
-        fprintf(stderr, "NULL argument passed to CreateCommand() in %s\n", __FILE__);
+ICommand* CommandFactory::CreateCommand(char *data) {
+    ICommand* result = 0;
+
+    if (!data) { 
+        fprintf(stderr, "NULL argument passed to CreateCommand() in %s\n", __FILE__); // TODO log 
         return NULL; 
     }
 
-    switch(data[0]) {
-        case '0': {
-            return CommandFactory::CreateSetTime(data);
-        }
-        case '1': {
-            return CommandFactory::CreateGetTime(data);
-        }
-        case '2': {
-            return CommandFactory::CreateUpdate(data);
-        }
-        case '3': {
+    switch (data[CMD_ID]) {
+        case SETTIME_CMD :
+            result = CommandFactory::CreateSetTime(data);
+            break; 
+        case GETTIME_CMD :
+            result = CommandFactory::CreateGetTime(data);
+            break;
+        case UPDATE_CMD : 
+            result = CommandFactory::CreateUpdate(data);
+            break;
+        case GETLOG_CMD : 
             /*
             * data[0]   :   Command number
             * data[1]   :   Option      - specifies if options are present or not
@@ -31,24 +33,23 @@ ICommand* CommandFactory::CreateCommand(char * data) {
             *   [3-6]   :   Size        - 
             *   [7-10]  :   Date        - time_t
             */
-            return CommandFactory::CreateGetLog(data);
-        }
-        case '4': {
-            return CommandFactory::CreateReboot(data);
-        }
-        case '6': {
-            return CommandFactory::CreateDecode(data);
-        }
-        case '7': {
-            return CommandFactory::CreateDeleteLog(data);
-        }
+            result = CommandFactory::CreateGetLog(data);
+            break;
+        case REBOOT_CMD : 
+            result = CommandFactory::CreateReboot(data);
+            break;
+        case DECODE_CMD : 
+            result = CommandFactory::CreateDecode(data);
+            break;
+        case DELETELOG_CMD : 
+            result = CommandFactory::CreateDeleteLog(data);
+            break;
     }
 
-    return NULL;
+    return result;
 }
 
-ICommand* CommandFactory::CreateDeleteLog(char* data) 
-{
+ICommand* CommandFactory::CreateDeleteLog(char* data) {
     DeleteLogCommand* result = 0;
     char opt_byte = data[1];
 
@@ -96,24 +97,28 @@ ICommand* CommandFactory::CreateUpdate(char* data) {
 
 ICommand* CommandFactory::CreateSetTime(char* data) {
     time_t timeRecieved;
-    memcpy(&timeRecieved, data + 1, sizeof(time_t));
+    memcpy(&timeRecieved, data + CMD_HEAD_SIZE, sizeof(time_t));
     
-    SetTimeCommand* result = new SetTimeCommand(timeRecieved,data[SETTIME_CMD_SIZE - 1] );
+    SetTimeCommand* result = new SetTimeCommand(timeRecieved, data[SETTIME_CMD_SIZE - 1] );
+
     return result;
 }
 
 ICommand* CommandFactory::CreateGetTime(char* data) {
     GetTimeCommand* result = new GetTimeCommand();
+
     return result;
 }
 
 
 ICommand* CommandFactory::CreateReboot(char* data){
     RebootCommand* result = new RebootCommand();
+
     return result;
 }
 
 ICommand* CommandFactory::CreateDecode(char* data) {
+    DecodeCommand* result = 0; 
     const int PATH_LENGTH = 3;
     int offset = 2;
 
@@ -132,13 +137,15 @@ ICommand* CommandFactory::CreateDecode(char* data) {
     int decodedSize = GetLength10(data, offset);
 
     int executable = data[1] - '0';
-    DecodeCommand* result = new DecodeCommand(dest, src, executable, decodedSize);
+    result = new DecodeCommand(dest, src, executable, decodedSize);
+
     return result;
 }
 
 int CommandFactory::GetLength3(char* data, int offset) {
     char length[4] = { data[offset] , data[offset + 1] , data[offset + 2] , '\0' };
     int result = atoi(length);
+
     return result;
 }
 
@@ -148,6 +155,7 @@ int CommandFactory::GetLength10(char* data, int offset) {
                         data[offset + 6] , data[offset + 7] , data[offset + 8],
                         data[offset + 9] , '\0' };
     int result = atoi(length);
+
     return result;
 }
 
@@ -155,5 +163,6 @@ char* CommandFactory::GetPath(char* data, size_t length, int offset) {
     char* result = (char* )malloc(sizeof(char) * length + 1);
     memset(result, '\0', length + 1);
     strncpy(result, data + offset, length);
+
     return result;
 }

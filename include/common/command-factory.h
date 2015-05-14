@@ -1,14 +1,14 @@
 #ifndef COMMAND_FACTORY_H
 #define COMMAND_FACTORY_H
 
-#include "icommand.h"
-#include "getlog-command.h"
-#include "update-command.h"
-#include "settime-command.h"
-#include "gettime-command.h"
 #include "decode-command.h"
-#include "reboot-command.h"
 #include "deletelog-command.h"
+#include "getlog-command.h"
+#include "gettime-command.h"
+#include "icommand.h"
+#include "reboot-command.h"
+#include "settime-command.h"
+#include "update-command.h"
 
 class CommandFactory {
 public:
