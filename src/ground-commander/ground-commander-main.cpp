@@ -1,3 +1,11 @@
+//TODO:
+//- TEST TEST TEST
+//- Receive command
+//- Check if it's OK or failure
+//- If it's OK then life is good
+//- If It's not OK then log the failure
+//- log status of all commands in a file
+
 #include <cstdio>
 #include <cstdlib>
 #include <time.h>
@@ -145,7 +153,10 @@ void delete_command(){
     rename(CMD_TEMP_FILE,CMD_INPUT_FILE);
 }
 
-
+/**
+ * The perform function will parse incoming bytes from the Dnet_w_com_r pipe 
+ * and attempt to detect result buffers. 
+ **/
 void perform(int bytes)
 {
     char* buffer = NULL; //TODO This buffer does not scare me !
@@ -184,7 +195,8 @@ void perform(int bytes)
 
                             delete obtainedSpaceGarbage;
                             obtainedSpaceGarbage = NULL;
-                            delete_command();
+                            delete_command(); // TODO - are we deleting a command from the input file because we received its result?
+                            // this is assuming the result buffer corresponds to the last executed command. Not necessarily true.
                         }
 
                         free(buffer);
@@ -212,6 +224,13 @@ void perform(int bytes)
     return; 
 }
 
+/** 
+ * GetResultData will take the incoming result buffers, create commands using the factory,
+ * and call the command ParseResult function to populate the InfoBytes object for 
+ * further processing
+ * 
+ * TODO verify this method is working correctly. TEST
+ **/
 string* GetResultData(char* result_buffer)
 {
             InfoBytes* result2;
@@ -222,9 +241,4 @@ string* GetResultData(char* result_buffer)
             cout << *garbage << endl;
             return garbage;
 }
-//TODO:
-//- Receive command
-//- Check if it's OK or failure
-//- If it's OK then life is good
-//- If It's not OK then log the failure
-//- log status of all commands in a file
+
