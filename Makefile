@@ -82,7 +82,7 @@ bin/common/%.o: src/common/%.cpp include/common/%.h
 #++++++++++++++++++++
 # CppUTest / PC Rules
 #--------------------
-buildBin: make_dir $(SPACE_COMMANDER_BIN) staticlibs.tar
+buildBin: make_dir $(SPACE_COMMANDER_BIN) staticlibs.tar buildGroundCommander
 
 $(SPACE_COMMANDER_BIN)/%.o: src/space-commander/%.cpp include/space-commander/%.h
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCLUDES) -c $< -o $@ $(ENV) 
@@ -133,7 +133,7 @@ bin/commonQ6/%Q6.o: src/common/%.cpp include/common/%.h
 #++++++++++++++++++++
 # MicroBlaze Rules 
 #--------------------
-buildQ6:  make_dir $(SPACE_COMMANDER_Q6_BIN) staticlibsQ6.tar
+buildQ6:  make_dir $(SPACE_COMMANDER_Q6_BIN) staticlibsQ6.tar buildGroundCommander
 	
 $(SPACE_COMMANDER_Q6_BIN)/%Q6.o: src/space-commander/%.cpp include/space-commander/%.h
 	$(MBCC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCLUDES) -c $< -o $@

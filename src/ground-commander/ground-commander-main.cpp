@@ -39,9 +39,9 @@ static char info_buffer[255] = {'\0'};
 static Net2Com* commander = 0; 
 static string stored_command;
 string* GetResultData(char* result_buffer);
-void perform(int bytes);
+int perform(int bytes);
 int read_command();
-void delete_command();
+int delete_command();
 
 const char* LOGNAME = "GROUND_COMMANDER"; // usually cs1_systems[CS1_COMMANDER];
 
@@ -79,7 +79,6 @@ int main()
 
         // if no result buffers, proceed to check for commands to send
         read_command();
-        delete_command();
         sleep(COMMANER_SLEEP_TIME);
     }        
     
@@ -87,7 +86,7 @@ int main()
         delete commander;
         commander = 0;
     }
-    return 0;
+    return CS1_SUCCESS;
 }
 
 /**
@@ -107,38 +106,42 @@ int read_command()
         cout << stored_command << endl;
     }
 
-    //TODO: write to pipes
-    
-    //int info_bytes_written = commander->WriteToInfoPipe(ERROR_EXECUTING_COMMAND);
-
-    int data_bytes_written = commander->WriteToDataPipe(stored_command);
+    // TODO: write to pipes
+    int data_bytes_written = commander->WriteToDataPipe( stored_command.c_str() );
     // TODO implement passing size // int data_bytes_written = commander->WriteToDataPipe(result, size);
 
-    if (info_bytes_written > 0) {
-
+    if (data_bytes_written > 0) 
+    {
+        delete_command();
+    }
+    else 
+    {
+        return CS1_FAILURE;
     }
 
     infile.close();
+    
+    return data_bytes_written;
 }
 
 /**
  * delete_command will remove the command from the command input file
  * if writing to the pipes was successful
  */
-void delete_command(){
+int delete_command(){
     string read_command;
     ifstream in(CMD_INPUT_FILE);
     
     if( !in.is_open()){
         cout << "Command input file failed to open" << endl;
-        return;
+        return CS1_FAILURE;
     }
     
     ofstream out(CMD_TEMP_FILE);
 
     if( !out.is_open()){
         cout << "Temp file failed to open. Check directory permmissions" << endl;
-        return;
+        return CS1_FAILURE;
     }
 
     while( getline(in,read_command) ){
@@ -151,13 +154,16 @@ void delete_command(){
     out.close();    
     remove(CMD_INPUT_FILE);
     rename(CMD_TEMP_FILE,CMD_INPUT_FILE);
+
+    // TODO validate number of bytes removed
+    return CS1_SUCCESS;
 }
 
 /**
  * The perform function will parse incoming bytes from the Dnet_w_com_r pipe 
  * and attempt to detect result buffers. 
  **/
-void perform(int bytes)
+int perform(int bytes)
 {
     char* buffer = NULL; //TODO This buffer does not scare me !
     int read_total = 0;
@@ -219,9 +225,7 @@ void perform(int bytes)
         }
     }
     
-
-    
-    return; 
+    return CS1_SUCCESS; 
 }
 
 /** 
@@ -237,8 +241,8 @@ string* GetResultData(char* result_buffer)
             ICommand* command = CommandFactory::CreateCommand(result_buffer);
             result2 = (InfoBytes* )command->ParseResult(result_buffer);
 
-            string *garbage = result2->ToString();       
-            cout << *garbage << endl;
-            return garbage;
+            string *result_data = result2->ToString();       
+            cout << *result_data << endl;
+            return result_data;
 }
 
