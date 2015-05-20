@@ -68,8 +68,7 @@ CS1_UTEST_DIR="cs1_utest" # as defined in SpaceDecl.h
 # ENV : either CS1_UTEST for test environment or empty for PROD, perform a 'make clean' when changing this parameter
 #
 UTEST_ENV=-DCS1_UTEST $(MEM_LEAK_MACRO) $(CPPUTEST_LIBS) 
-ENV = -DCS1_DEBUG  $(UTEST_ENV)  -DPRESERVE
-
+ENV = -DCS1_DEBUG -DGROUND_MOCK_SAT $(UTEST_ENV)  -DPRESERVE
 
 #
 #++++++++++++++++++++
@@ -104,11 +103,12 @@ bin/AllTests: tests/unit/AllTests.cpp  $(UNIT_TEST) $(COMMON_OBJECTS) $(OBJECTS)
 # NOTE, GROUND COMMANDER IS CURRENTLY BUILDING IN DEMO MODE, SO NAMED PIPES ARE PLACED 
 # IN /home/pipes/ground/ RATHER THAN /home/pipes, SO THAT BOTH THE GROUND AND SATELLITE
 # COMMANDERS CAN RUN SIMULTANEOUSLY
+# TODO - DISABLE THE GROUND_MOCK_SAT FLAG WHEN THIS IS NOT NEEDED ANYMORE
 
 buildGroundCommander: make_dir $(GROUND_COMMANDER_BIN) staticlibs.tar
 
 $(GROUND_COMMANDER_BIN): src/ground-commander/ground-commander-main.cpp $(COMMON_OBJECTS) $(OBJECTS)
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCLUDES) $(LIBPATH) -o $@/ground-commander $^ $(LIBS) $(ENV) -DCS1_DEBUG 
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCLUDES) $(LIBPATH) -o $@/ground-commander $^ $(LIBS) $(ENV) 
 
 #
 #++++++++++++++++++++

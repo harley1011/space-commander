@@ -8,16 +8,20 @@
 
 // CS1_PIPES is defined in space-lib/include/SpaceDecl.h 
 #ifdef GROUND_MOCK_SAT
-#define GND_PIPES "CS1_PIPES/ground/"
-const char* Net2Com::pipe_str[] = { GND_PIPES"/Dnet-w-com-r", 
-                                    GND_PIPES"/Dcom-w-net-r", 
-                                    GND_PIPES"/Inet-w-com-r", 
-                                    GND_PIPES"/Icom-w-net-r"};
+    #define GND_PIPES "/home/pipes/ground/"
+    const char* Net2Com::pipe_str[] = { CS1_PIPES"/Dnet-w-com-r", 
+                                        CS1_PIPES"/Dcom-w-net-r", 
+                                        CS1_PIPES"/Inet-w-com-r", 
+                                        CS1_PIPES"/Icom-w-net-r",
+                                        GND_PIPES"/Dnet-w-com-r", 
+                                        GND_PIPES"/Dcom-w-net-r", 
+                                        GND_PIPES"/Inet-w-com-r", 
+                                        GND_PIPES"/Icom-w-net-r"};
 #else 
-const char* Net2Com::pipe_str[] = { CS1_PIPES"/Dnet-w-com-r", 
-                                    CS1_PIPES"/Dcom-w-net-r", 
-                                    CS1_PIPES"/Inet-w-com-r", 
-                                    CS1_PIPES"/Icom-w-net-r"};
+    const char* Net2Com::pipe_str[] = { CS1_PIPES"/Dnet-w-com-r", 
+                                        CS1_PIPES"/Dcom-w-net-r", 
+                                        CS1_PIPES"/Inet-w-com-r", 
+                                        CS1_PIPES"/Icom-w-net-r"};
 #endif
 
 //----------------------------------------------

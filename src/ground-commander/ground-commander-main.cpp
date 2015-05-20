@@ -43,12 +43,19 @@ int perform(int bytes);
 int read_command();
 int delete_command();
 
-const char* LOGNAME = "GROUND_COMMANDER"; // usually cs1_systems[CS1_COMMANDER];
+const char* GC_LOGNAME = cs1_systems[CS1_GND_COMMANDER]; 
+char gc_log_buffer[CS1_MAX_LOG_ENTRY] = {0};
 
-// TODO
-const char CMD_INPUT_FILE[] = "/home/pipes/command-input"; // ? TODO ostensibly the input pipe
+// The file where commands are added to be sent to the satellite
+const char CMD_INPUT_FILE[] = "/home/pipes/command-input";  
+
+// TODO What is this file for?
 const char CMD_TEMP_FILE[] = "/home/groundCommanderTemp"; //###MAKE SURE TO HAVE WRITE PERMISSIONS###
 
+#define NETMAN_INPUT_PIPE "/home/pipes/gnd-input"
+#define NETMAN_OUTPUT_PIPE "/home/pipes/gnd-output"
+static NamedPipe nm_output(NETMAN_OUTPUT_PIPE);
+static NamedPipe nm_input(NETMAN_OUTPUT_PIPE);
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  *
@@ -63,15 +70,33 @@ const char CMD_TEMP_FILE[] = "/home/groundCommanderTemp"; //###MAKE SURE TO HAVE
  *-----------------------------------------------------------------------------*/
 int main() 
 {
+    if(!nm_output.Exist()) {
+        Shakespeare::log(Shakespeare::NOTICE,GC_LOGNAME,"Creating "NETMAN_OUTPUT_PIPE);
+        nm_output.CreatePipe(); 
+    };
+    if(!nm_input.Exist()) {
+        Shakespeare::log(Shakespeare::NOTICE,GC_LOGNAME,"Creating "NETMAN_INPUT_PIPE);
+        nm_input.CreatePipe();
+    };
+#ifdef GROUND_MOCK_SAT
+    fprintf(stderr,"Mock configuration\n");
+#endif
+
+    fprintf(stderr,"Follow log files in /home/logs for output\n");
+
     // TODO for mock satellite simulation, the ground and satellite commanders need to be
     // reading from a different set of named pipes
-    commander = new Net2Com(Dcom_w_net_r, Dnet_w_com_r, Icom_w_net_r, Inet_w_com_r);
+    
+    // TODO this is causing segfault
+    // commander = new Net2Com(GDcom_w_net_r, GDnet_w_com_r, GIcom_w_net_r, GInet_w_com_r);
 
     while (true)
     {
+        Shakespeare::log(Shakespeare::NOTICE, GC_LOGNAME, "Waiting for commands to send or satellite data");
         memset(info_buffer, 0, sizeof(char) * 255);
         
-        int bytes = commander->ReadFromInfoPipe(info_buffer, 255);
+        //int bytes = commander->ReadFromInfoPipe(info_buffer, 255);
+        int bytes = nm_output.ReadFromPipe(info_buffer, CS1_MAX_FRAME_SIZE);
         if (bytes > 0) {
             //get result buffers
             perform(bytes);
@@ -103,13 +128,15 @@ int read_command()
     if ( infile.good() )
     {
         getline(infile, stored_command);
-        cout << stored_command << endl;
+        snprintf(gc_log_buffer,CS1_MAX_LOG_ENTRY,"Read from command input file: %s", stored_command.c_str());
+        Shakespeare::log(Shakespeare::NOTICE,GC_LOGNAME,gc_log_buffer);
     }
 
-    // TODO: write to pipes
-    int data_bytes_written = commander->WriteToDataPipe( stored_command.c_str() );
+    int data_bytes_written = nm_input.WriteToPipe( stored_command.c_str(), CS1_MAX_FRAME_SIZE );
+    // TODO: write to normal pipes
+    //int data_bytes_written = commander->WriteToDataPipe( stored_command.c_str() );
     // TODO implement passing size // int data_bytes_written = commander->WriteToDataPipe(result, size);
-
+    
     if (data_bytes_written > 0) 
     {
         delete_command();
@@ -133,14 +160,14 @@ int delete_command(){
     ifstream in(CMD_INPUT_FILE);
     
     if( !in.is_open()){
-        cout << "Command input file failed to open" << endl;
+        Shakespeare::log(Shakespeare::ERROR,GC_LOGNAME,"Command input file failed to open");
         return CS1_FAILURE;
     }
     
     ofstream out(CMD_TEMP_FILE);
 
     if( !out.is_open()){
-        cout << "Temp file failed to open. Check directory permmissions" << endl;
+        Shakespeare::log(Shakespeare::ERROR,GC_LOGNAME,"Temp file failed to open. Check directory permmissions");
         return CS1_FAILURE;
     }
 
@@ -186,7 +213,7 @@ int perform(int bytes)
 
                     if (data_bytes > 0) {
                         if (data_bytes != read_total) {
-                            Shakespeare::log(Shakespeare::ERROR, LOGNAME, "Something went wrong !!");
+                            Shakespeare::log(Shakespeare::ERROR, GC_LOGNAME, "Something went wrong !!");
                             read_total = 0;
                             break;
                         }
