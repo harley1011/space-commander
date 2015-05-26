@@ -90,9 +90,9 @@ int main()
     // TODO this is causing segfault
     // commander = new Net2Com(GDcom_w_net_r, GDnet_w_com_r, GIcom_w_net_r, GInet_w_com_r);
 
+    Shakespeare::log(Shakespeare::NOTICE, GC_LOGNAME, "Waiting for commands to send or satellite data");
     while (true)
     {
-        Shakespeare::log(Shakespeare::NOTICE, GC_LOGNAME, "Waiting for commands to send or satellite data");
         memset(info_buffer, 0, sizeof(char) * 255);
         
         //int bytes = commander->ReadFromInfoPipe(info_buffer, 255);
@@ -155,30 +155,31 @@ int read_command()
  * delete_command will remove the command from the command input file
  * if writing to the pipes was successful
  */
-int delete_command(){
+int delete_command()
+{
     string read_command;
-    ifstream in(CMD_INPUT_FILE);
+    ifstream cmd_input_file(CMD_INPUT_FILE);
     
-    if( !in.is_open()){
+    if( !cmd_input_file.is_open()) {
         Shakespeare::log(Shakespeare::ERROR,GC_LOGNAME,"Command input file failed to open");
         return CS1_FAILURE;
     }
     
     ofstream out(CMD_TEMP_FILE);
 
-    if( !out.is_open()){
+    if( !out.is_open()) {
         Shakespeare::log(Shakespeare::ERROR,GC_LOGNAME,"Temp file failed to open. Check directory permmissions");
         return CS1_FAILURE;
     }
 
-    while( getline(in,read_command) ){
+    while( getline(cmd_input_file,read_command) ){
         if(read_command.compare(stored_command) != 0){
             out << read_command << "\n";
         }
     }
 
-    in.close();
-    out.close();    
+    cmd_input_file.close();
+    out.close();
     remove(CMD_INPUT_FILE);
     rename(CMD_TEMP_FILE,CMD_INPUT_FILE);
 
@@ -218,17 +219,20 @@ int perform(int bytes)
                             break;
                         }
 
-                        string* obtainedSpaceGarbage = GetResultData(buffer);
-                        if (obtainedSpaceGarbage != NULL) { // success
+                        string* obtainedSpaceData = GetResultData(buffer);
+                        // TODO this is returning not null 
+                        if (obtainedSpaceData != NULL) { // success
                             if (buffer[(uint8_t)MAGIC_BYTE] == GETLOG_CMD) {
                                 // TODO: log to proper system (get log)
                             } else {
-                                Shakespeare::log(Shakespeare::NOTICE, "GROUND_COMMANDER", obtainedSpaceGarbage->c_str());
+                                Shakespeare::log(Shakespeare::NOTICE, "GROUND_COMMANDER", obtainedSpaceData->c_str());
                             }
 
-                            delete obtainedSpaceGarbage;
-                            obtainedSpaceGarbage = NULL;
-                            delete_command(); // TODO - are we deleting a command from the input file because we received its result?
+                            delete obtainedSpaceData;
+                            obtainedSpaceData = NULL;
+                            if (delete_command() != 0) { 
+                                return CS1_FAILURE;
+                            } // TODO - are we deleting a command from the input file because we received its result?
                             // this is assuming the result buffer corresponds to the last executed command. Not necessarily true.
                         }
 
