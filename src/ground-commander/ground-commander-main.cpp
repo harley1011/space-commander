@@ -99,6 +99,10 @@ int main()
         int bytes = nm_output.ReadFromPipe(info_buffer, CS1_MAX_FRAME_SIZE);
         if (bytes > 0) {
             //get result buffers
+            //memset(gc_log_buffer,0,CS1_MAX_LOG_ENTRY);
+            //snprintf(gc_log_buffer,CS1_MAX_LOG_ENTRY,"Got bytes from Ground Netman: %d", bytes);
+            //Shakespeare::log(Shakespeare::NOTICE, GC_LOGNAME, gc_log_buffer );
+
             perform(bytes);
         }
 
@@ -161,7 +165,10 @@ int delete_command()
     ifstream cmd_input_file(CMD_INPUT_FILE);
     
     if( !cmd_input_file.is_open()) {
+#ifdef VERBOSE_DEBUG // TODO resolve - this was added to avoid unnecessary output while in early stages
+        
         Shakespeare::log(Shakespeare::ERROR,GC_LOGNAME,"Command input file failed to open");
+#endif
         return CS1_FAILURE;
     }
     
