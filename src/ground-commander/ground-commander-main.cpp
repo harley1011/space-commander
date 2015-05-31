@@ -28,34 +28,40 @@ const char MAGIC_BYTE = 0;
 const string LAST_COMMAND_FILENAME("last-command");
 const int COMMAND_RESEND_INDEX = 0;
 const char COMMAND_RESEND_CHAR = '!';
-const int MAX_COMMAND_SIZE     = 255;
-const int MAX_BUFFER_SIZE      = 255;
+const int MAX_COMMAND_SIZE     = CS1_MAX_FRAME_SIZE-30; // TODO define thethis limit more clearly
+const int MAX_BUFFER_SIZE      = MAX_COMMAND_SIZE;  
 
 const char ERROR_CREATING_COMMAND  = '1';
 const char ERROR_EXECUTING_COMMAND = '2';
 
 // Declarations
-static char info_buffer[255] = {'\0'};
+static char info_buffer[MAX_BUFFER_SIZE] = {'\0'};
+static char cmd_buffer[MAX_COMMAND_SIZE] = {'\0'};
 static Net2Com* commander = 0; 
 static string stored_command;
 string* GetResultData(char* result_buffer);
 int perform(int bytes);
+int read_results();
 int read_command();
 int delete_command();
+int create_pipes();
 
 const char* GC_LOGNAME = cs1_systems[CS1_GND_COMMANDER]; 
 char gc_log_buffer[CS1_MAX_LOG_ENTRY] = {0};
-
-// The file where commands are added to be sent to the satellite
-const char CMD_INPUT_FILE[] = "/home/pipes/command-input";  
 
 // TODO What is this file for?
 const char CMD_TEMP_FILE[] = "/home/groundCommanderTemp"; //###MAKE SURE TO HAVE WRITE PERMISSIONS###
 
 #define NETMAN_INPUT_PIPE "/home/pipes/gnd-input"
 #define NETMAN_OUTPUT_PIPE "/home/pipes/gnd-output"
+#define COMMAND_INPUT_PIPE "/home/pipes/cmd-input"
+
 static NamedPipe nm_output(NETMAN_OUTPUT_PIPE);
 static NamedPipe nm_input(NETMAN_OUTPUT_PIPE);
+static NamedPipe cmd_input(NETMAN_OUTPUT_PIPE);
+
+// The file where commands are added to be sent to the satellite
+const char CMD_INPUT_PIPE[] = COMMAND_INPUT_PIPE;
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  *
@@ -64,20 +70,13 @@ static NamedPipe nm_input(NETMAN_OUTPUT_PIPE);
  * DESCRIPTION : ground-commander main 
  * - the ground-commander main should read Dnet_w_com_r and Inet_w_com_r pipes
  *   for incoming data (result buffers) from the satellite
- * - it should also read the Command Input File (CMD_INPUT_FILE) for commands
+ * - it should also read the Command Input File (CMD_INPUT_PIPE) for commands
  *   to be sent to the satellite (command buffers)
  *
  *-----------------------------------------------------------------------------*/
 int main() 
 {
-    if(!nm_output.Exist()) {
-        Shakespeare::log(Shakespeare::NOTICE,GC_LOGNAME,"Creating "NETMAN_OUTPUT_PIPE);
-        nm_output.CreatePipe(); 
-    };
-    if(!nm_input.Exist()) {
-        Shakespeare::log(Shakespeare::NOTICE,GC_LOGNAME,"Creating "NETMAN_INPUT_PIPE);
-        nm_input.CreatePipe();
-    };
+    create_pipes();
 #ifdef GROUND_MOCK_SAT
     fprintf(stderr,"Mock configuration\n");
 #endif
@@ -91,21 +90,19 @@ int main()
     // commander = new Net2Com(GDcom_w_net_r, GDnet_w_com_r, GIcom_w_net_r, GInet_w_com_r);
 
     Shakespeare::log(Shakespeare::NOTICE, GC_LOGNAME, "Waiting for commands to send or satellite data");
+
     while (true)
     {
-        memset(info_buffer, 0, sizeof(char) * 255);
-        
-        //int bytes = commander->ReadFromInfoPipe(info_buffer, 255);
-        int bytes = nm_output.ReadFromPipe(info_buffer, CS1_MAX_FRAME_SIZE);
-        if (bytes > 0) {
+        int result_bytes = read_results();
+
+        if (result_bytes > 0) {
             //get result buffers
-            //memset(gc_log_buffer,0,CS1_MAX_LOG_ENTRY);
-            //snprintf(gc_log_buffer,CS1_MAX_LOG_ENTRY,"Got bytes from Ground Netman: %d", bytes);
-            //Shakespeare::log(Shakespeare::NOTICE, GC_LOGNAME, gc_log_buffer );
+            memset(gc_log_buffer,0,CS1_MAX_LOG_ENTRY);
+            snprintf(gc_log_buffer,CS1_MAX_LOG_ENTRY,"Got bytes from Ground Netman: %d", result_bytes);
+            Shakespeare::log(Shakespeare::NOTICE, GC_LOGNAME, gc_log_buffer );
 
-            perform(bytes);
+            perform(result_bytes);
         }
-
         // if no result buffers, proceed to check for commands to send
         read_command();
         sleep(COMMANER_SLEEP_TIME);
@@ -119,40 +116,71 @@ int main()
 }
 
 /**
+ * create_pipes will ensure that all pipes required for IPC are present
+ **/
+int create_pipes() 
+{
+    if(!nm_output.Exist()) {
+        Shakespeare::log(Shakespeare::NOTICE,GC_LOGNAME,"Creating "NETMAN_OUTPUT_PIPE);
+        nm_output.CreatePipe(); 
+    };
+    if(!nm_input.Exist()) {
+        Shakespeare::log(Shakespeare::NOTICE,GC_LOGNAME,"Creating "NETMAN_INPUT_PIPE);
+        nm_input.CreatePipe();
+    };
+    if(!cmd_input.Exist()) {
+        Shakespeare::log(Shakespeare::NOTICE,GC_LOGNAME,"Creating "COMMAND_INPUT_PIPE);
+        cmd_input.CreatePipe();
+    };
+    return CS1_SUCCESS; // TODO when will this ever return CS1_FAILURE?
+}
+
+/**
+ * Read for responses from ground station (result buffers)
+ */
+int read_results() 
+{
+	memset(info_buffer, 0, sizeof(char) * 255);
+	
+	//int bytes = commander->ReadFromInfoPipe(info_buffer, 255);
+	return nm_output.ReadFromPipe(info_buffer, MAX_COMMAND_SIZE);
+}
+
+/**
  * read_command will parse a file containing commands, and write them to the
  * info and data pipes as necessary to deliver them to the netman, and 
  * subsequently to the satellite
  */
 int read_command()
 {
-    ifstream infile(CMD_INPUT_FILE);
-
-    // the command input file contains command buffers that are ready to be passed
+    memset(cmd_buffer,0,MAX_COMMAND_SIZE);
+    //
+    // the command input pipe contains command buffers that are ready to be passed
     // through the pipes to the satellite commander
-    if ( infile.good() )
+    int input_bytes_read = cmd_input.ReadFromPipe(cmd_buffer, MAX_COMMAND_SIZE);
+
+    if (input_bytes_read > 0) // if we have read a command from the command_input_pipe
     {
-        getline(infile, stored_command);
         snprintf(gc_log_buffer,CS1_MAX_LOG_ENTRY,"Read from command input file: %s", stored_command.c_str());
         Shakespeare::log(Shakespeare::NOTICE,GC_LOGNAME,gc_log_buffer);
+        int data_bytes_written = nm_input.WriteToPipe( stored_command.c_str(), CS1_MAX_FRAME_SIZE );
+        // TODO: write to normal pipes
+        //int data_bytes_written = commander->WriteToDataPipe( stored_command.c_str() );
+        // TODO implement passing size // int data_bytes_written = commander->WriteToDataPipe(result, size);
+
+        if (data_bytes_written > 0) 
+        {
+            return data_bytes_written;
+            delete_command(); // delete_command is obsolete now, IIRC reading from pipe removes the line automatically
+            // TODO perhaps rewrite the data back to the pipe if it failed to be passed on correctly
+        }
+        else 
+        {
+            return CS1_FAILURE;
+        }
     }
 
-    int data_bytes_written = nm_input.WriteToPipe( stored_command.c_str(), CS1_MAX_FRAME_SIZE );
-    // TODO: write to normal pipes
-    //int data_bytes_written = commander->WriteToDataPipe( stored_command.c_str() );
-    // TODO implement passing size // int data_bytes_written = commander->WriteToDataPipe(result, size);
-    
-    if (data_bytes_written > 0) 
-    {
-        delete_command();
-    }
-    else 
-    {
-        return CS1_FAILURE;
-    }
-
-    infile.close();
-    
-    return data_bytes_written;
+    return input_bytes_read; // TODO so far this is never checked
 }
 
 /**
@@ -162,16 +190,14 @@ int read_command()
 int delete_command()
 {
     string read_command;
-    ifstream cmd_input_file(CMD_INPUT_FILE);
+    ifstream cmd_input_file(CMD_INPUT_PIPE);
     
     if( !cmd_input_file.is_open()) {
-#ifdef VERBOSE_DEBUG // TODO resolve - this was added to avoid unnecessary output while in early stages
-        
         Shakespeare::log(Shakespeare::ERROR,GC_LOGNAME,"Command input file failed to open");
-#endif
         return CS1_FAILURE;
     }
     
+    // TODO again, what is this for?
     ofstream out(CMD_TEMP_FILE);
 
     if( !out.is_open()) {
@@ -187,8 +213,8 @@ int delete_command()
 
     cmd_input_file.close();
     out.close();
-    remove(CMD_INPUT_FILE);
-    rename(CMD_TEMP_FILE,CMD_INPUT_FILE);
+    remove(CMD_INPUT_PIPE);
+    rename(CMD_TEMP_FILE,CMD_INPUT_PIPE);
 
     // TODO validate number of bytes removed
     return CS1_SUCCESS;
@@ -200,7 +226,35 @@ int delete_command()
  **/
 int perform(int bytes)
 {
-    char* buffer = NULL; //TODO This buffer does not scare me !
+    // TODO there is supposed to be a master log of outstanding command requests and
+    // the result of the command execution. Except for getlog, there is a one-to-one
+    // relationship between commands and responses, but we don't want the system to 
+    // hang waiting for the response. The system should be able to handle any command 
+    // responses coming from the satellite in any order
+#ifdef GROUND_MOCK_SAT // using the single pipe method, built from Olivier's hack of gnd_main (netman)
+	if (bytes) 
+	{ // success
+    #ifdef CS1_DEBUG
+		switch ( (uint8_t)info_buffer[0] )
+		{
+			case GETLOG_CMD:
+				Shakespeare::log(Shakespeare::NOTICE, GC_LOGNAME, "Decoding GETLOG_CMD...");
+				// TODO: log to proper system (get log), e.g. log to database
+                break;
+			case GETTIME_CMD:
+				Shakespeare::log(Shakespeare::NOTICE, GC_LOGNAME, "Decoding GETTIME_CMD...");
+                break;
+			default:
+				Shakespeare::log(Shakespeare::NOTICE, GC_LOGNAME, "Not sure what we got...");
+		}
+    #endif
+        string * parsed_result = GetResultData(info_buffer);
+        Shakespeare::log(Shakespeare::NOTICE, GC_LOGNAME, parsed_result->c_str());
+	}
+#else // This code is intended for the info and data pipe operation
+
+    char* buffer = NULL; // this buffer will be filled in the default case, see below!
+    // TODO change this, we prefer the code to read better sequentially
     int read_total = 0;
     unsigned char read = 0;
 
@@ -237,9 +291,13 @@ int perform(int bytes)
 
                             delete obtainedSpaceData;
                             obtainedSpaceData = NULL;
+
+                            /* TODO don't know about this code
                             if (delete_command() != 0) { 
                                 return CS1_FAILURE;
-                            } // TODO - are we deleting a command from the input file because we received its result?
+                            }
+                            */ 
+                            // TODO - are we deleting a command from the input file because we received its result?
                             // this is assuming the result buffer corresponds to the last executed command. Not necessarily true.
                         }
 
@@ -262,6 +320,7 @@ int perform(int bytes)
             break;
         }
     }
+#endif
     
     return CS1_SUCCESS; 
 }
