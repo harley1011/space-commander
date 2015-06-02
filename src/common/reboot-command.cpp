@@ -36,12 +36,14 @@ void* RebootCommand::Execute(size_t* pSize){
 *
 * RETURNS : struct InfoBytes* to STATIC memory
 * 
+* NOTES : Logs with the Ground Commander tag because this only is run on the 
+*         Ground
 *-----------------------------------------------------------------------------*/
 InfoBytes* RebootCommand::ParseResult(char* result)
 {
     static struct InfoBytesReboot info_bytes;
     if (!result || result[0] != REBOOT_CMD ){
-        Shakespeare::log(Shakespeare::ERROR,cs1_systems[CS1_COMMANDER],"Reboot failure: Can't parse result");
+        Shakespeare::log(Shakespeare::ERROR,cs1_systems[CS1_GND_COMMANDER],"Reboot failure: Can't parse result");
         info_bytes.reboot_status = CS1_FAILURE;
         return &info_bytes;
     }
@@ -51,12 +53,12 @@ InfoBytes* RebootCommand::ParseResult(char* result)
     if(info_bytes.reboot_status == CS1_SUCCESS)
     {
         sprintf(buffer, "Reboot success.");
-        Shakespeare::log(Shakespeare::NOTICE,s_cs1_subsystems[CS1_COMMANDER], buffer);
+        Shakespeare::log(Shakespeare::NOTICE,s_cs1_subsystems[CS1_GND_COMMANDER], buffer);
     }
     else
     {
         sprintf(buffer, "Reboot failure.");
-        Shakespeare::log(Shakespeare::ERROR,s_cs1_subsystems[CS1_COMMANDER], buffer);
+        Shakespeare::log(Shakespeare::ERROR,s_cs1_subsystems[CS1_GND_COMMANDER], buffer);
     }
     return &info_bytes;
 

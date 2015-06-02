@@ -78,11 +78,16 @@ void* DecodeCommand::Execute() {
 
     return result;         
 }
+
+/*
+ * NOTES : Logs with the Ground Commander tag because this only is run on the 
+ *         Ground
+ */
 InfoBytes* DecodeCommand::ParseResult(char *result)
 {
     static struct InfoBytesDecode info_bytes;
     if (!result || result[0] != DECODE_CMD){
-        Shakespeare::log(Shakespeare::ERROR,cs1_systems[CS1_COMMANDER],"Decode failure: Can't parse result");
+        Shakespeare::log(Shakespeare::ERROR,cs1_systems[CS1_GND_COMMANDER],"Decode failure: Can't parse result");
         info_bytes.decode_status = CS1_FAILURE;
         return &info_bytes;
     }
@@ -93,12 +98,12 @@ InfoBytes* DecodeCommand::ParseResult(char *result)
     if(info_bytes.decode_status == CS1_SUCCESS)
     {    
         snprintf(buffer,100,"Decode success: No informaation to report");
-        Shakespeare::log(Shakespeare::NOTICE,cs1_systems[CS1_COMMANDER], buffer);
+        Shakespeare::log(Shakespeare::NOTICE,cs1_systems[CS1_GND_COMMANDER], buffer);
     }
     else
     {
         snprintf(buffer,100,"Decode failure: Unknown");
-        Shakespeare::log(Shakespeare::ERROR,cs1_systems[CS1_COMMANDER], buffer);
+        Shakespeare::log(Shakespeare::ERROR,cs1_systems[CS1_GND_COMMANDER], buffer);
     }
     return &info_bytes;
 

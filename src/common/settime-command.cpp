@@ -95,13 +95,16 @@ void* SetTimeCommand::Execute(size_t* pSize){
  * ARGUMENTS : result    : pointer to the result buffer
  *
  * RETURNS : struct InfoBytes* to STATIC memory
+ *
+ * NOTES : Logs with the Ground Commander tag because this only is run on the 
+ *         Ground
  * 
  *-----------------------------------------------------------------------------*/
 InfoBytes* SetTimeCommand::ParseResult(char *result) {
     static struct InfoBytesSetTime info_bytes;
 
     if (!result || result[CMD_ID] != SETTIME_CMD) {
-        Shakespeare::log(Shakespeare::ERROR,cs1_systems[CS1_COMMANDER],"Possible SetTime failure: Can't parse result");
+        Shakespeare::log(Shakespeare::ERROR,cs1_systems[CS1_GND_COMMANDER],"Possible SetTime failure: Can't parse result");
         info_bytes.time_status = CS1_FAILURE;
 
         return &info_bytes;
@@ -115,11 +118,11 @@ InfoBytes* SetTimeCommand::ParseResult(char *result) {
     if (info_bytes.time_status == CS1_SUCCESS) {
         snprintf(buffer, CS1_MAX_LOG_ENTRY,
                     "SetTime success: Time set to %u seconds since epoch", (unsigned)info_bytes.time_set); 
-        Shakespeare::log(Shakespeare::NOTICE, cs1_systems[CS1_COMMANDER], buffer);
+        Shakespeare::log(Shakespeare::NOTICE, cs1_systems[CS1_GND_COMMANDER], buffer);
     } else {
         snprintf(buffer, CS1_MAX_LOG_ENTRY,
                     "SetTime failure: Time failed to set %u seconds since epoch", (unsigned)info_bytes.time_set);
-        Shakespeare::log(Shakespeare::ERROR, cs1_systems[CS1_COMMANDER], buffer);
+        Shakespeare::log(Shakespeare::ERROR, cs1_systems[CS1_GND_COMMANDER], buffer);
     }
 
     return &info_bytes;

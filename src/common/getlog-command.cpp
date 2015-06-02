@@ -501,6 +501,8 @@ char* GetLogCommand::GetCmdStr(char* cmd_buf)
 *   
 * RETURN : struct InfoBytes* to STATIC memory (Make a COPY!)
 *
+* NOTES : Logs with the Ground Commander tag because this only is run on the 
+*         Ground
 *-----------------------------------------------------------------------------*/
 InfoBytes* GetLogCommand::ParseResult(char *result, const char *filename)
 {
@@ -508,7 +510,7 @@ InfoBytes* GetLogCommand::ParseResult(char *result, const char *filename)
     FILE* pFile = 0;
 
     if (!result || result[CMD_ID] != GETLOG_CMD) {
-        Shakespeare::log(Shakespeare::ERROR,cs1_systems[CS1_COMMANDER],"GetLog failure: Can't parse result");
+        Shakespeare::log(Shakespeare::ERROR,cs1_systems[CS1_GND_COMMANDER],"GetLog failure: Can't parse result");
         info_bytes.getlog_status = CS1_FAILURE;
         return &info_bytes;
     }
@@ -548,7 +550,7 @@ InfoBytes* GetLogCommand::ParseResult(char *result, const char *filename)
 
         snprintf(this->log_buffer, CS1_MAX_LOG_ENTRY, 
                     "GetLog success with inode %u and with message(%i bytes)", info_bytes.inode, bytes);
-        Shakespeare::log(Shakespeare::NOTICE, cs1_systems[CS1_COMMANDER], this->log_buffer);
+        Shakespeare::log(Shakespeare::NOTICE, cs1_systems[CS1_GND_COMMANDER], this->log_buffer);
 
         info_bytes.message_bytes_size = bytes;
         info_bytes.next_file_in_result_buffer = this->HasNextFile(result);
@@ -559,7 +561,7 @@ InfoBytes* GetLogCommand::ParseResult(char *result, const char *filename)
     }
     else
     {
-       Shakespeare::log(Shakespeare::ERROR,cs1_systems[CS1_COMMANDER], "GetLog failure: No files may exist");
+       Shakespeare::log(Shakespeare::ERROR,cs1_systems[CS1_GND_COMMANDER], "GetLog failure: No files may exist");
     }
 
     return &info_bytes;    

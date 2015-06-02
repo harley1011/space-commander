@@ -185,6 +185,9 @@ char* DeleteLogCommand::ExtractFilenameFromFile()
 * ARGUMENTS : result    : pointer to the result buffer
 *
 * RETURN : A InfoBytes containing delete_status, and filename
+*
+* NOTES : Logs with the Ground Commander tag because this only is run on the 
+*         Ground
 * 
 *-----------------------------------------------------------------------------*/
 InfoBytes* DeleteLogCommand::ParseResult(char *result)
@@ -192,7 +195,7 @@ InfoBytes* DeleteLogCommand::ParseResult(char *result)
     static struct InfoBytesDeleteLog info_bytes;
 
     if (!result || result[CMD_ID] != DELETELOG_CMD) {
-        Shakespeare::log(Shakespeare::NOTICE, cs1_systems[CS1_COMMANDER],
+        Shakespeare::log(Shakespeare::NOTICE, cs1_systems[CS1_GND_COMMANDER],
                                         "DeleteLog failure: Can't parse result");
         info_bytes.delete_status = CS1_FAILURE;
         return &info_bytes;
@@ -214,7 +217,7 @@ InfoBytes* DeleteLogCommand::ParseResult(char *result)
                                 info_bytes.filename);
     }
 
-    Shakespeare::log(Shakespeare::NOTICE, cs1_systems[CS1_COMMANDER], this->log_buffer);
+    Shakespeare::log(Shakespeare::NOTICE, cs1_systems[CS1_GND_COMMANDER], this->log_buffer);
 
     return &info_bytes;
 }

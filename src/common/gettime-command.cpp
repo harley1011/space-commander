@@ -38,13 +38,15 @@ void* GetTimeCommand::Execute(size_t * pSize){
 *
 * RETURNS : struct InfoBytes* to STATIC memory
 * 
+* NOTES : Logs with the Ground Commander tag because this only is run on the 
+*         Ground
 *-----------------------------------------------------------------------------*/
 
 InfoBytes* GetTimeCommand::ParseResult(char *result)
 {
     static struct InfoBytesGetTime info_bytes;
     if(!result || result[0] != GETTIME_CMD) {
-        Shakespeare::log(Shakespeare::ERROR,cs1_systems[CS1_COMMANDER],"GetTime failure: Can't parse result");
+        Shakespeare::log(Shakespeare::ERROR,cs1_systems[CS1_GND_COMMANDER],"GetTime failure: Can't parse result");
         info_bytes.time_status = CS1_FAILURE;
         return &info_bytes;
     }
@@ -56,12 +58,12 @@ InfoBytes* GetTimeCommand::ParseResult(char *result)
     if(info_bytes.time_status == CS1_SUCCESS)
     {    
         snprintf(buffer,100,"GetTime success. Time recieved is %u seconds since epoch or %i-%i-%i %i:%i:%i",(unsigned)info_bytes.time_set,1900 + time_info->tm_year, time_info->tm_mon,time_info->tm_mday,time_info->tm_hour,time_info->tm_min,time_info->tm_sec);
-        Shakespeare::log(Shakespeare::NOTICE, cs1_systems[CS1_COMMANDER], buffer);    
+        Shakespeare::log(Shakespeare::NOTICE, cs1_systems[CS1_GND_COMMANDER], buffer);    
     }
     else
     {
         snprintf(buffer,100,"GetTime failure: Unknown");
-        Shakespeare::log(Shakespeare::ERROR, cs1_systems[CS1_COMMANDER], buffer);
+        Shakespeare::log(Shakespeare::ERROR, cs1_systems[CS1_GND_COMMANDER], buffer);
    }
     return &info_bytes;
 }

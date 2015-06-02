@@ -42,11 +42,15 @@ void* UpdateCommand::Execute(size_t* pSize) {
 
     return result;         
 }
+/* 
+ * NOTES : Logs with the Ground Commander tag because this only is run on the 
+ *         Ground
+ */
 InfoBytes* UpdateCommand::ParseResult(char *result)
 { 
     static struct InfoBytesUpdate info_bytes;
     if(!result || result[0] != SETTIME_CMD) {
-        Shakespeare::log(Shakespeare::ERROR,cs1_systems[CS1_COMMANDER],"Possible update failure: Can't parse result");
+        Shakespeare::log(Shakespeare::ERROR,cs1_systems[CS1_GND_COMMANDER],"Possible update failure: Can't parse result");
         info_bytes.update_status = CS1_FAILURE;
         return &info_bytes;
     }
@@ -59,12 +63,12 @@ InfoBytes* UpdateCommand::ParseResult(char *result)
     if(info_bytes.update_status == CS1_SUCCESS)
     {
         snprintf(buffer,100,"Update success: Bytes written %s ",info_bytes.bytes_written);
-        Shakespeare::log(Shakespeare::NOTICE, cs1_systems[CS1_COMMANDER], buffer);
+        Shakespeare::log(Shakespeare::NOTICE, cs1_systems[CS1_GND_COMMANDER], buffer);
     }
     else
     {
         snprintf(buffer,100,"Update failure: Unknown"); 
-        Shakespeare::log(Shakespeare::ERROR,cs1_systems[CS1_COMMANDER], buffer);
+        Shakespeare::log(Shakespeare::ERROR,cs1_systems[CS1_GND_COMMANDER], buffer);
     }
     return &info_bytes;
 
