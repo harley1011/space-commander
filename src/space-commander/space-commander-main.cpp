@@ -1,11 +1,13 @@
 #include <cstdio>
 #include <cstdlib>
-#include <time.h>
 #include <cstring>
+#include <inttypes.h>
 #include <signal.h>
 #include <sstream>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <time.h>
 #include <unistd.h>
-#include <inttypes.h>
 
 #include "space-commander/Net2Com.h"
 #include "common/command-factory.h"
@@ -25,6 +27,7 @@ const char ERROR_EXECUTING_COMMAND = '2';
 // Declarations
 static void out_of_memory_handler();
 static int perform(int bytes);
+static void validate();
 
 static char log_buffer[255] = {0};
 static char info_buffer[255] = {'\0'};
@@ -40,8 +43,8 @@ const char* LOGNAME = cs1_systems[CS1_COMMANDER];
  *-----------------------------------------------------------------------------*/
 int main() 
 {
+    validate();
     set_new_handler(&out_of_memory_handler);
-
 
     commander = new Net2Com(Dcom_w_net_r, Dnet_w_com_r, 
                                                     Icom_w_net_r, Inet_w_com_r);
@@ -236,4 +239,43 @@ void out_of_memory_handler()
     std::cerr << "[ERROR] new failed\n";
     throw bad_alloc();
 }
+
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ *
+ * NAME : perform 
+ *
+ * PURPOSE : validation
+ *
+ *-----------------------------------------------------------------------------*/
+void validate() {
+    Shakespeare::log(Shakespeare::ERROR, LOGNAME, "validating...");
+    bool isValid = true;
+    struct stat stat_buf = {0};
+
+    // checks that the CS1_TGZ dir exists
+    if (stat(CS1_TGZ, &stat_buf) < 0 ) {
+        if (!S_ISDIR(stat_buf.st_mode)) {
+            memset(log_buffer,0, MAX_BUFFER_SIZE);
+            snprintf(log_buffer, MAX_BUFFER_SIZE, "file found while directory expected : CS1_TGZ=%s\n", CS1_TGZ);
+            Shakespeare::log(Shakespeare::ERROR, LOGNAME, log_buffer);
+            isValid = false;
+        }
+    } else {
+        memset(log_buffer,0, MAX_BUFFER_SIZE);
+        snprintf(log_buffer, MAX_BUFFER_SIZE, "directory does not exist, creating : CS1_TGZ=%s\n", CS1_TGZ);
+        Shakespeare::log(Shakespeare::WARNING, LOGNAME, log_buffer);
+        if (mkdir(CS1_TGZ, 0777) < 0) {
+            memset(log_buffer,0, MAX_BUFFER_SIZE);
+            snprintf(log_buffer, MAX_BUFFER_SIZE, "can't create directory : CS1_TGZ=%s\n", CS1_TGZ);
+            Shakespeare::log(Shakespeare::ERROR, LOGNAME, log_buffer);
+            isValid = false;
+        }
+    }
+
+    if (!isValid) {
+        exit(1);
+    }
+}
+
+
 
