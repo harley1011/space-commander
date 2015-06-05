@@ -256,8 +256,8 @@ void validate() {
     if (stat(CS1_TGZ, &stat_buf) < 0 ) {
         
 
-        memset(log_buffer,0, MAX_BUFFER_SIZE);
-        snprintf(log_buffer, MAX_BUFFER_SIZE, "directory does not exist, creating : CS1_TGZ=%s", CS1_TGZ);
+        memset(log_buffer,0, CS1_MAX_LOG_ENTRY);
+        snprintf(log_buffer, CS1_MAX_LOG_ENTRY, "directory does not exist, creating : CS1_TGZ=%s", CS1_TGZ);
         Shakespeare::log(Shakespeare::WARNING, LOGNAME, log_buffer);
 
 
@@ -266,25 +266,24 @@ void validate() {
 
 
         if (system(cmd) != 0) {
-            memset(log_buffer,0, MAX_BUFFER_SIZE);
-            snprintf(log_buffer, MAX_BUFFER_SIZE, "can't create directory : CS1_TGZ=%s", cmd);
+            memset(log_buffer,0, CS1_MAX_LOG_ENTRY);
+            snprintf(log_buffer, CS1_MAX_LOG_ENTRY, "can't create directory : CS1_TGZ=%s", cmd);
             Shakespeare::log(Shakespeare::ERROR, LOGNAME, log_buffer);
             isValid = false;
         }
     } else {
        if (!S_ISDIR(stat_buf.st_mode)) {
-            memset(log_buffer,0, MAX_BUFFER_SIZE);
-            snprintf(log_buffer, MAX_BUFFER_SIZE, "file found while directory expected : CS1_TGZ=%s\n", CS1_TGZ);
+            memset(log_buffer,0, CS1_MAX_LOG_ENTRY);
+            snprintf(log_buffer, CS1_MAX_LOG_ENTRY, "file found while directory expected : CS1_TGZ=%s\n", CS1_TGZ);
             Shakespeare::log(Shakespeare::ERROR, LOGNAME, log_buffer);
             isValid = false;
         }
     }
 
     if (!isValid) {
-        memset(log_buffer,0, MAX_BUFFER_SIZE);
-        snprintf(log_buffer, MAX_BUFFER_SIZE, "exiting");
+        memset(log_buffer,0, CS1_MAX_LOG_ENTRY);
+        snprintf(log_buffer, CS1_MAX_LOG_ENTRY, "space-commander is in unstable state... some commands might not work properly");
         Shakespeare::log(Shakespeare::ERROR, LOGNAME, log_buffer);
-        exit(1);
     }
 }
 
