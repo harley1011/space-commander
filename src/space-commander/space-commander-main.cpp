@@ -248,31 +248,42 @@ void out_of_memory_handler()
  *
  *-----------------------------------------------------------------------------*/
 void validate() {
-    Shakespeare::log(Shakespeare::ERROR, LOGNAME, "validating...");
     bool isValid = true;
     struct stat stat_buf = {0};
 
     // checks that the CS1_TGZ dir exists
+    Shakespeare::log(Shakespeare::NOTICE, LOGNAME, "validating CS1_TGZ directory existence");
     if (stat(CS1_TGZ, &stat_buf) < 0 ) {
-        if (!S_ISDIR(stat_buf.st_mode)) {
+        
+
+        memset(log_buffer,0, MAX_BUFFER_SIZE);
+        snprintf(log_buffer, MAX_BUFFER_SIZE, "directory does not exist, creating : CS1_TGZ=%s", CS1_TGZ);
+        Shakespeare::log(Shakespeare::WARNING, LOGNAME, log_buffer);
+
+
+        char cmd[CS1_PATH_MAX] = {0};
+        snprintf(cmd, CS1_PATH_MAX, "mkdir -p ./%s", CS1_TGZ);
+
+
+        if (system(cmd) != 0) {
             memset(log_buffer,0, MAX_BUFFER_SIZE);
-            snprintf(log_buffer, MAX_BUFFER_SIZE, "file found while directory expected : CS1_TGZ=%s\n", CS1_TGZ);
+            snprintf(log_buffer, MAX_BUFFER_SIZE, "can't create directory : CS1_TGZ=%s", cmd);
             Shakespeare::log(Shakespeare::ERROR, LOGNAME, log_buffer);
             isValid = false;
         }
     } else {
-        memset(log_buffer,0, MAX_BUFFER_SIZE);
-        snprintf(log_buffer, MAX_BUFFER_SIZE, "directory does not exist, creating : CS1_TGZ=%s\n", CS1_TGZ);
-        Shakespeare::log(Shakespeare::WARNING, LOGNAME, log_buffer);
-        if (mkdir(CS1_TGZ, 0777) < 0) {
+       if (!S_ISDIR(stat_buf.st_mode)) {
             memset(log_buffer,0, MAX_BUFFER_SIZE);
-            snprintf(log_buffer, MAX_BUFFER_SIZE, "can't create directory : CS1_TGZ=%s\n", CS1_TGZ);
+            snprintf(log_buffer, MAX_BUFFER_SIZE, "file found while directory expected : CS1_TGZ=%s\n", CS1_TGZ);
             Shakespeare::log(Shakespeare::ERROR, LOGNAME, log_buffer);
             isValid = false;
         }
     }
 
     if (!isValid) {
+        memset(log_buffer,0, MAX_BUFFER_SIZE);
+        snprintf(log_buffer, MAX_BUFFER_SIZE, "exiting");
+        Shakespeare::log(Shakespeare::ERROR, LOGNAME, log_buffer);
         exit(1);
     }
 }
