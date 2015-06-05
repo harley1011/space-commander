@@ -68,7 +68,7 @@ CS1_UTEST_DIR="cs1_utest" # as defined in SpaceDecl.h
 # ENV : either CS1_UTEST for test environment or empty for PROD, perform a 'make clean' when changing this parameter
 #
 UTEST_ENV=-DCS1_UTEST $(MEM_LEAK_MACRO) $(CPPUTEST_LIBS) 
-ENV = -DCS1_DEBUG -DGROUND_MOCK_SAT $(UTEST_ENV)  -DPRESERVE
+ENV = -DCS1_DEBUG -DGROUND_MOCK_SAT -DPRESERVE
 
 #
 #++++++++++++++++++++
@@ -89,7 +89,8 @@ $(SPACE_COMMANDER_BIN)/%.o: src/space-commander/%.cpp include/space-commander/%.
 $(SPACE_COMMANDER_BIN): src/space-commander/space-commander-main.cpp $(COMMON_OBJECTS) $(OBJECTS)
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(DEBUGFLAGS) $(INCLUDES) $(LIBPATH) -o $@/space-commander $^ $(LIBS) $(ENV)
 
-test: make_dir bin/AllTests $(SPACE_COMMANDER_BIN)
+test: ENV = -DCS1_DEBUG  $(UTEST_ENV)  -DPRESERVE
+test: buildBin make_dir bin/AllTests $(SPACE_COMMANDER_BIN)
 	mkdir -p $(CS1_UTEST_DIR)
 
 bin/AllTests: tests/unit/AllTests.cpp  $(UNIT_TEST) $(COMMON_OBJECTS) $(OBJECTS) 
