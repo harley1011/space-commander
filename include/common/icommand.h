@@ -1,15 +1,23 @@
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*
+* AUTHORS : Space Concordia 2015
+*
+* TITLE : icommand.h 
+*
+* NOTES :
+*       CMD_HEAD_SIZE => size of the common header for sent commands
+*       [0] - CMD_ID
+*       [?] - CMD_CID // TODO
+*
+*       CMD_RES_HEAD_SIZE  => size of the common header for result buffers
+*       [1] - CMD_STS (for result buffer only only)
+*       [?] - CMD_CID TODO
+*
+*----------------------------------------------------------------------------*/
 #ifndef ICOMMAND_H
 #define ICOMMAND_H
 
 
-// CMD_RES_HEAD_SIZE  => size of the common header for result buffers
-// [0] - CMD_ID
-// [1] - CMD_STS (for result buffer only only)
-// [?] - CMD_CID TODO
-//
-// CMD_HEAD_SIZE => size of the common header for sent commands
-// [0] - CMD_ID
-// [?] - CMD_CID // TODO
 #define CMD_HEAD_SIZE 1
 #define CMD_RES_HEAD_SIZE 2
 #define CMD_ID 0
@@ -19,14 +27,12 @@
 #include "SpaceDecl.h"
 #include "infobytes.h"
 
-class ICommand 
-{
+class ICommand {
     protected :
         char* log_buffer;
 
     public :
-        ICommand()
-        {
+        ICommand() {
             this->log_buffer = new char[CS1_MAX_LOG_ENTRY];
             memset(this->log_buffer, 0, CS1_MAX_LOG_ENTRY);
         }
@@ -47,8 +53,8 @@ class ICommand
         // call GetCmdStr to build the command buffer to be sent to the satellite. The idea is that 
         // the Commands themselve should have the knowledge of how to build the command buffer.
         // Also, they allow to have a queue of ICommand waiting to be sent and to parse the result buffer returned.
-        virtual char* GetCmdStr(char *cmd_buf) { return 0; } // will be set to pure virtual when implemented in all cmds TODO
-        virtual InfoBytes* ParseResult(char *result) { return 0; } // Idem
+        virtual char* GetCmdStr(char *cmd_buf) { return 0;}; // will be set to pure virtual when implemented in all cmds TODO
+        virtual InfoBytes* ParseResult(char *result) = 0; // Idem
 };
 
 #endif
