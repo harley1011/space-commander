@@ -28,7 +28,7 @@ const char MAGIC_BYTE = 0;
 const string LAST_COMMAND_FILENAME("last-command");
 const int COMMAND_RESEND_INDEX = 0;
 const char COMMAND_RESEND_CHAR = '!';
-const int MAX_COMMAND_SIZE     = CS1_MAX_FRAME_SIZE-30; // TODO define thethis limit more clearly
+const int MAX_COMMAND_SIZE     = CS1_MAX_FRAME_SIZE-CS1_MAX_CMD_RESULT_HEADER_SIZE; // TODO define the this limit more clearly
 const int MAX_BUFFER_SIZE      = MAX_COMMAND_SIZE;  
 
 const char ERROR_CREATING_COMMAND  = '1';
@@ -39,7 +39,7 @@ static char info_buffer[MAX_BUFFER_SIZE] = {'\0'};
 static char cmd_buffer[MAX_COMMAND_SIZE] = {'\0'};
 static Net2Com* commander = 0; 
 static string stored_command;
-string* GetResultData(char* result_buffer);
+InfoBytes* ParseResultData(char* result_buffer);
 int perform(int bytes);
 int read_results();
 int read_command();
@@ -235,11 +235,17 @@ int perform(int bytes)
 	if (bytes) 
 	{ // success
     #ifdef CS1_DEBUG
+        InfoBytes* result_object;
+        ICommand* command = CommandFactory::CreateCommand(info_buffer);
 		switch ( (uint8_t)info_buffer[0] )
 		{
 			case GETLOG_CMD:
 				Shakespeare::log(Shakespeare::NOTICE, GC_LOGNAME, "Decoding GETLOG_CMD...");
+                
 				// TODO: log to proper system (get log), e.g. log to database
+                
+                result_object = ((GetLogCommand* )command)->ParseResult(info_buffer,"/home/logs/cheese");
+
                 break;
 			case GETTIME_CMD:
 				Shakespeare::log(Shakespeare::NOTICE, GC_LOGNAME, "Decoding GETTIME_CMD...");
@@ -248,8 +254,14 @@ int perform(int bytes)
 				Shakespeare::log(Shakespeare::NOTICE, GC_LOGNAME, "Not sure what we got...");
 		}
     #endif
-        string * parsed_result = GetResultData(info_buffer);
-        Shakespeare::log(Shakespeare::NOTICE, GC_LOGNAME, parsed_result->c_str());
+
+        //InfoBytes * parsed_result = ParseResultData(info_buffer);
+
+        // TODO
+
+        //
+        // TODO
+
 	}
 #else // This code is intended for the info and data pipe operation
 
@@ -280,7 +292,7 @@ int perform(int bytes)
                             break;
                         }
 
-                        string* obtainedSpaceData = GetResultData(buffer);
+                        string* obtainedSpaceData = ParseResultData(buffer);
                         // TODO this is returning not null 
                         if (obtainedSpaceData != NULL) { // success
                             if (buffer[(uint8_t)MAGIC_BYTE] == GETLOG_CMD) {
@@ -326,20 +338,17 @@ int perform(int bytes)
 }
 
 /** 
- * GetResultData will take the incoming result buffers, create commands using the factory,
+ * ParseResultData will take the incoming result buffers, create commands using the factory,
  * and call the command ParseResult function to populate the InfoBytes object for 
  * further processing
  * 
  * TODO verify this method is working correctly. TEST
  **/
-string* GetResultData(char* result_buffer)
+InfoBytes* ParseResultData(char* result_buffer)
 {
-            InfoBytes* result2;
+            InfoBytes* result_object;
             ICommand* command = CommandFactory::CreateCommand(result_buffer);
-            result2 = (InfoBytes* )command->ParseResult(result_buffer);
-
-            string *result_data = result2->ToString();       
-            cout << *result_data << endl;
-            return result_data;
+            result_object = (InfoBytes* )command->ParseResult(result_buffer);
+            return result_object;
 }
 
