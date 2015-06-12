@@ -63,8 +63,8 @@ int main()
 
     while (true) 
     {
-        memset(info_buffer, 0, sizeof(char) * 255);
-        int bytes = commander->ReadFromInfoPipe(info_buffer, 255);
+        memset(info_buffer, 0, sizeof(char) * NET2COM_MAX_INFO_BUFFER_SIZE);
+        int bytes = commander->ReadFromInfoPipe(info_buffer, NET2COM_MAX_INFO_BUFFER_SIZE);
 
         if (bytes > 0) {
             perform(bytes);
