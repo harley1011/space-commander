@@ -25,7 +25,9 @@ private:
         
     static int GetLength3(char* data, int offset);
     static int GetLength10(char* data, int offset);
-    static char* GetPath(char* data, size_t length, int offset);        // This method allocate memory on the heap. Free it!
+
+    // This method allocate memory on the heap. Free it!
+    static char* GetPath(char* data, size_t length, int offset);        
 };
 
 #endif
