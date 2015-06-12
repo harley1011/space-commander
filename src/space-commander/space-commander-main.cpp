@@ -29,8 +29,8 @@ static void out_of_memory_handler();
 static int perform(int bytes);
 static void validate();
 
-static char log_buffer[255] = {0};
-static char info_buffer[255] = {'\0'};
+static char log_buffer[CS1_MAX_LOG_ENTRY] = {0};
+static char info_buffer[NET2COM_MAX_INFO_BUFFER_SIZE] = {'\0'};
 static Net2Com* commander = 0; 
 
 const char* LOGNAME = cs1_systems[CS1_COMMANDER];
@@ -63,8 +63,8 @@ int main()
 
     while (true) 
     {
-        memset(info_buffer, 0, sizeof(char) * 255);
-        int bytes = commander->ReadFromInfoPipe(info_buffer, 255);
+        memset(info_buffer, 0, sizeof(char) * NET2COM_MAX_INFO_BUFFER_SIZE);
+        int bytes = commander->ReadFromInfoPipe(info_buffer, NET2COM_MAX_INFO_BUFFER_SIZE);
 
         if (bytes > 0) {
             perform(bytes);
@@ -110,11 +110,11 @@ int perform(int bytes)
 
         switch (read) 
         {
-            case 252: 
+            case NET2COM_SESSION_ESTABLISHED :
                 break;
-            case 253:
-            case 254:
-            case 255: 
+            case NET2COM_SESSION_END_CMD_CONFIRMATION :
+            case NET2COM_SESSION_END_TIMEOUT :
+            case NET2COM_SESSION_END_BY_OTHER_HOST :
             {
                 int data_bytes = 0;
                 while (data_bytes == 0) {
