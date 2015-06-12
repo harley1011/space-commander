@@ -123,10 +123,10 @@ void perform(int bytes){
         read = (unsigned char)info_buffer[i];
         switch (read) 
         {
-            case 252: 
+            case NET2COM_SESSION_ESTABLISHED: 
                 break;
-            case 253:
-            case 254:
+            case NET2COM_SESSION_END_CMD_CONFIRMATION:
+            case NET2COM_SESSION_END_TIMEOUT:
             case 255: 
             {
                 int data_bytes = 0;

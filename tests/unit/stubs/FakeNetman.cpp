@@ -62,7 +62,7 @@ int main(){
         settime_command[1 + i] = convert.arr[i];
     }
 
-    Write(channel, 252);    // Start session signal.
+    Write(channel, NET2COM_SESSION_ESTABLISHED);    // Start session signal.
     Write(channel, settime_command, sizeof(settime_command)); // send setsettime_command command.
 
     if (channel != NULL){
