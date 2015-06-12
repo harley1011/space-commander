@@ -1,11 +1,13 @@
 #include <cstdio>
 #include <cstdlib>
-#include <time.h>
 #include <cstring>
+#include <inttypes.h>
 #include <signal.h>
 #include <sstream>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <time.h>
 #include <unistd.h>
-#include <inttypes.h>
 
 #include "space-commander/Net2Com.h"
 #include "common/command-factory.h"
@@ -25,6 +27,7 @@ const char ERROR_EXECUTING_COMMAND = '2';
 // Declarations
 static void out_of_memory_handler();
 static int perform(int bytes);
+static void validate();
 
 static char log_buffer[255] = {0};
 static char info_buffer[255] = {'\0'};
@@ -40,8 +43,8 @@ const char* LOGNAME = cs1_systems[CS1_COMMANDER];
  *-----------------------------------------------------------------------------*/
 int main() 
 {
+    validate();
     set_new_handler(&out_of_memory_handler);
-
 
     commander = new Net2Com(Dcom_w_net_r, Dnet_w_com_r, 
                                                     Icom_w_net_r, Inet_w_com_r);
@@ -236,4 +239,53 @@ void out_of_memory_handler()
     std::cerr << "[ERROR] new failed\n";
     throw bad_alloc();
 }
+
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ *
+ * NAME : perform 
+ *
+ * PURPOSE : validation
+ *
+ *-----------------------------------------------------------------------------*/
+void validate() {
+    bool isValid = true;
+    struct stat stat_buf = {0};
+
+    // checks that the CS1_TGZ dir exists
+    Shakespeare::log(Shakespeare::NOTICE, LOGNAME, "validating CS1_TGZ directory existence");
+    if (stat(CS1_TGZ, &stat_buf) < 0 ) {
+        
+
+        memset(log_buffer,0, CS1_MAX_LOG_ENTRY);
+        snprintf(log_buffer, CS1_MAX_LOG_ENTRY, "directory does not exist, creating : CS1_TGZ=%s", CS1_TGZ);
+        Shakespeare::log(Shakespeare::WARNING, LOGNAME, log_buffer);
+
+
+        char cmd[CS1_PATH_MAX] = {0};
+        snprintf(cmd, CS1_PATH_MAX, "mkdir -p ./%s", CS1_TGZ);
+
+
+        if (system(cmd) != 0) {
+            memset(log_buffer,0, CS1_MAX_LOG_ENTRY);
+            snprintf(log_buffer, CS1_MAX_LOG_ENTRY, "can't create directory : CS1_TGZ=%s", cmd);
+            Shakespeare::log(Shakespeare::ERROR, LOGNAME, log_buffer);
+            isValid = false;
+        }
+    } else {
+       if (!S_ISDIR(stat_buf.st_mode)) {
+            memset(log_buffer,0, CS1_MAX_LOG_ENTRY);
+            snprintf(log_buffer, CS1_MAX_LOG_ENTRY, "file found while directory expected : CS1_TGZ=%s\n", CS1_TGZ);
+            Shakespeare::log(Shakespeare::ERROR, LOGNAME, log_buffer);
+            isValid = false;
+        }
+    }
+
+    if (!isValid) {
+        memset(log_buffer,0, CS1_MAX_LOG_ENTRY);
+        snprintf(log_buffer, CS1_MAX_LOG_ENTRY, "space-commander is in unstable state... some commands might not work properly");
+        Shakespeare::log(Shakespeare::ERROR, LOGNAME, log_buffer);
+    }
+}
+
+
 
