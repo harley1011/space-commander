@@ -51,9 +51,9 @@ SetTimeCommand::SetTimeCommand(time_t time, char rtc_bus_number) {
 void* SetTimeCommand::Execute(size_t* pSize){
     struct timeval tv = {0};
     char *result = 0;
-
-    result = (char*)malloc(sizeof(char) * (SETTIME_RTN_SIZE + CMD_RES_HEAD_SIZE) );
     *pSize = SETTIME_RTN_SIZE + CMD_RES_HEAD_SIZE;
+
+    result = (char*)malloc(sizeof(char) * (*pSize));
     result[CMD_ID] = SETTIME_CMD;
     result[CMD_STS] = CS1_SUCCESS;
     tv.tv_sec = this->GetSeconds();   

@@ -1,15 +1,23 @@
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*
+* AUTHORS : Space Concordia 2015
+*
+* TITLE : icommand.h 
+*
+* NOTES :
+*       CMD_HEAD_SIZE => size of the common header for sent commands
+*       [0] - CMD_ID
+*       [?] - CMD_CID // TODO
+*
+*       CMD_RES_HEAD_SIZE  => size of the common header for result buffers
+*       [1] - CMD_STS (for result buffer only only)
+*       [?] - CMD_CID TODO
+*
+*----------------------------------------------------------------------------*/
 #ifndef ICOMMAND_H
 #define ICOMMAND_H
 
 
-// CMD_RES_HEAD_SIZE  => size of the common header for result buffers
-// [0] - CMD_ID
-// [1] - CMD_STS (for result buffer only only)
-// [?] - CMD_CID TODO
-//
-// CMD_HEAD_SIZE => size of the common header for sent commands
-// [0] - CMD_ID
-// [?] - CMD_CID // TODO
 #define CMD_HEAD_SIZE 1
 #define CMD_RES_HEAD_SIZE 2
 #define CMD_ID 0
@@ -19,14 +27,12 @@
 #include "SpaceDecl.h"
 #include "infobytes.h"
 
-class ICommand 
-{
+class ICommand {
     protected :
         char* log_buffer;
 
     public :
-        ICommand()
-        {
+        ICommand() {
             this->log_buffer = new char[CS1_MAX_LOG_ENTRY];
             memset(this->log_buffer, 0, CS1_MAX_LOG_ENTRY);
         }
