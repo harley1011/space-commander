@@ -13,6 +13,15 @@
 #include "common/gettime-command.h"
 #include "common/commands.h"
 
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ *
+ * NAME : Execute
+ *
+ * ARGUMENTS : pSize - OUT size of the returned buffer
+ *
+ * RETURNS : char* dynamically allocated
+ * 
+ *-----------------------------------------------------------------------------*/
 void* GetTimeCommand::Execute(size_t * pSize){
     struct timeval tv;
     char* result; 
@@ -28,40 +37,47 @@ void* GetTimeCommand::Execute(size_t * pSize){
     memcpy(result+CMD_RES_HEAD_SIZE, &tv.tv_sec, sizeof(time_t));
     return (void*)result;
 }
-/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-*
-* NAME : ParseResult
-*
-* PURPOSE : Parse the result buffer returned by the execute function
-*
-* ARGUMENTS : result    : pointer to the result buffer
-*
-* RETURNS : struct InfoBytes* to STATIC memory
-* 
-*-----------------------------------------------------------------------------*/
 
-InfoBytes* GetTimeCommand::ParseResult(char *result)
-{
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ *
+ * NAME : ParseResult
+ *
+ * PURPOSE : Parse the result buffer returned by the execute function
+ *
+ * ARGUMENTS : result    : pointer to the result buffer
+ *
+ * RETURNS : struct InfoBytes* to STATIC memory
+ * 
+ *-----------------------------------------------------------------------------*/
+InfoBytes* GetTimeCommand::ParseResult(char *result) {
     static struct InfoBytesGetTime info_bytes;
-    if(!result || result[0] != GETTIME_CMD) {
+
+    if (!result || result[0] != GETTIME_CMD) {
         Shakespeare::log(Shakespeare::ERROR,cs1_systems[CS1_COMMANDER],"GetTime failure: Can't parse result");
         info_bytes.time_status = CS1_FAILURE;
         return &info_bytes;
     }
+
     info_bytes.time_status = result[1];
     info_bytes.time_set = SpaceString::getTimet(result+CMD_RES_HEAD_SIZE);
 
     char buffer[100];
     struct tm *time_info = localtime(&info_bytes.time_set); 
-    if(info_bytes.time_status == CS1_SUCCESS)
+    if (info_bytes.time_status == CS1_SUCCESS)
     {    
-        snprintf(buffer,100,"GetTime success. Time recieved is %u seconds since epoch or %i-%i-%i %i:%i:%i",(unsigned)info_bytes.time_set,1900 + time_info->tm_year, time_info->tm_mon,time_info->tm_mday,time_info->tm_hour,time_info->tm_min,time_info->tm_sec);
+        snprintf(buffer,100,"GetTime success. Time recieved is %u seconds since epoch or %i-%i-%i %i:%i:%i",
+                    (unsigned)info_bytes.time_set,
+                    1900 + time_info->tm_year, 
+                    time_info->tm_mon,
+                    time_info->tm_mday,
+                    time_info->tm_hour,
+                    time_info->tm_min,
+                    time_info->tm_sec);
         Shakespeare::log(Shakespeare::NOTICE, cs1_systems[CS1_COMMANDER], buffer);    
-    }
-    else
-    {
+    } else {
         snprintf(buffer,100,"GetTime failure: Unknown");
         Shakespeare::log(Shakespeare::ERROR, cs1_systems[CS1_COMMANDER], buffer);
-   }
+    }
+
     return &info_bytes;
 }
