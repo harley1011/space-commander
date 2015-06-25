@@ -32,7 +32,7 @@ DEBUGFLAGS=-ggdb -g -gdwarf-2 -g3 #gdwarf-2 + g3 provides macro info to gdb
 #++++++++++++++++++++
 # includes
 #--------------------
-INCLUDES = -I./include/ -I$(SPACE_LIB)/include -I$(SPACE_UPTDATER)/include -I$(SPACE_SCRIPT)/tgz-wizard/include -I$(SPACE_UTLS)/include -I$(SPACE_LIB)/shakespeare/inc
+INCLUDES = -I./include/ -I./include/ground-commander/ -I$(SPACE_LIB)/include -I$(SPACE_UPTDATER)/include -I$(SPACE_SCRIPT)/tgz-wizard/include -I$(SPACE_UTLS)/include -I$(SPACE_LIB)/shakespeare/inc
 INCTESTPATH = -I./tests/unit/stubs/ -I./tests/helpers/include/
 
 #

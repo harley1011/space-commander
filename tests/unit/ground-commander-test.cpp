@@ -28,6 +28,8 @@
 #include "dirUtl.h"
 #include "UTestUtls.h"
 
+#include "ground-commander-main.h"
+
 #define RESULT_BUF_SIZE 50 // TODO this should be globally defined
 #define CMD_BUF_SIZE 25 // TODO this should be globally defined
 
@@ -56,7 +58,7 @@ TEST_GROUP(GroundCommanderTestGroup)
         }
 
         // Make sure the commander is running
-        while (system("ps aux | grep bin/space-commander/space-commander 1>/dev/null") != 0){
+        while (system("ps aux | grep bin/ground-commander/ground-commander 1>/dev/null") != 0){
            usleep(1000); 
         }
 
@@ -74,8 +76,8 @@ TEST_GROUP(GroundCommanderTestGroup)
         rmdir(CS1_LOGS);
 #endif
 
-        if (system("pidof space-commander | xargs  kill -15") != 0) {
-            fprintf(stderr, "[ERROR] pidof space-commander | xargs -15 kill");
+        if (system("pidof ground-commander | xargs  kill -15") != 0) {
+            fprintf(stderr, "[ERROR] pidof ground-commander | xargs -15 kill");
         }
 
         DeleteDirectoryContent(CS1_PIPES);
@@ -97,6 +99,7 @@ TEST_GROUP(GroundCommanderTestGroup)
  *-----------------------------------------------------------------------------*/
 TEST(GroundCommanderTestGroup, Read_Command_Success) 
 {
+    COMMAND_INPUT_PIPE
     // - write a command buffer to the Command Input File
     // - run read_command
     // - check if data pipe was written to, and validate the contents of the 
