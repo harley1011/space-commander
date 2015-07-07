@@ -9,7 +9,7 @@
 *----------------------------------------------------------------------------*/
 #include <time.h>
 #include <unistd.h>
-#include <dirent.h>     // DIR
+#include <dirent.h> 
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -27,21 +27,17 @@
 #include "common/commands.h"
 #include "common/subsystems.h"
 #include "dirUtl.h"
-//constant in command_buf
+
 static char command_buf[GETTIME_CMD_SIZE] = {'\0'};
-// Test when changing envrionments such as kernel, make sure time_t is either 4 bytes or 8 bytes
-//ENDIAN test checker
-//Make sure the time is set. How to mock a clock
 
 TEST_GROUP(GetTimeTestGroup)
 {
-    void setup()
-    {
+    void setup() {
         command_buf[0] = GETTIME_CMD;
     }
-    void teardown()
-    {
 
+    void teardown() {
+        //*/
     }
 };
 
@@ -67,16 +63,18 @@ TEST(GetTimeTestGroup, Check_Gettime)
     CHECK(newtime-gettime_info->time_set < 1);        
 
     #ifdef CS1_DEBUG
-        std::cerr << "[DEBUG] " << __FILE__ << "Raw Seconds elapsed from gettime is " << gettime_info->time_set << " time is currently " << newtime << " difference is " << newtime - gettime_info->time_set << endl;
-#endif    
-    if ( command != NULL)
-    {
+        std::cerr << "[DEBUG] " << __FILE__ << "Raw Seconds elapsed from gettime is " << gettime_info->time_set 
+                  << " time is currently " << newtime << " difference is " << newtime - gettime_info->time_set 
+                  << endl;
+    #endif    
+
+    if (command != NULL) {
         delete command;
         command = NULL;
     }
+
     if (result) {
         free(result);
         result = 0;
      }
-
 }
