@@ -226,3 +226,22 @@ TEST(SetTimeTestGroup, Check_Settime_Fail)
         }
     }
 }
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*
+* GROUP : SetTimeTestGroup
+*
+* NAME : Check_Spacestring_GetTimet
+* 
+*-----------------------------------------------------------------------------*/
+TEST(SetTimeTestGroup, Check_Spacestring_GetTimet)
+{ 
+    time_t raw_seconds = 10000;
+    char convert_to_timet[sizeof(time_t)];
+    time_t converted_raw_seconds = 0;
+    
+    SpaceString::getTimetInChar(convert_to_timet, raw_seconds);
+    converted_raw_seconds = SpaceString::getTimet(convert_to_timet);
+    CHECK(raw_seconds == converted_raw_seconds);
+    CHECK(convert_to_timet[0] == 0x10);
+    CHECK(convert_to_timet[1] == 0x27);
+}
